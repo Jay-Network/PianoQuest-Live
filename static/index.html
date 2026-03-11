@@ -1447,6 +1447,7 @@ async function startSession() {
       earnedBadges.clear();
       document.getElementById('scoreNumber').textContent = '--';
       document.getElementById('scoreTrend').textContent = '';
+      document.getElementById('btnCamera').disabled = false;
       ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
       sendCameraState();
       sendHandState(true);

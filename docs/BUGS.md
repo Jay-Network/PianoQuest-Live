@@ -44,3 +44,19 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: The live agent prompt allowed finger-specific coaching whenever camera input existed, even if only one hand or no hands were actually detected.
 - Fix: Frontend now sends hand-detection state, backend forwards that state into the live session, and the agent instructions now forbid finger/fingering comments or `report_technique` unless both hands are detected.
 - Prevention: Visual coaching prompts must be gated by concrete detection state, not just by camera availability.
+
+## BUG-006
+- Version found: `0.4.3`
+- Severity: High
+- Status: Fixed
+- Root cause: Startup `camera_state` and `hand_state` messages were being forwarded into Gemini as standalone user turns. Those extra turns interrupted the opening response, so the model restarted its greeting multiple times.
+- Fix: Camera and hand-detection updates are now stored as session state on the server and merged into the next meaningful MIDI performance update instead of being sent as separate turns.
+- Prevention: Session-state telemetry must not be forwarded to a live conversational model as its own user turn unless an interruption is explicitly intended.
+
+## BUG-007
+- Version found: `0.4.4`
+- Severity: Medium
+- Status: Fixed
+- Root cause: The new camera toggle button was only enabled on startup failure, not on the normal successful WebSocket/session startup path.
+- Fix: The camera toggle is now enabled as soon as the session WebSocket opens successfully.
+- Prevention: Interactive controls added for in-session use must be enabled in the success path first, then selectively disabled only on teardown or fatal startup failure.

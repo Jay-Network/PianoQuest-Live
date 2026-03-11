@@ -49,7 +49,12 @@ def midi_note_name(note: int) -> str:
     return f"{NOTE_NAMES[note % 12]}{octave}"
 
 
-def describe_midi_snapshot(msg: dict) -> str | None:
+def describe_midi_snapshot(
+    msg: dict,
+    camera_enabled: bool,
+    both_hands_detected: bool,
+    detected_hand_count: int,
+) -> str | None:
     recent_notes = msg.get("recent_notes") or []
     active_notes = msg.get("active_notes") or []
     pedal_down = bool(msg.get("pedal_down"))
@@ -94,10 +99,20 @@ def describe_midi_snapshot(msg: dict) -> str | None:
     if not details:
         return None
 
+    vision_state = (
+        "Camera is off; do not claim visual observations."
+        if not camera_enabled else
+        "Both hands are visible; finger-specific visual coaching is allowed if it matches the MIDI evidence."
+        if both_hands_detected else
+        f"Both hands are not fully visible (detected hands: {detected_hand_count}); do not claim finger-specific visual observations."
+    )
+
     return (
         "MIDI performance update from the digital piano. "
         + ". ".join(details)
-        + ". Use this instead of piano microphone audio for note, timing, and dynamics analysis."
+        + ". "
+        + vision_state
+        + " Use this instead of piano microphone audio for note, timing, and dynamics analysis."
     )
 
 
@@ -151,6 +166,9 @@ async def websocket_dialog(websocket: WebSocket):
 
     # Per-session visual event queue for tool-driven UI updates
     vq = asyncio.Queue()
+    camera_enabled = True
+    both_hands_detected = False
+    detected_hand_count = 0
 
     print(f"[{APP_NAME}] Client connected: {session_id}")
 
@@ -181,7 +199,12 @@ async def websocket_dialog(websocket: WebSocket):
                             mode_set = True
                             mode_ready.set()
                     elif msg.get("type") == "midi_snapshot":
-                        summary = describe_midi_snapshot(msg)
+                        summary = describe_midi_snapshot(
+                            msg,
+                            camera_enabled=camera_enabled,
+                            both_hands_detected=both_hands_detected,
+                            detected_hand_count=detected_hand_count,
+                        )
                         if summary:
                             live_queue.send_content(
                                 types.Content(role="user", parts=[types.Part(text=summary)])
@@ -191,32 +214,13 @@ async def websocket_dialog(websocket: WebSocket):
                         # get forwarded to the live agent as compact musical context.
                         pass
                     elif msg.get("type") == "camera_state":
-                        enabled = bool(msg.get("enabled"))
-                        text = (
-                            "Camera is currently ON. You may use visual observations, but only if you are genuinely seeing the hands clearly."
-                            if enabled else
-                            "Camera is currently OFF. Do not claim to see fingers, wrists, or hand position until the camera is on again."
-                        )
-                        live_queue.send_content(
-                            types.Content(role="user", parts=[types.Part(text=text)])
-                        )
+                        camera_enabled = bool(msg.get("enabled"))
+                        if not camera_enabled:
+                            both_hands_detected = False
+                            detected_hand_count = 0
                     elif msg.get("type") == "hand_state":
-                        detected_count = int(msg.get("detected_count") or 0)
+                        detected_hand_count = int(msg.get("detected_count") or 0)
                         both_hands_detected = bool(msg.get("both_hands_detected"))
-                        if both_hands_detected:
-                            text = (
-                                "Both hands are currently detected in camera view. "
-                                "You may comment on fingering, finger movement, or hand shape only when your visual observations match the MIDI evidence."
-                            )
-                        else:
-                            text = (
-                                f"Both hands are not currently visible in camera view (detected hands: {detected_count}). "
-                                "Do not comment on finger movement, fingering, wrist motion, or hand shape until both hands are clearly detected again. "
-                                "Limit feedback to MIDI performance and spoken conversation."
-                            )
-                        live_queue.send_content(
-                            types.Content(role="user", parts=[types.Part(text=text)])
-                        )
                     elif msg.get("type") == "close":
                         live_queue.close()
                         break
