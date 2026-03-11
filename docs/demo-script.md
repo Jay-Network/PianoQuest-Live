@@ -1,89 +1,144 @@
-# PianoQuest Live — Demo Video Script
+# PianoQuest Live — Demo Video Script (v0.3.0)
 
-**Duration:** 2-3 minutes
+**Duration:** 3-4 minutes (max 4:00)
 **Arc:** Bad playing → Coaching → Visible improvement
 **Judging:** Innovation 40% | Technical 30% | Demo 30%
 
 ---
 
-## Opening (0:00 - 0:15)
+## Opening — The Hook (0:00 - 0:20)
 
-**Visual:** Browser opens to PianoQuest Live dark UI. Camera shows hands on piano keyboard.
-**Voiceover:** "PianoQuest Live is an AI piano coach that sees your hands, hears your playing, and speaks to you in real time — turning practice into a creative quest."
+**Visual:** Dark screen. Piano chord sound. PianoQuest Live logo fades in.
+**Voiceover:** "What if your piano playing could tell a story? What if an AI could see your hands, hear your music, and coach you in real time — all through creative narrative?"
 
-**Action:** Click "Start Session." Status dot turns green. MIDI bars appear idle.
-
----
-
-## The Problem — Bad Playing (0:15 - 0:45)
-
-**Visual:** Camera on fingers. Player attempts a C major triad with uneven dynamics (loud C, quiet E, loud G). MIDI bars show uneven heights.
-
-**Agent (voice):** Greets the user. Acknowledges what it sees and hears. Names the session "Chapter 1: The Quest for the Resonant Triad."
-
-**Player (voice):** "I want to make this triad sound more even. The E keeps getting lost."
-
-**Key visuals to highlight:**
-- MIDI bars clearly show uneven frequency response
-- Rhythm grid shows timing dots (may be slightly off-grid)
-- Camera preview showing hand position
-- Transcript populating in real-time
+**Action:** Browser opens. Full UI visible: quest map, scene card ("Your Quest Awaits"), empty achievement shelf, technique score showing "--".
 
 ---
 
-## Coaching Phase (0:45 - 1:30)
+## The Problem (0:20 - 0:35)
 
-**Agent coaches** based on what it sees AND hears:
-- "I can see your middle finger is flatter than the others — try curving it more to get more weight on the E"
-- "Play it again, but imagine you're whispering the C, speaking the E, and whispering the G"
-- Player tries again → agent gives real-time micro-feedback
+**Voiceover:** "Music practice apps score notes right or wrong. They don't make music meaningful. PianoQuest Live changes that — it turns every practice session into an interactive quest."
 
-**Key moments:**
-- Agent references BOTH visual (finger position) and audio (note balance)
-- Coaching is specific and actionable
-- Storytelling framing maintained ("The E is waking up!")
+**Action:** Click "Start Session." Camera activates showing hands on keyboard. Status dot turns green. Level meter starts responding.
 
 ---
 
-## Improvement — Visible Progress (1:30 - 2:00)
+## Act 1 — Bad Playing (0:35 - 1:15)
 
-**Visual:** Player tries again with improved technique. MIDI bars become more uniform. Rhythm grid shows dots aligning closer to beat lines (green dots).
+**Player:** Plays C major triad with uneven dynamics (loud C, quiet E, loud G). Rhythm slightly off.
 
-**Agent:** "Yes! Did you feel that? The E rang out this time — your triad is singing as one voice now."
+**What the viewer sees:**
+- **MIDI bars** show uneven heights (visual proof of imbalance)
+- **Rhythm grid** shows amber/red dots (off-beat)
+- **Technique score** appears: ~35-45
+- **Quest map** stays at "Opening"
 
-**Key visuals:**
-- MIDI bars visibly more even than before (side-by-side improvement)
-- Rhythm grid showing green on-beat dots
-- Player's hand position improved (curved fingers)
+**Agent (voice):** Greets warmly. "Welcome to the Harmony Garden — here, every note in your chord must bloom equally." Observes: "I can see your middle finger is flatter than the others, and I can hear the E getting lost."
+
+**What changes:**
+- **Scene card** transitions to "Harmony Garden" (green gradient)
+- **Quest map** advances to "Assessment" (line turns green)
+- **Coaching focus card** updates: "Try curving your middle finger more to get weight on the E"
+- **"First Note" badge** appears with animated popup
 
 ---
 
-## Wrap-Up (2:00 - 2:30)
+## Act 2 — Coaching (1:15 - 2:15)
 
-**Agent:** Summarizes the session — "Chapter 1 complete. You've unlocked the Resonant Triad."
+**Player (voice):** "How can I make the E louder without hitting it harder?"
 
-**Voiceover/text overlay:**
-- "3 modalities: Vision + Audio + Voice"
-- "Real-time MIDI visualization"
+**Agent (voice):** "Imagine you're whispering the C, speaking the E, and whispering the G. The E needs more finger weight, not more force. Try leading with your fingertip."
+
+**What changes:**
+- **Coaching focus** updates with the tip
+- **Quest map** advances to "Challenge"
+- **Scene** may shift to "Technique Tower" if agent mentions technique
+
+**Player:** Tries again. Second attempt slightly better.
+
+**Agent:** "Better! I can hear the E waking up. Your wrist dropped a bit on that stretch though — try keeping it level."
+
+**Player:** Third attempt — more even.
+
+**Agent:** "Yes! Did you feel that difference? That chord is starting to sing as one voice."
+
+**What the viewer sees:**
+- **MIDI bars** becoming more uniform with each attempt
+- **Technique score** climbing: 45 → 55 → 65
+- **Score trend arrow** appears (green up arrow)
+- **Rhythm grid** dots becoming greener
+
+---
+
+## Act 3 — Breakthrough (2:15 - 2:50)
+
+**Player:** Plays the triad with good evenness. Then plays a short progression (C-F-G-C) with consistent dynamics.
+
+**Agent:** "That chord rang like a bell! You've earned the Resonant Triad. The Harmony Garden is in full bloom."
+
+**What the viewer sees (the money shots):**
+- **Technique score** hits 78-85+ (turns green)
+- **"Resonant Triad" achievement** pops up with animation
+- **Scene** transitions to "Sunrise Peak" (warm orange gradient)
+- **Quest map** advances to "Mastery"
+- **MIDI bars** showing even, consistent response
+- **Rhythm grid** mostly green dots on-beat
+
+---
+
+## Wrap-Up (2:50 - 3:20)
+
+**Agent:** "Chapter complete! From uneven chords to a resonant voice — what a journey. You've conquered the Harmony Garden."
+
+**What changes:**
+- **"Chapter Complete" badge** popup
+- **Quest map** reaches "Celebration" — all nodes green
+- **Scene** transitions to "Victory Hall" (gold gradient)
+
+**Player (voice):** "That was amazing. I could actually feel the improvement."
+
+---
+
+## Tech Walkthrough (3:20 - 3:50)
+
+**Visual:** Architecture diagram (docs/architecture.svg) or overlay on the app.
+
+**Voiceover / text overlay:**
+- "3 multimodal inputs: Camera + Piano Audio + Voice"
+- "8 interleaved outputs: Voice, Scenes, MIDI Bars, Rhythm Grid, Score, Coaching, Achievements, Quest Map"
 - "Powered by Gemini 2.5 Flash Live API + Google ADK"
-- "Built for the Gemini Live Agent Challenge"
-
-**End card:** PianoQuest Live logo, URL, "Built by Jay — MIT · STEM Educator"
+- "Deployed on Google Cloud Run"
+- "Real-time WebSocket streaming — no turn-taking"
 
 ---
 
-## Technical Highlights to Emphasize
+## End Card (3:50 - 4:00)
 
-1. **Multimodal input:** Camera sees fingers, mic hears piano + voice simultaneously
-2. **Real-time streaming:** No turn-taking delay — agent responds during natural pauses
-3. **Visual feedback:** MIDI dynamic bars + rhythm accuracy grid update in real-time
-4. **Creative framing:** Practice sessions as narrative quests (Creative Storyteller category)
-5. **Architecture:** Gemini Live API → ADK → WebSocket → browser, deployed on Cloud Run
+**Visual:** PianoQuest Live logo, final technique score, all earned badges.
+
+**Text:**
+- "PianoQuest Live — Creative Musical Storytelling"
+- "Gemini Live Agent Challenge — Creative Storyteller"
+- GitHub URL
+- "Built by Jay — MIT · STEM Educator"
+- #GeminiLiveAgentChallenge
+
+---
+
+## Key Moments to Capture
+
+1. **Scene transition** — the gradient change when agent says "Harmony Garden"
+2. **Achievement popup** — the animated badge sliding in
+3. **Score climbing** — technique score going from 35 to 85
+4. **Quest map progression** — nodes lighting up green
+5. **MIDI bars evening out** — visual proof of dynamics improvement
+6. **Agent referencing vision** — "I can see your middle finger is flatter"
 
 ## Demo Tips
 
 - Use a well-lit keyboard for clear camera view
 - Exaggerate the "bad" playing initially (very uneven dynamics)
 - Speak clearly when talking to the agent
-- Point out the MIDI bars and rhythm grid changes to the viewer
-- Keep BPM slider visible during rhythm work
+- Show the full UI in frame so all 8 output modalities are visible
+- Keep BPM slider at 90 for the demo
+- Consider split screen: webcam of hands + app UI
