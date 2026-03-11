@@ -20,3 +20,11 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: After switching piano analysis to MIDI, the microphone capture path was still configured for raw music intake (`echoCancellation: false`, `noiseSuppression: false`, `autoGainControl: false`). That made Gemini more likely to hear its own playback/room bleed and less likely to respond reliably to spoken input.
 - Fix: Speech microphone capture is now optimized for conversation with echo cancellation, noise suppression, auto gain control, and mono input.
 - Prevention: Keep browser audio constraints aligned with the actual modality split. If piano analysis is MIDI-first, microphone settings must be speech-first.
+
+## BUG-003
+- Version found: `0.4.1`
+- Severity: High
+- Status: Fixed
+- Root cause: Even after speech-optimized mic constraints, the browser continued streaming microphone frames while Gemini audio was playing. Playback bleed triggered live-session interruptions, causing Gemini to get chopped off every few seconds and resume from roughly the same point.
+- Fix: Browser now gates outgoing microphone PCM while agent playback is active, with a short post-playback hold window.
+- Prevention: In full-duplex live voice apps, treat output playback as a first-class signal in the input pipeline. Do not stream mic audio to the model while model audio is actively playing unless true echo cancellation has been verified.

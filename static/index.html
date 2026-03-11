@@ -570,6 +570,7 @@ let videoInterval = null;
 let animFrame = null;
 let nextPlayTime = 0;
 let sessionActive = false;
+let playbackActiveUntil = 0;
 
 let midiAccess = null;
 let midiInput = null;
@@ -1207,6 +1208,7 @@ async function startSession() {
 
       processor.onaudioprocess = function(e) {
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        if (playbackCtx && playbackCtx.currentTime < playbackActiveUntil) return;
         var input = e.inputBuffer.getChannelData(0);
         var pcm16 = new Int16Array(input.length);
         for (var i = 0; i < input.length; i++) {
@@ -1294,6 +1296,8 @@ function queueAudio(arrayBuf) {
   var startTime = Math.max(now + 0.01, nextPlayTime);
   src.start(startTime);
   nextPlayTime = startTime + buffer.duration;
+  // Gate mic streaming while agent audio is playing to avoid self-interruption.
+  playbackActiveUntil = nextPlayTime + 0.2;
 }
 
 // ============================================================================
