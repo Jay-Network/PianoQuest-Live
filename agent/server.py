@@ -1,6 +1,7 @@
 """
 FastAPI + WebSocket server for PianoQuest Live — Creative Musical Storytelling.
 Connects browser camera + microphone → ADK streaming → Gemini Live API → audio output.
+Tool-driven visual events (scenes, achievements, coaching) are sent via WebSocket JSON.
 """
 
 import asyncio
@@ -21,7 +22,7 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.agents.live_request_queue import LiveRequestQueue
 from google.genai import types
 
-from .agent import AGENTS, root_agent
+from .agent import AGENTS, root_agent, visual_queue
 
 load_dotenv()
 
@@ -38,6 +39,66 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="PianoQuest Live", lifespan=lifespan)
+
+
+NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def midi_note_name(note: int) -> str:
+    octave = (note // 12) - 1
+    return f"{NOTE_NAMES[note % 12]}{octave}"
+
+
+def describe_midi_snapshot(msg: dict) -> str | None:
+    recent_notes = msg.get("recent_notes") or []
+    active_notes = msg.get("active_notes") or []
+    pedal_down = bool(msg.get("pedal_down"))
+    bpm = msg.get("bpm")
+    score = msg.get("score")
+
+    note_bits = []
+    for item in recent_notes[:8]:
+        note = item.get("note")
+        velocity = item.get("velocity")
+        if isinstance(note, int):
+            if isinstance(velocity, int):
+                note_bits.append(f"{midi_note_name(note)}@{velocity}")
+            else:
+                note_bits.append(midi_note_name(note))
+
+    active_bits = []
+    for item in active_notes[:8]:
+        note = item.get("note")
+        velocity = item.get("velocity")
+        if isinstance(note, int):
+            if isinstance(velocity, int):
+                active_bits.append(f"{midi_note_name(note)}@{velocity}")
+            else:
+                active_bits.append(midi_note_name(note))
+
+    has_performance_signal = bool(recent_notes or active_notes or pedal_down)
+    if not has_performance_signal:
+        return None
+
+    details = []
+    if note_bits:
+        details.append("recent notes: " + ", ".join(note_bits))
+    if active_bits:
+        details.append("currently held: " + ", ".join(active_bits))
+    details.append("sustain pedal is down" if pedal_down else "sustain pedal is up")
+    if bpm:
+        details.append(f"target tempo {bpm} BPM")
+    if score is not None:
+        details.append(f"current technique score {score}")
+
+    if not details:
+        return None
+
+    return (
+        "MIDI performance update from the digital piano. "
+        + ". ".join(details)
+        + ". Use this instead of piano microphone audio for note, timing, and dynamics analysis."
+    )
 
 
 async def start_agent_session(session_id: str, live_queue: LiveRequestQueue, mode: str = "storyteller"):
@@ -88,6 +149,9 @@ async def websocket_dialog(websocket: WebSocket):
     mode = "storyteller"
     mode_ready = asyncio.Event()
 
+    # Per-session visual event queue for tool-driven UI updates
+    vq = asyncio.Queue()
+
     print(f"[{APP_NAME}] Client connected: {session_id}")
 
     async def handle_input():
@@ -116,6 +180,16 @@ async def websocket_dialog(websocket: WebSocket):
                         if not mode_set:
                             mode_set = True
                             mode_ready.set()
+                    elif msg.get("type") == "midi_snapshot":
+                        summary = describe_midi_snapshot(msg)
+                        if summary:
+                            live_queue.send_content(
+                                types.Content(role="user", parts=[types.Part(text=summary)])
+                            )
+                    elif msg.get("type") == "midi_event":
+                        # Frontend uses raw MIDI events for UI rendering; snapshots are what
+                        # get forwarded to the live agent as compact musical context.
+                        pass
                     elif msg.get("type") == "close":
                         live_queue.close()
                         break
@@ -127,6 +201,10 @@ async def websocket_dialog(websocket: WebSocket):
             await asyncio.wait_for(mode_ready.wait(), timeout=5.0)
         except asyncio.TimeoutError:
             pass
+
+        # Set the contextvars visual queue for this session's tool calls
+        token = visual_queue.set(vq)
+
         try:
             buf_input = ""
             buf_output = ""
@@ -135,6 +213,15 @@ async def websocket_dialog(websocket: WebSocket):
                     for part in event.content.parts:
                         if part.inline_data and part.inline_data.data:
                             await websocket.send_bytes(part.inline_data.data)
+
+                # Drain visual event queue — send tool-driven UI updates
+                while not vq.empty():
+                    try:
+                        visual_event = vq.get_nowait()
+                        await websocket.send_text(json.dumps(visual_event))
+                    except asyncio.QueueEmpty:
+                        break
+
                 if event.input_transcription:
                     raw = event.input_transcription
                     text = getattr(raw, 'text', None) or str(raw)
@@ -165,6 +252,8 @@ async def websocket_dialog(websocket: WebSocket):
                     await websocket.send_text(json.dumps({"type": "interrupted"}))
         except WebSocketDisconnect:
             pass
+        finally:
+            visual_queue.reset(token)
 
     input_task = asyncio.create_task(handle_input())
     output_task = asyncio.create_task(handle_output())
