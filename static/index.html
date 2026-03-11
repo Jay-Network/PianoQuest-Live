@@ -28,12 +28,12 @@
     min-height: 100vh;
   }
   .app {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     min-height: 100vh;
   }
 
@@ -42,220 +42,291 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 0;
+    padding: 8px 0;
   }
-  .header h1 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
+  .header-left { display: flex; align-items: center; gap: 20px; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
   .header h1 span { color: var(--amber); }
-  .header-sub {
-    font-size: 12px;
-    color: var(--text3);
-    letter-spacing: 0.04em;
+  .header-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.04em; }
+
+  /* Progress Score */
+  .score-display {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(251,191,36,0.2);
+    background: rgba(251,191,36,0.05);
   }
-  .controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+  .score-number {
+    font-size: 32px; font-weight: 800; color: var(--amber);
+    font-variant-numeric: tabular-nums;
+    min-width: 56px; text-align: right;
+    line-height: 1;
+    transition: color 0.5s;
   }
+  .score-number.high { color: var(--green); }
+  .score-meta { font-size: 10px; color: var(--text3); line-height: 1.4; }
+  .score-trend { font-size: 16px; margin-left: 2px; }
+  .score-trend.up { color: var(--green); }
+  .score-trend.down { color: var(--rose); }
+
+  .controls { display: flex; gap: 10px; align-items: center; }
   .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #444;
+    width: 8px; height: 8px; border-radius: 50%; background: #444;
     transition: background 0.3s;
   }
   .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
   .status-dot.error { background: var(--rose); }
-  .status-label {
-    font-size: 12px;
-    color: var(--text3);
-  }
+  .status-label { font-size: 12px; color: var(--text3); }
   button {
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
+    padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg2); color: var(--text); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
   }
   button:hover { background: var(--bg3); border-color: rgba(255,255,255,0.15); }
   button.primary {
-    background: rgba(251,191,36,0.15);
-    border-color: rgba(251,191,36,0.3);
-    color: var(--amber);
+    background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: var(--amber);
   }
-  button.primary:hover {
-    background: rgba(251,191,36,0.25);
-  }
+  button.primary:hover { background: rgba(251,191,36,0.25); }
   button.danger {
-    background: rgba(251,113,133,0.1);
-    border-color: rgba(251,113,133,0.25);
-    color: var(--rose);
+    background: rgba(251,113,133,0.1); border-color: rgba(251,113,133,0.25); color: var(--rose);
   }
   button:disabled { opacity: 0.4; cursor: default; }
+
+  /* Quest Journey Map */
+  .quest-map {
+    display: flex; align-items: center; gap: 0;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    overflow: hidden;
+  }
+  .quest-node {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    min-width: 80px; position: relative; z-index: 1;
+  }
+  .quest-node .node-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; transition: all 0.5s;
+  }
+  .quest-node.completed .node-dot {
+    border-color: var(--green); background: rgba(134,239,172,0.15);
+    box-shadow: 0 0 8px rgba(134,239,172,0.3);
+  }
+  .quest-node.active .node-dot {
+    border-color: var(--amber); background: rgba(251,191,36,0.15);
+    box-shadow: 0 0 10px rgba(251,191,36,0.3);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .quest-node .node-label {
+    font-size: 9px; color: var(--text3); letter-spacing: 0.03em;
+    text-align: center; white-space: nowrap;
+  }
+  .quest-node.active .node-label { color: var(--amber); font-weight: 600; }
+  .quest-node.completed .node-label { color: var(--green); }
+  .quest-line {
+    flex: 1; height: 2px; background: rgba(255,255,255,0.06); min-width: 20px;
+    position: relative;
+  }
+  .quest-line.completed { background: var(--green); }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(251,191,36,0.3); }
+    50% { box-shadow: 0 0 20px rgba(251,191,36,0.5); }
+  }
 
   /* Main grid */
   .main {
     display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 16px;
+    grid-template-columns: 260px 1fr;
+    gap: 12px;
     flex: 1;
   }
 
-  /* Camera panel */
-  .camera-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
+  /* Left column */
+  .left-col { display: flex; flex-direction: column; gap: 12px; }
+
   .panel {
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    overflow: hidden;
+    border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg2); overflow: hidden;
   }
   .panel-header {
-    padding: 10px 14px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: var(--text2);
+    padding: 8px 12px; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.04em; color: var(--text2);
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex; align-items: center; gap: 6px;
   }
-  .panel-header .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-  }
+  .panel-header .dot { width: 5px; height: 5px; border-radius: 50%; }
+
+  /* Camera */
   .video-container {
-    position: relative;
-    background: #000;
-    aspect-ratio: 4/3;
+    position: relative; background: #000; aspect-ratio: 4/3;
   }
   .video-container video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
+    width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
   }
   .video-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 8px;
-    color: var(--text3);
-    font-size: 12px;
+    position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; flex-direction: column; gap: 6px;
+    color: var(--text3); font-size: 11px;
   }
-  .video-placeholder .icon { font-size: 32px; opacity: 0.3; }
+  .video-placeholder .icon { font-size: 28px; opacity: 0.3; }
 
-  /* Visualization panels */
-  .viz-col {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  .level-meter {
+    padding: 6px 12px; display: flex; align-items: center; gap: 6px;
   }
-  .viz-canvas-wrap {
-    padding: 12px;
+  .level-bar-bg {
+    flex: 1; height: 3px; background: rgba(255,255,255,0.05);
+    border-radius: 2px; overflow: hidden;
   }
-  canvas {
-    width: 100%;
-    display: block;
-    border-radius: 6px;
+  .level-bar {
+    height: 100%; width: 0%; background: var(--amber);
+    border-radius: 2px; transition: width 0.05s;
   }
+  .level-label { font-size: 9px; color: var(--text3); min-width: 20px; text-align: right; }
+
+  /* Coaching Focus Card */
+  .coaching-card { padding: 12px; }
+  .coaching-focus {
+    font-size: 12px; color: var(--text2); line-height: 1.5;
+    min-height: 36px;
+  }
+  .coaching-focus .focus-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.05em;
+    color: var(--gemini); margin-bottom: 4px;
+  }
+
+  /* Achievement Badges */
+  .badges-area {
+    padding: 10px 12px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    min-height: 40px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 12px; font-size: 10px;
+    border: 1px solid rgba(251,191,36,0.25);
+    background: rgba(251,191,36,0.08);
+    color: var(--amber);
+    animation: badgeIn 0.5s ease-out;
+  }
+  @keyframes badgeIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .badges-empty { font-size: 10px; color: var(--text3); font-style: italic; }
+
+  /* Right column */
+  .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+  /* Story Scene Card */
+  .scene-card {
+    position: relative;
+    min-height: 120px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: all 0.8s ease;
+  }
+  .scene-bg {
+    position: absolute; inset: 0;
+    transition: background 1s ease;
+  }
+  .scene-content {
+    position: relative; z-index: 1;
+    padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .scene-chapter {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.4); text-transform: uppercase;
+  }
+  .scene-title {
+    font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
+    transition: color 0.8s;
+  }
+  .scene-desc {
+    font-size: 12px; color: var(--text2); max-width: 500px;
+    line-height: 1.5;
+  }
+  .scene-icon {
+    position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
+    font-size: 56px; opacity: 0.12;
+  }
+  .scene-card[data-scene="default"] .scene-bg { background: linear-gradient(135deg, #1a1a2e, #12121e); }
+  .scene-card[data-scene="default"] .scene-title { color: var(--text2); }
+  .scene-card[data-scene="enchanted_forest"] .scene-bg { background: linear-gradient(135deg, #0d2818, #1a3d2e, #0a1f12); }
+  .scene-card[data-scene="enchanted_forest"] { border-color: rgba(134,239,172,0.2); }
+  .scene-card[data-scene="enchanted_forest"] .scene-title { color: var(--green); }
+  .scene-card[data-scene="rhythm_dragon"] .scene-bg { background: linear-gradient(135deg, #3a1224, #4a1a2e, #2d0a18); }
+  .scene-card[data-scene="rhythm_dragon"] { border-color: rgba(251,113,133,0.25); }
+  .scene-card[data-scene="rhythm_dragon"] .scene-title { color: var(--rose); }
+  .scene-card[data-scene="crystal_cave"] .scene-bg { background: linear-gradient(135deg, #1a1a3e, #2d1f4e, #12122e); }
+  .scene-card[data-scene="crystal_cave"] { border-color: rgba(168,139,250,0.25); }
+  .scene-card[data-scene="crystal_cave"] .scene-title { color: var(--purple); }
+  .scene-card[data-scene="technique_tower"] .scene-bg { background: linear-gradient(135deg, #1e3a5f, #162d4a, #0f2035); }
+  .scene-card[data-scene="technique_tower"] { border-color: rgba(147,197,253,0.2); }
+  .scene-card[data-scene="technique_tower"] .scene-title { color: var(--blue); }
+  .scene-card[data-scene="harmony_garden"] .scene-bg { background: linear-gradient(135deg, #2a3518, #3a4a18, #1a2510); }
+  .scene-card[data-scene="harmony_garden"] { border-color: rgba(190,230,80,0.2); }
+  .scene-card[data-scene="harmony_garden"] .scene-title { color: #bef050; }
+  .scene-card[data-scene="victory_hall"] .scene-bg { background: linear-gradient(135deg, #3a2a12, #4a3518, #2d1f0a); }
+  .scene-card[data-scene="victory_hall"] { border-color: rgba(251,191,36,0.3); }
+  .scene-card[data-scene="victory_hall"] .scene-title { color: var(--amber); }
+  .scene-card[data-scene="shadow_passage"] .scene-bg { background: linear-gradient(135deg, #0a0a12, #14141e, #08080e); }
+  .scene-card[data-scene="shadow_passage"] { border-color: rgba(255,255,255,0.06); }
+  .scene-card[data-scene="shadow_passage"] .scene-title { color: rgba(255,255,255,0.4); }
+  .scene-card[data-scene="sunrise_peak"] .scene-bg { background: linear-gradient(135deg, #4a2810, #5a3818, #3a1a08); }
+  .scene-card[data-scene="sunrise_peak"] { border-color: rgba(251,146,60,0.25); }
+  .scene-card[data-scene="sunrise_peak"] .scene-title { color: #fb923c; }
+
+  /* Viz canvases */
+  .viz-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .viz-canvas-wrap { padding: 10px; }
+  canvas { width: 100%; display: block; border-radius: 4px; }
+  .bpm-control { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+  .bpm-control label { font-size: 9px; color: var(--text3); }
+  .bpm-control input[type=range] { width: 60px; accent-color: var(--green); }
+  .bpm-control .bpm-val { font-size: 10px; color: var(--green); min-width: 20px; }
 
   /* Transcript */
-  .transcript-panel {
-    flex: 1;
-    min-height: 200px;
-  }
+  .transcript-panel { flex: 1; min-height: 160px; }
   .transcript-body {
-    padding: 12px 14px;
-    max-height: 300px;
-    overflow-y: auto;
-    font-size: 13px;
-    line-height: 1.6;
+    padding: 10px 12px; max-height: 220px; overflow-y: auto;
+    font-size: 12px; line-height: 1.5;
   }
-  .transcript-body::-webkit-scrollbar { width: 4px; }
+  .transcript-body::-webkit-scrollbar { width: 3px; }
   .transcript-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-  .msg {
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-  }
+  .msg { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.02); }
   .msg:last-child { border-bottom: none; }
-  .msg .role {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    margin-bottom: 2px;
-  }
+  .msg .role { font-size: 9px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 1px; }
   .msg.user .role { color: var(--blue); }
   .msg.agent .role { color: var(--amber); }
   .msg .content { color: var(--text2); }
-  .msg.system { color: var(--text3); font-size: 11px; font-style: italic; }
+  .msg.system { color: var(--text3); font-size: 10px; font-style: italic; }
 
-  /* Waveform / level meter */
-  .level-meter {
-    padding: 8px 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  /* Achievement popup */
+  .achievement-popup {
+    position: fixed; top: 20px; right: 20px; z-index: 100;
+    padding: 12px 20px; border-radius: 12px;
+    background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3);
+    backdrop-filter: blur(12px);
+    animation: achieveSlide 0.5s ease-out, achieveFade 0.5s 2.5s ease-in forwards;
+    display: flex; align-items: center; gap: 10px;
   }
-  .level-bar-bg {
-    flex: 1;
-    height: 4px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .level-bar {
-    height: 100%;
-    width: 0%;
-    background: var(--amber);
-    border-radius: 2px;
-    transition: width 0.05s;
-  }
-  .level-label {
-    font-size: 10px;
-    color: var(--text3);
-    min-width: 24px;
-    text-align: right;
-  }
+  .achievement-popup .ach-icon { font-size: 24px; }
+  .achievement-popup .ach-name { color: var(--amber); font-weight: 700; font-size: 12px; }
+  .achievement-popup .ach-sub { color: var(--text2); font-size: 10px; }
+  @keyframes achieveSlide { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes achieveFade { to { opacity: 0; transform: translateY(-10px); } }
 
-  /* BPM control */
-  .bpm-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-  }
-  .bpm-control label {
-    font-size: 10px;
-    color: var(--text3);
-  }
-  .bpm-control input[type=range] {
-    width: 80px;
-    accent-color: var(--green);
-  }
-  .bpm-control .bpm-val {
-    font-size: 11px;
-    color: var(--green);
-    min-width: 24px;
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     .main { grid-template-columns: 1fr; }
-    .camera-panel { flex-direction: row; }
-    .video-container { width: 200px; aspect-ratio: 4/3; }
+    .viz-row { grid-template-columns: 1fr; }
+    .quest-map { overflow-x: auto; }
   }
 </style>
 </head>
@@ -264,9 +335,19 @@
 
   <!-- Header -->
   <div class="header">
-    <div>
-      <h1>Piano<span>Quest</span> Live</h1>
-      <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING</div>
+    <div class="header-left">
+      <div>
+        <h1>Piano<span>Quest</span> Live</h1>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING</div>
+      </div>
+      <div class="score-display" id="scoreDisplay">
+        <div>
+          <div class="score-number" id="scoreNumber">--</div>
+        </div>
+        <div class="score-meta">
+          TECHNIQUE<br>SCORE <span class="score-trend" id="scoreTrend"></span>
+        </div>
+      </div>
     </div>
     <div class="controls">
       <div class="status-dot" id="statusDot"></div>
@@ -276,15 +357,42 @@
     </div>
   </div>
 
+  <!-- Quest Journey Map -->
+  <div class="quest-map" id="questMap">
+    <div class="quest-node active" id="qn-opening">
+      <div class="node-dot">&#x1F3B5;</div>
+      <div class="node-label">Opening</div>
+    </div>
+    <div class="quest-line" id="ql-1"></div>
+    <div class="quest-node" id="qn-assessment">
+      <div class="node-dot">&#x1F50D;</div>
+      <div class="node-label">Assessment</div>
+    </div>
+    <div class="quest-line" id="ql-2"></div>
+    <div class="quest-node" id="qn-challenge">
+      <div class="node-dot">&#x2694;&#xFE0F;</div>
+      <div class="node-label">Challenge</div>
+    </div>
+    <div class="quest-line" id="ql-3"></div>
+    <div class="quest-node" id="qn-mastery">
+      <div class="node-dot">&#x2B50;</div>
+      <div class="node-label">Mastery</div>
+    </div>
+    <div class="quest-line" id="ql-4"></div>
+    <div class="quest-node" id="qn-celebration">
+      <div class="node-dot">&#x1F3C6;</div>
+      <div class="node-label">Celebration</div>
+    </div>
+  </div>
+
   <!-- Main content -->
   <div class="main">
 
-    <!-- Left: Camera + Level meter -->
-    <div class="camera-panel">
+    <!-- Left column: Camera + Coaching + Badges -->
+    <div class="left-col">
       <div class="panel">
         <div class="panel-header">
-          <div class="dot" style="background:var(--rose)"></div>
-          CAMERA — FINGER VIEW
+          <div class="dot" style="background:var(--rose)"></div>CAMERA
         </div>
         <div class="video-container">
           <video id="cameraVideo" autoplay playsinline muted></video>
@@ -294,54 +402,83 @@
           </div>
         </div>
         <div class="level-meter">
-          <div class="dot" style="background:var(--amber);width:6px;height:6px;border-radius:50%"></div>
+          <div class="dot" style="background:var(--amber);width:5px;height:5px;border-radius:50%"></div>
           <div class="level-bar-bg"><div class="level-bar" id="levelBar"></div></div>
           <div class="level-label" id="levelLabel">0</div>
         </div>
       </div>
-    </div>
 
-    <!-- Right: Visualizations + Transcript -->
-    <div class="viz-col">
-
-      <!-- MIDI Dynamic Bars -->
       <div class="panel">
         <div class="panel-header">
-          <div class="dot" style="background:var(--purple)"></div>
-          DYNAMIC RESPONSE — KEY STRENGTH
+          <div class="dot" style="background:var(--gemini)"></div>COACHING FOCUS
         </div>
-        <div class="viz-canvas-wrap">
-          <canvas id="midiBars" height="140"></canvas>
+        <div class="coaching-card">
+          <div class="coaching-focus" id="coachingFocus">
+            <div class="focus-label">CURRENT FOCUS</div>
+            <div id="coachingText">Start a session to receive coaching guidance.</div>
+          </div>
         </div>
       </div>
 
-      <!-- Rhythm Accuracy Grid -->
       <div class="panel">
         <div class="panel-header">
-          <div class="dot" style="background:var(--green)"></div>
-          RHYTHM ACCURACY
-          <div class="bpm-control">
-            <label>BPM</label>
-            <input type="range" id="bpmSlider" min="40" max="200" value="90">
-            <span class="bpm-val" id="bpmVal">90</span>
+          <div class="dot" style="background:var(--amber)"></div>ACHIEVEMENTS
+        </div>
+        <div class="badges-area" id="badgesArea">
+          <div class="badges-empty">No badges yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Scene + Viz + Transcript -->
+    <div class="right-col">
+
+      <!-- Story Scene Card -->
+      <div class="scene-card" id="sceneCard" data-scene="default">
+        <div class="scene-bg"></div>
+        <div class="scene-content">
+          <div class="scene-chapter" id="sceneChapter">YOUR QUEST AWAITS</div>
+          <div class="scene-title" id="sceneTitle">The Musical Journey Begins</div>
+          <div class="scene-desc" id="sceneDesc">Start a session and play piano to begin your quest. The AI narrator will guide your journey.</div>
+        </div>
+        <div class="scene-icon" id="sceneIcon">&#x1F3B9;</div>
+      </div>
+
+      <!-- Visualizations side by side -->
+      <div class="viz-row">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="dot" style="background:var(--purple)"></div>DYNAMIC RESPONSE
+          </div>
+          <div class="viz-canvas-wrap">
+            <canvas id="midiBars" height="120"></canvas>
           </div>
         </div>
-        <div class="viz-canvas-wrap">
-          <canvas id="rhythmGrid" height="80"></canvas>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="dot" style="background:var(--green)"></div>RHYTHM
+            <div class="bpm-control">
+              <label>BPM</label>
+              <input type="range" id="bpmSlider" min="40" max="200" value="90">
+              <span class="bpm-val" id="bpmVal">90</span>
+            </div>
+          </div>
+          <div class="viz-canvas-wrap">
+            <canvas id="rhythmGrid" height="120"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- Transcript -->
       <div class="panel transcript-panel">
         <div class="panel-header">
-          <div class="dot" style="background:var(--blue)"></div>
-          CONVERSATION
+          <div class="dot" style="background:var(--blue)"></div>CONVERSATION
         </div>
         <div class="transcript-body" id="transcript">
           <div class="msg system">Session not started. Click "Start Session" to begin.</div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -351,29 +488,304 @@
 // State
 // ============================================================================
 let ws = null;
-let audioCtx = null;       // capture context (16kHz)
-let playbackCtx = null;    // playback context (24kHz)
+let audioCtx = null;
+let playbackCtx = null;
 let mediaStream = null;
 let analyser = null;
 let processor = null;
-let videoStream = null;
 let videoInterval = null;
 let animFrame = null;
 let nextPlayTime = 0;
 let sessionActive = false;
 
-// Onset detection
-const onsets = [];          // { time: seconds since session start }
+const onsets = [];
 let sessionStartTime = 0;
 let prevRms = 0;
 const ONSET_THRESHOLD = 0.06;
-const ONSET_COOLDOWN = 0.08;  // min seconds between onsets
+const ONSET_COOLDOWN = 0.08;
 let lastOnsetTime = 0;
 
-// BPM
+let scoreHistory = [];
+let currentScore = 0;
+let currentScene = 'default';
+let questPhase = 0;
+let earnedBadges = new Set();
+
 const bpmSlider = document.getElementById('bpmSlider');
 const bpmVal = document.getElementById('bpmVal');
-bpmSlider.addEventListener('input', () => { bpmVal.textContent = bpmSlider.value; });
+bpmSlider.addEventListener('input', function() { bpmVal.textContent = bpmSlider.value; });
+
+// ============================================================================
+// Scene and Achievement Definitions (all hardcoded — no user input)
+// ============================================================================
+var SCENES = {
+  enchanted_forest: {
+    keywords: ['enchanted forest', 'forest', 'woods', 'trees', 'nature', 'garden path'],
+    chapter: 'THE ENCHANTED FOREST', title: 'Into the Musical Woods',
+    desc: 'Gentle melodies echo through ancient trees. Let your fingers find the path.',
+    icon: '\uD83C\uDF32'
+  },
+  rhythm_dragon: {
+    keywords: ['rhythm dragon', 'dragon', 'battle', 'fight', 'conquer', 'beast'],
+    chapter: 'THE RHYTHM DRAGON', title: 'Face the Beat',
+    desc: 'A fearsome challenge of timing and precision. Keep your rhythm steady!',
+    icon: '\uD83D\uDC09'
+  },
+  crystal_cave: {
+    keywords: ['crystal cave', 'cave', 'crystal', 'echo', 'resonance', 'chamber'],
+    chapter: 'THE CRYSTAL CAVE', title: 'Echoes of Resonance',
+    desc: 'Every note rings pure in this chamber. Listen to the clarity of each tone.',
+    icon: '\uD83D\uDC8E'
+  },
+  technique_tower: {
+    keywords: ['technique tower', 'tower', 'climb', 'ascend', 'skill', 'precision'],
+    chapter: 'THE TECHNIQUE TOWER', title: 'Ascending with Skill',
+    desc: 'Each floor demands more precise technique. Curve those fingers!',
+    icon: '\uD83C\uDFF0'
+  },
+  harmony_garden: {
+    keywords: ['harmony garden', 'harmony', 'chord', 'triad', 'together', 'blend', 'uniform', 'even'],
+    chapter: 'THE HARMONY GARDEN', title: 'Where Notes Bloom Together',
+    desc: 'In this garden, every voice in a chord must sing equally. Find the balance.',
+    icon: '\uD83C\uDF3A'
+  },
+  victory_hall: {
+    keywords: ['victory', 'celebration', 'congratulations', 'champion', 'mastered', 'conquered', 'well done', 'amazing', 'brilliant'],
+    chapter: 'THE VICTORY HALL', title: 'A Quest Fulfilled',
+    desc: 'Your musical journey reaches its triumphant conclusion!',
+    icon: '\uD83C\uDFC6'
+  },
+  shadow_passage: {
+    keywords: ['shadow', 'dark', 'minor', 'mysterious', 'eerie', 'struggle'],
+    chapter: 'THE SHADOW PASSAGE', title: 'Through the Darkness',
+    desc: 'The passage narrows. Play through the challenge \u2014 light awaits beyond.',
+    icon: '\uD83C\uDF11'
+  },
+  sunrise_peak: {
+    keywords: ['sunrise', 'peak', 'bright', 'major', 'joyful', 'warm', 'breakthrough', 'improvement', 'better', 'progress'],
+    chapter: 'SUNRISE PEAK', title: 'The Light of Progress',
+    desc: 'Dawn breaks over the mountain. Your improvement shines through every note.',
+    icon: '\uD83C\uDF05'
+  }
+};
+
+var ACHIEVEMENTS = {
+  first_note:       { icon: '\uD83C\uDFB5', name: 'First Note',       desc: 'Started your musical quest' },
+  even_triad:       { icon: '\uD83C\uDFB6', name: 'Resonant Triad',   desc: 'Played an even chord' },
+  steady_pulse:     { icon: '\u2764\uFE0F', name: 'Steady Pulse',     desc: 'Maintained consistent rhythm' },
+  singing_legato:   { icon: '\uD83C\uDFB6', name: 'Singing Legato',   desc: 'Smooth connected playing' },
+  dragon_slayer:    { icon: '\u2694\uFE0F', name: 'Dragon Slayer',    desc: 'Conquered a rhythm challenge' },
+  technique_master: { icon: '\uD83C\uDF1F', name: 'Technique Master', desc: 'Excellent hand position' },
+  chapter_complete: { icon: '\uD83D\uDCD6', name: 'Chapter Complete', desc: 'Finished a story chapter' }
+};
+
+var QUEST_KEYWORDS = [
+  { phase: 1, keywords: ['listen', 'observe', 'hear', 'watching', 'notice', 'see your', 'assessment'] },
+  { phase: 2, keywords: ['try', 'challenge', 'practice', 'work on', 'focus on', "let's", 'play that'] },
+  { phase: 3, keywords: ['better', 'improvement', 'getting there', 'almost', 'closer', 'progress', 'feel that'] },
+  { phase: 4, keywords: ['congratulations', 'mastered', 'victory', 'conquered', 'well done', 'chapter complete', 'amazing'] }
+];
+
+// ============================================================================
+// Detection — keyword matching on agent transcripts
+// ============================================================================
+function detectScene(text) {
+  var lower = text.toLowerCase();
+  for (var sceneId in SCENES) {
+    var scene = SCENES[sceneId];
+    for (var k = 0; k < scene.keywords.length; k++) {
+      if (lower.indexOf(scene.keywords[k]) !== -1) {
+        if (currentScene !== sceneId) setScene(sceneId);
+        return;
+      }
+    }
+  }
+}
+
+function detectAchievement(text) {
+  var lower = text.toLowerCase();
+  var patterns = [
+    { re: /resonant triad|even.*triad|triad.*even/i, id: 'even_triad' },
+    { re: /steady pulse|steady rhythm|consistent.*rhythm/i, id: 'steady_pulse' },
+    { re: /legato|smooth.*connect/i, id: 'singing_legato' },
+    { re: /dragon.*slay|conquered.*rhythm|rhythm.*conquered/i, id: 'dragon_slayer' },
+    { re: /technique.*master|excellent.*hand|hand.*position.*great/i, id: 'technique_master' },
+    { re: /chapter.*complete|finished.*chapter/i, id: 'chapter_complete' }
+  ];
+  for (var i = 0; i < patterns.length; i++) {
+    if (patterns[i].re.test(lower) && !earnedBadges.has(patterns[i].id)) {
+      awardBadge(patterns[i].id);
+    }
+  }
+}
+
+function detectQuestPhase(text) {
+  var lower = text.toLowerCase();
+  for (var i = 0; i < QUEST_KEYWORDS.length; i++) {
+    var qk = QUEST_KEYWORDS[i];
+    if (qk.phase > questPhase) {
+      for (var k = 0; k < qk.keywords.length; k++) {
+        if (lower.indexOf(qk.keywords[k]) !== -1) {
+          advanceQuest(qk.phase);
+          return;
+        }
+      }
+    }
+  }
+}
+
+function detectCoachingTip(text) {
+  var patterns = [
+    /try\s+(.{10,80})/i, /focus on\s+(.{10,80})/i, /play\s+(.{10,60}again)/i,
+    /imagine\s+(.{10,80})/i, /your\s+(\w+ finger.{5,60})/i, /keep\s+(.{10,60})/i
+  ];
+  for (var i = 0; i < patterns.length; i++) {
+    var m = text.match(patterns[i]);
+    if (m) { setCoachingFocus(m[0].slice(0, 120)); return; }
+  }
+}
+
+// ============================================================================
+// UI Updates for interleaved output features
+// ============================================================================
+function setScene(sceneId) {
+  currentScene = sceneId;
+  var scene = SCENES[sceneId];
+  if (!scene) return;
+  document.getElementById('sceneCard').setAttribute('data-scene', sceneId);
+  document.getElementById('sceneChapter').textContent = scene.chapter;
+  document.getElementById('sceneTitle').textContent = scene.title;
+  document.getElementById('sceneDesc').textContent = scene.desc;
+  document.getElementById('sceneIcon').textContent = scene.icon;
+}
+
+function setCoachingFocus(text) {
+  document.getElementById('coachingText').textContent = text;
+}
+
+function awardBadge(badgeId) {
+  if (earnedBadges.has(badgeId)) return;
+  earnedBadges.add(badgeId);
+  var info = ACHIEVEMENTS[badgeId];
+  if (!info) return;
+
+  // Add to badge shelf
+  var area = document.getElementById('badgesArea');
+  var empty = area.querySelector('.badges-empty');
+  if (empty) empty.remove();
+  var badge = document.createElement('div');
+  badge.className = 'badge';
+  badge.textContent = info.icon + ' ' + info.name;
+  area.appendChild(badge);
+
+  // Show popup notification
+  var popup = document.createElement('div');
+  popup.className = 'achievement-popup';
+  var iconEl = document.createElement('div');
+  iconEl.className = 'ach-icon';
+  iconEl.textContent = info.icon;
+  var textEl = document.createElement('div');
+  var nameEl = document.createElement('div');
+  nameEl.className = 'ach-name';
+  nameEl.textContent = 'Achievement Unlocked: ' + info.name;
+  var subEl = document.createElement('div');
+  subEl.className = 'ach-sub';
+  subEl.textContent = info.desc;
+  textEl.appendChild(nameEl);
+  textEl.appendChild(subEl);
+  popup.appendChild(iconEl);
+  popup.appendChild(textEl);
+  document.body.appendChild(popup);
+  setTimeout(function() { popup.remove(); }, 3500);
+}
+
+function advanceQuest(phase) {
+  if (phase <= questPhase) return;
+  questPhase = phase;
+  var nodeIds = ['qn-opening', 'qn-assessment', 'qn-challenge', 'qn-mastery', 'qn-celebration'];
+  var lineIds = ['ql-1', 'ql-2', 'ql-3', 'ql-4'];
+  for (var i = 0; i < nodeIds.length; i++) {
+    var node = document.getElementById(nodeIds[i]);
+    node.className = 'quest-node';
+    if (i < phase) node.classList.add('completed');
+    else if (i === phase) node.classList.add('active');
+  }
+  for (var j = 0; j < lineIds.length; j++) {
+    var line = document.getElementById(lineIds[j]);
+    line.className = 'quest-line';
+    if (j < phase) line.classList.add('completed');
+  }
+  if (phase >= 1 && !earnedBadges.has('first_note')) awardBadge('first_note');
+}
+
+function updateScore() {
+  if (!analyser) return;
+  var freqData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(freqData);
+  var binRes = 16000 / 2048;
+  var startBin = Math.floor(27.5 / binRes);
+  var endBin = Math.min(Math.ceil(4200 / binRes), freqData.length - 1);
+  var numBands = 24;
+  var binsPerBand = Math.max(1, Math.floor((endBin - startBin) / numBands));
+
+  var bandValues = [];
+  for (var i = 0; i < numBands; i++) {
+    var sum = 0;
+    var from = startBin + i * binsPerBand;
+    var to = Math.min(from + binsPerBand, freqData.length);
+    for (var b = from; b < to; b++) sum += freqData[b];
+    bandValues.push(sum / (to - from));
+  }
+
+  var maxBand = Math.max.apply(null, bandValues);
+  if (maxBand < 15) return;
+
+  var activeBands = bandValues.filter(function(v) { return v > 10; });
+  if (activeBands.length < 3) return;
+  var mean = activeBands.reduce(function(a, b) { return a + b; }, 0) / activeBands.length;
+  var variance = activeBands.reduce(function(a, v) { return a + (v - mean) * (v - mean); }, 0) / activeBands.length;
+  var cv = Math.sqrt(variance) / (mean || 1);
+  var evennessScore = Math.max(0, Math.min(100, (1 - cv) * 100));
+
+  var bpm = parseInt(bpmSlider.value) || 90;
+  var beatInterval = 60 / bpm;
+  var now = performance.now() / 1000 - sessionStartTime;
+  var recentOnsets = onsets.filter(function(o) { return o.time > now - 10; });
+  var rhythmScore = 50;
+  if (recentOnsets.length >= 3) {
+    var tolerance = beatInterval * 0.15;
+    var onBeat = 0;
+    for (var r = 0; r < recentOnsets.length; r++) {
+      var nearest = Math.round(recentOnsets[r].time / beatInterval) * beatInterval;
+      if (Math.abs(recentOnsets[r].time - nearest) < tolerance * 2) onBeat++;
+    }
+    rhythmScore = (onBeat / recentOnsets.length) * 100;
+  }
+
+  var raw = evennessScore * 0.5 + rhythmScore * 0.5;
+  scoreHistory.push(raw);
+  if (scoreHistory.length > 60) scoreHistory.shift();
+
+  var slice = scoreHistory.slice(-10);
+  var smoothed = slice.reduce(function(a, b) { return a + b; }, 0) / slice.length;
+  currentScore = Math.round(smoothed);
+
+  var el = document.getElementById('scoreNumber');
+  el.textContent = currentScore;
+  el.className = 'score-number' + (currentScore >= 70 ? ' high' : '');
+
+  var trend = document.getElementById('scoreTrend');
+  if (scoreHistory.length > 10) {
+    var oldSlice = scoreHistory.slice(-20, -10);
+    if (oldSlice.length > 0) {
+      var oldAvg = oldSlice.reduce(function(a, b) { return a + b; }, 0) / oldSlice.length;
+      var newAvg = smoothed;
+      if (newAvg > oldAvg + 3) { trend.textContent = '\u2191'; trend.className = 'score-trend up'; }
+      else if (newAvg < oldAvg - 3) { trend.textContent = '\u2193'; trend.className = 'score-trend down'; }
+      else { trend.textContent = ''; }
+    }
+  }
+}
 
 // ============================================================================
 // Session management
@@ -384,103 +796,88 @@ async function startSession() {
   setStatus('connecting');
 
   try {
-    // Request camera + mic
     mediaStream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       video: { width: 640, height: 480, facingMode: 'user' }
     });
 
-    // Show camera
-    const video = document.getElementById('cameraVideo');
+    var video = document.getElementById('cameraVideo');
     video.srcObject = mediaStream;
     document.getElementById('videoPlaceholder').style.display = 'none';
 
-    // Audio capture context at 16kHz
     audioCtx = new AudioContext({ sampleRate: 16000 });
-    const source = audioCtx.createMediaStreamSource(mediaStream);
-
-    // Analyser for visualization (use higher FFT for piano frequency resolution)
+    var source = audioCtx.createMediaStreamSource(mediaStream);
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0.8;
     source.connect(analyser);
-
-    // ScriptProcessor for PCM capture → WebSocket
     processor = audioCtx.createScriptProcessor(4096, 1, 1);
     source.connect(processor);
-    processor.connect(audioCtx.destination);  // must connect for processing to work
+    processor.connect(audioCtx.destination);
 
-    // Playback context at 24kHz for agent voice
     playbackCtx = new AudioContext({ sampleRate: 24000 });
     nextPlayTime = 0;
 
-    // WebSocket
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(`${proto}://${location.host}/ws/dialog`);
+    var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(proto + '://' + location.host + '/ws/dialog');
     ws.binaryType = 'arraybuffer';
 
-    ws.onopen = () => {
+    ws.onopen = function() {
       setStatus('connected');
       sessionActive = true;
       sessionStartTime = performance.now() / 1000;
       onsets.length = 0;
-      addTranscript('system', 'Connected. Speak or play piano to begin.');
+      scoreHistory = [];
+      currentScore = 0;
+      questPhase = 0;
+      earnedBadges.clear();
+      addTranscript('system', 'Connected. Speak or play piano to begin your quest.');
       ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
 
-      // Start sending audio
-      processor.onaudioprocess = (e) => {
+      processor.onaudioprocess = function(e) {
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
-        const input = e.inputBuffer.getChannelData(0);
-        const pcm16 = new Int16Array(input.length);
-        for (let i = 0; i < input.length; i++) {
+        var input = e.inputBuffer.getChannelData(0);
+        var pcm16 = new Int16Array(input.length);
+        for (var i = 0; i < input.length; i++) {
           pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(input[i] * 32767)));
         }
         ws.send(pcm16.buffer);
       };
 
-      // Start sending video frames (1 frame every 2s)
-      const captureCanvas = document.createElement('canvas');
+      var captureCanvas = document.createElement('canvas');
       captureCanvas.width = 640;
       captureCanvas.height = 480;
-      const captureCtx = captureCanvas.getContext('2d');
-      videoInterval = setInterval(() => {
+      var captureCtx = captureCanvas.getContext('2d');
+      videoInterval = setInterval(function() {
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
         captureCtx.drawImage(video, 0, 0, 640, 480);
-        const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.6);
-        const b64 = dataUrl.split(',')[1];
+        var dataUrl = captureCanvas.toDataURL('image/jpeg', 0.6);
+        var b64 = dataUrl.split(',')[1];
         ws.send(JSON.stringify({ type: 'video_frame', data: b64 }));
       }, 2000);
 
-      // Start visualizations
       drawLoop();
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = function(event) {
       if (event.data instanceof ArrayBuffer) {
-        // Audio from agent — play it
         queueAudio(event.data);
       } else {
-        const msg = JSON.parse(event.data);
+        var msg = JSON.parse(event.data);
         if (msg.type === 'input_transcript') {
           addTranscript('user', msg.text);
         } else if (msg.type === 'output_transcript') {
           addTranscript('agent', msg.text);
-        } else if (msg.type === 'turn_complete') {
-          // optional: visual indicator
-        } else if (msg.type === 'interrupted') {
-          // agent was interrupted by user speech
+          detectScene(msg.text);
+          detectAchievement(msg.text);
+          detectQuestPhase(msg.text);
+          detectCoachingTip(msg.text);
         }
       }
     };
 
-    ws.onclose = () => {
-      setStatus('disconnected');
-      addTranscript('system', 'Disconnected.');
-    };
-
-    ws.onerror = () => {
-      setStatus('error');
-    };
+    ws.onclose = function() { setStatus('disconnected'); addTranscript('system', 'Disconnected.'); };
+    ws.onerror = function() { setStatus('error'); };
 
   } catch (err) {
     console.error('Failed to start session:', err);
@@ -504,10 +901,7 @@ function stopSession() {
   if (analyser) { analyser.disconnect(); analyser = null; }
   if (audioCtx) { audioCtx.close(); audioCtx = null; }
   if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
-  if (mediaStream) {
-    mediaStream.getTracks().forEach(t => t.stop());
-    mediaStream = null;
-  }
+  if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
   document.getElementById('cameraVideo').srcObject = null;
   document.getElementById('videoPlaceholder').style.display = '';
   document.getElementById('btnStart').disabled = false;
@@ -516,222 +910,158 @@ function stopSession() {
 }
 
 // ============================================================================
-// Audio playback (agent voice — 24kHz PCM)
+// Audio playback
 // ============================================================================
 function queueAudio(arrayBuf) {
   if (!playbackCtx) return;
-  const int16 = new Int16Array(arrayBuf);
-  const float32 = new Float32Array(int16.length);
-  for (let i = 0; i < int16.length; i++) {
-    float32[i] = int16[i] / 32768;
-  }
-  const buffer = playbackCtx.createBuffer(1, float32.length, 24000);
+  var int16 = new Int16Array(arrayBuf);
+  var float32 = new Float32Array(int16.length);
+  for (var i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
+  var buffer = playbackCtx.createBuffer(1, float32.length, 24000);
   buffer.copyToChannel(float32, 0);
-  const source = playbackCtx.createBufferSource();
-  source.buffer = buffer;
-  source.connect(playbackCtx.destination);
-  const now = playbackCtx.currentTime;
-  const startTime = Math.max(now + 0.01, nextPlayTime);
-  source.start(startTime);
+  var src = playbackCtx.createBufferSource();
+  src.buffer = buffer;
+  src.connect(playbackCtx.destination);
+  var now = playbackCtx.currentTime;
+  var startTime = Math.max(now + 0.01, nextPlayTime);
+  src.start(startTime);
   nextPlayTime = startTime + buffer.duration;
 }
 
 // ============================================================================
-// Visualizations
+// Visualization loop
 // ============================================================================
+var scoreTimer = 0;
 function drawLoop() {
   if (!sessionActive) return;
   drawMidiBars();
   drawRhythmGrid();
   detectOnset();
   updateLevelMeter();
+  scoreTimer++;
+  if (scoreTimer % 15 === 0) updateScore();
   animFrame = requestAnimationFrame(drawLoop);
 }
 
-// --- MIDI Dynamic Bars ---
 function drawMidiBars() {
-  const canvas = document.getElementById('midiBars');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
+  var canvas = document.getElementById('midiBars');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
   canvas.width = rect.width * dpr;
-  canvas.height = 140 * dpr;
+  canvas.height = 120 * dpr;
   ctx.scale(dpr, dpr);
-  const W = rect.width;
-  const H = 140;
-
+  var W = rect.width, H = 120;
   ctx.clearRect(0, 0, W, H);
-
   if (!analyser) return;
-  const freqData = new Uint8Array(analyser.frequencyBinCount);
+
+  var freqData = new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(freqData);
+  var binRes = 16000 / 2048;
+  var startBin = Math.floor(27.5 / binRes);
+  var endBin = Math.min(Math.ceil(4200 / binRes), freqData.length - 1);
+  var numBars = 36;
+  var binsPerBar = Math.max(1, Math.floor((endBin - startBin) / numBars));
+  var barWidth = (W - 16) / numBars;
+  var gap = 2;
 
-  // Map frequency bins to piano-relevant bands (27.5Hz A0 to 4186Hz C8)
-  // With 16kHz sample rate and FFT size 2048: bin resolution = 16000/2048 ≈ 7.8 Hz
-  // Piano range: bin ~3 (27.5Hz) to bin ~537 (4186Hz)
-  const binRes = 16000 / 2048;
-  const startBin = Math.floor(27.5 / binRes);
-  const endBin = Math.min(Math.ceil(4200 / binRes), freqData.length - 1);
-  const numBars = 48;
-  const binsPerBar = Math.max(1, Math.floor((endBin - startBin) / numBars));
-  const barWidth = (W - 20) / numBars;
-  const gap = 2;
+  for (var i = 0; i < numBars; i++) {
+    var sum = 0;
+    var from = startBin + i * binsPerBar;
+    var to = Math.min(from + binsPerBar, freqData.length);
+    for (var b = from; b < to; b++) sum += freqData[b];
+    var avg = sum / (to - from);
+    var normH = (avg / 255) * (H - 8);
+    var t = i / numBars;
+    var r, g, b_c;
+    if (t < 0.33) { var lt = t / 0.33; r = 167 - lt * 20; g = 139 + lt * 58; b_c = 250; }
+    else if (t < 0.66) { var lt2 = (t - 0.33) / 0.33; r = 147 + lt2 * 104; g = 197 - lt2 * 6; b_c = 253 - lt2 * 217; }
+    else { var lt3 = (t - 0.66) / 0.34; r = 251; g = 191 - lt3 * 78; b_c = 36 + lt3 * 97; }
 
-  for (let i = 0; i < numBars; i++) {
-    let sum = 0;
-    const from = startBin + i * binsPerBar;
-    const to = Math.min(from + binsPerBar, freqData.length);
-    for (let b = from; b < to; b++) sum += freqData[b];
-    const avg = sum / (to - from);
-    const normH = (avg / 255) * (H - 10);
-
-    // Color gradient: bass=blue/purple, mid=amber, treble=rose
-    const t = i / numBars;
-    let r, g, b_c;
-    if (t < 0.33) {
-      // purple to blue
-      const lt = t / 0.33;
-      r = 167 - lt * 20; g = 139 + lt * 58; b_c = 250;
-    } else if (t < 0.66) {
-      // blue to amber
-      const lt = (t - 0.33) / 0.33;
-      r = 147 + lt * 104; g = 197 - lt * 6; b_c = 253 - lt * 217;
-    } else {
-      // amber to rose
-      const lt = (t - 0.66) / 0.34;
-      r = 251; g = 191 - lt * 78; b_c = 36 + lt * 97;
-    }
-
-    const x = 10 + i * barWidth;
-    const barW = barWidth - gap;
-
-    // Glow effect
-    ctx.shadowBlur = normH > 40 ? 8 : 0;
-    ctx.shadowColor = `rgba(${r},${g},${b_c},0.4)`;
-
-    // Bar
-    const gradient = ctx.createLinearGradient(0, H, 0, H - normH);
-    gradient.addColorStop(0, `rgba(${r},${g},${b_c},0.15)`);
-    gradient.addColorStop(1, `rgba(${r},${g},${b_c},0.8)`);
+    var x = 8 + i * barWidth;
+    var barW = barWidth - gap;
+    ctx.shadowBlur = normH > 30 ? 6 : 0;
+    ctx.shadowColor = 'rgba(' + r + ',' + g + ',' + b_c + ',0.4)';
+    var gradient = ctx.createLinearGradient(0, H, 0, H - normH);
+    gradient.addColorStop(0, 'rgba(' + r + ',' + g + ',' + b_c + ',0.12)');
+    gradient.addColorStop(1, 'rgba(' + r + ',' + g + ',' + b_c + ',0.75)');
     ctx.fillStyle = gradient;
     ctx.fillRect(x, H - normH, barW, normH);
-
-    // Top cap
     ctx.shadowBlur = 0;
-    ctx.fillStyle = `rgba(${r},${g},${b_c},0.9)`;
+    ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b_c + ',0.85)';
     ctx.fillRect(x, H - normH, barW, 2);
   }
 }
 
-// --- Rhythm Accuracy Grid ---
 function drawRhythmGrid() {
-  const canvas = document.getElementById('rhythmGrid');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
+  var canvas = document.getElementById('rhythmGrid');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
   canvas.width = rect.width * dpr;
-  canvas.height = 80 * dpr;
+  canvas.height = 120 * dpr;
   ctx.scale(dpr, dpr);
-  const W = rect.width;
-  const H = 80;
-
+  var W = rect.width, H = 120;
   ctx.clearRect(0, 0, W, H);
 
-  const bpm = parseInt(bpmSlider.value) || 90;
-  const beatInterval = 60 / bpm;  // seconds per beat
-  const now = performance.now() / 1000 - sessionStartTime;
-  const windowDuration = 8;  // show 8 seconds of history
-  const windowStart = Math.max(0, now - windowDuration);
+  var bpm = parseInt(bpmSlider.value) || 90;
+  var beatInterval = 60 / bpm;
+  var now = performance.now() / 1000 - sessionStartTime;
+  var windowDuration = 8;
+  var windowStart = Math.max(0, now - windowDuration);
 
-  // Draw beat grid lines
-  const firstBeat = Math.ceil(windowStart / beatInterval) * beatInterval;
-  for (let bt = firstBeat; bt < now + beatInterval; bt += beatInterval) {
-    const x = ((bt - windowStart) / windowDuration) * W;
+  var firstBeat = Math.ceil(windowStart / beatInterval) * beatInterval;
+  for (var bt = firstBeat; bt < now + beatInterval; bt += beatInterval) {
+    var x = ((bt - windowStart) / windowDuration) * W;
     if (x < 0 || x > W) continue;
-
-    // Strong beat (every 4)
-    const beatNum = Math.round(bt / beatInterval);
-    const isStrong = beatNum % 4 === 0;
-
-    ctx.strokeStyle = isStrong ? 'rgba(134,239,172,0.3)' : 'rgba(134,239,172,0.1)';
+    var beatNum = Math.round(bt / beatInterval);
+    var isStrong = beatNum % 4 === 0;
+    ctx.strokeStyle = isStrong ? 'rgba(134,239,172,0.3)' : 'rgba(134,239,172,0.08)';
     ctx.lineWidth = isStrong ? 1.5 : 0.5;
-    ctx.beginPath();
-    ctx.moveTo(x, 5);
-    ctx.lineTo(x, H - 5);
-    ctx.stroke();
-
-    // Beat number label
+    ctx.beginPath(); ctx.moveTo(x, 8); ctx.lineTo(x, H - 8); ctx.stroke();
     if (isStrong) {
-      ctx.fillStyle = 'rgba(134,239,172,0.3)';
-      ctx.font = '9px sans-serif';
+      ctx.fillStyle = 'rgba(134,239,172,0.25)';
+      ctx.font = '8px sans-serif';
       ctx.fillText(beatNum / 4 + 1, x + 2, H - 2);
     }
   }
 
-  // Draw onset dots
-  for (const onset of onsets) {
+  for (var oi = 0; oi < onsets.length; oi++) {
+    var onset = onsets[oi];
     if (onset.time < windowStart) continue;
-    const x = ((onset.time - windowStart) / windowDuration) * W;
-    if (x < 0 || x > W) continue;
+    var ox = ((onset.time - windowStart) / windowDuration) * W;
+    if (ox < 0 || ox > W) continue;
+    var nearestBeat = Math.round(onset.time / beatInterval) * beatInterval;
+    var offset = Math.abs(onset.time - nearestBeat);
+    var tolerance = beatInterval * 0.15;
+    var color;
+    if (offset < tolerance) color = 'rgba(134,239,172,0.9)';
+    else if (offset < tolerance * 2.5) color = 'rgba(251,191,36,0.8)';
+    else color = 'rgba(251,113,133,0.7)';
 
-    // How close to nearest beat?
-    const nearestBeat = Math.round(onset.time / beatInterval) * beatInterval;
-    const offset = Math.abs(onset.time - nearestBeat);
-    const tolerance = beatInterval * 0.15;  // within 15% of beat interval
-
-    let color;
-    if (offset < tolerance) {
-      color = 'rgba(134,239,172,0.9)';  // green — on beat
-    } else if (offset < tolerance * 2.5) {
-      color = 'rgba(251,191,36,0.8)';   // amber — close
-    } else {
-      color = 'rgba(251,113,133,0.7)';  // rose — off beat
-    }
-
-    // Dot
-    ctx.beginPath();
-    ctx.arc(x, H / 2, 5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-
-    // Glow
-    ctx.beginPath();
-    ctx.arc(x, H / 2, 8, 0, Math.PI * 2);
-    ctx.fillStyle = color.replace(/[\d.]+\)$/, '0.15)');
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(ox, H / 2, 4, 0, Math.PI * 2);
+    ctx.fillStyle = color; ctx.fill();
+    ctx.beginPath(); ctx.arc(ox, H / 2, 7, 0, Math.PI * 2);
+    ctx.fillStyle = color.replace(/[\d.]+\)$/, '0.12)'); ctx.fill();
   }
 
-  // "Now" line
-  const nowX = ((now - windowStart) / windowDuration) * W;
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-  ctx.lineWidth = 1;
+  var nowX = ((now - windowStart) / windowDuration) * W;
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1;
   ctx.setLineDash([3, 3]);
-  ctx.beginPath();
-  ctx.moveTo(nowX, 0);
-  ctx.lineTo(nowX, H);
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(nowX, 0); ctx.lineTo(nowX, H); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Trim old onsets (keep last 30 seconds)
-  while (onsets.length > 0 && onsets[0].time < now - 30) {
-    onsets.shift();
-  }
+  while (onsets.length > 0 && onsets[0].time < now - 30) onsets.shift();
 }
 
-// --- Onset Detection ---
 function detectOnset() {
   if (!analyser) return;
-  const timeDomainData = new Uint8Array(analyser.fftSize);
-  analyser.getByteTimeDomainData(timeDomainData);
-
-  let sum = 0;
-  for (let i = 0; i < timeDomainData.length; i++) {
-    const v = (timeDomainData[i] - 128) / 128;
-    sum += v * v;
-  }
-  const rms = Math.sqrt(sum / timeDomainData.length);
-  const now = performance.now() / 1000 - sessionStartTime;
-
+  var data = new Uint8Array(analyser.fftSize);
+  analyser.getByteTimeDomainData(data);
+  var sum = 0;
+  for (var i = 0; i < data.length; i++) { var v = (data[i] - 128) / 128; sum += v * v; }
+  var rms = Math.sqrt(sum / data.length);
+  var now = performance.now() / 1000 - sessionStartTime;
   if (rms > ONSET_THRESHOLD && prevRms < ONSET_THRESHOLD * 0.7 && (now - lastOnsetTime) > ONSET_COOLDOWN) {
     onsets.push({ time: now });
     lastOnsetTime = now;
@@ -739,17 +1069,13 @@ function detectOnset() {
   prevRms = rms;
 }
 
-// --- Level Meter ---
 function updateLevelMeter() {
   if (!analyser) return;
-  const data = new Uint8Array(analyser.fftSize);
+  var data = new Uint8Array(analyser.fftSize);
   analyser.getByteTimeDomainData(data);
-  let max = 0;
-  for (let i = 0; i < data.length; i++) {
-    const v = Math.abs(data[i] - 128);
-    if (v > max) max = v;
-  }
-  const pct = Math.min(100, (max / 128) * 100);
+  var max = 0;
+  for (var i = 0; i < data.length; i++) { var v = Math.abs(data[i] - 128); if (v > max) max = v; }
+  var pct = Math.min(100, (max / 128) * 100);
   document.getElementById('levelBar').style.width = pct + '%';
   document.getElementById('levelLabel').textContent = Math.round(pct);
 }
@@ -758,40 +1084,30 @@ function updateLevelMeter() {
 // UI Helpers
 // ============================================================================
 function setStatus(state) {
-  const dot = document.getElementById('statusDot');
-  const label = document.getElementById('statusLabel');
+  var dot = document.getElementById('statusDot');
+  var label = document.getElementById('statusLabel');
   dot.className = 'status-dot';
-  if (state === 'connected') {
-    dot.classList.add('connected');
-    label.textContent = 'Connected';
-  } else if (state === 'connecting') {
-    label.textContent = 'Connecting...';
-  } else if (state === 'error') {
-    dot.classList.add('error');
-    label.textContent = 'Error';
-  } else {
-    label.textContent = 'Disconnected';
-  }
+  if (state === 'connected') { dot.classList.add('connected'); label.textContent = 'Connected'; }
+  else if (state === 'connecting') { label.textContent = 'Connecting...'; }
+  else if (state === 'error') { dot.classList.add('error'); label.textContent = 'Error'; }
+  else { label.textContent = 'Disconnected'; }
 }
 
 function addTranscript(role, text) {
-  const container = document.getElementById('transcript');
-  // Remove the initial system placeholder
-  const placeholder = container.querySelector('.msg.system');
-  if (placeholder && placeholder.textContent.includes('Session not started')) {
-    placeholder.remove();
-  }
+  var container = document.getElementById('transcript');
+  var placeholder = container.querySelector('.msg.system');
+  if (placeholder && placeholder.textContent.indexOf('Session not started') !== -1) placeholder.remove();
 
-  const div = document.createElement('div');
+  var div = document.createElement('div');
   div.className = 'msg ' + role;
   if (role === 'system') {
     div.textContent = text;
   } else {
-    const roleLabel = document.createElement('div');
+    var roleLabel = document.createElement('div');
     roleLabel.className = 'role';
     roleLabel.textContent = role === 'user' ? 'YOU' : 'PIANOQUEST';
     div.appendChild(roleLabel);
-    const content = document.createElement('div');
+    var content = document.createElement('div');
     content.className = 'content';
     content.textContent = text;
     div.appendChild(content);
