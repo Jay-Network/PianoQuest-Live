@@ -60,3 +60,11 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: The new camera toggle button was only enabled on startup failure, not on the normal successful WebSocket/session startup path.
 - Fix: The camera toggle is now enabled as soon as the session WebSocket opens successfully.
 - Prevention: Interactive controls added for in-session use must be enabled in the success path first, then selectively disabled only on teardown or fatal startup failure.
+
+## BUG-008
+- Version found: `0.4.5`
+- Severity: High
+- Status: Fixed
+- Root cause: The live session could emit spoken replies for non-speech turns, including startup state changes and MIDI-only context, which made Gemini greet or comment without being verbally addressed.
+- Fix: Server now suppresses audio and transcript output unless the current turn contains actual user speech transcription, and the agent prompt explicitly says not to speak first.
+- Prevention: In a speech-driven UX, only turns with verified spoken user input should be allowed to reach audio playback.

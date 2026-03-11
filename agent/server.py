@@ -239,12 +239,9 @@ async def websocket_dialog(websocket: WebSocket):
         try:
             buf_input = ""
             buf_output = ""
+            turn_has_user_speech = False
+            pending_audio_chunks: list[bytes] = []
             async for event in start_agent_session(session_id, live_queue, mode):
-                if event.content and event.content.parts:
-                    for part in event.content.parts:
-                        if part.inline_data and part.inline_data.data:
-                            await websocket.send_bytes(part.inline_data.data)
-
                 # Drain visual event queue — send tool-driven UI updates
                 while not vq.empty():
                     try:
@@ -259,6 +256,16 @@ async def websocket_dialog(websocket: WebSocket):
                     text = text.strip()
                     if text:
                         buf_input = text
+                        turn_has_user_speech = True
+                        while pending_audio_chunks:
+                            await websocket.send_bytes(pending_audio_chunks.pop(0))
+                if event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if part.inline_data and part.inline_data.data:
+                            if turn_has_user_speech:
+                                await websocket.send_bytes(part.inline_data.data)
+                            else:
+                                pending_audio_chunks.append(part.inline_data.data)
                 if event.output_transcription:
                     raw = event.output_transcription
                     text = getattr(raw, 'text', None) or str(raw)
@@ -266,21 +273,27 @@ async def websocket_dialog(websocket: WebSocket):
                     if text:
                         buf_output = text
                 if event.turn_complete:
-                    if buf_input:
+                    if turn_has_user_speech and buf_input:
                         await websocket.send_text(json.dumps({"type": "input_transcript", "text": buf_input}))
                         buf_input = ""
-                    if buf_output:
+                    if turn_has_user_speech and buf_output:
                         await websocket.send_text(json.dumps({"type": "output_transcript", "text": buf_output}))
                         buf_output = ""
-                    await websocket.send_text(json.dumps({"type": "turn_complete"}))
+                    pending_audio_chunks.clear()
+                    if turn_has_user_speech:
+                        await websocket.send_text(json.dumps({"type": "turn_complete"}))
+                    turn_has_user_speech = False
                 if event.interrupted:
-                    if buf_input:
+                    if turn_has_user_speech and buf_input:
                         await websocket.send_text(json.dumps({"type": "input_transcript", "text": buf_input}))
                         buf_input = ""
-                    if buf_output:
+                    if turn_has_user_speech and buf_output:
                         await websocket.send_text(json.dumps({"type": "output_transcript", "text": buf_output}))
                         buf_output = ""
-                    await websocket.send_text(json.dumps({"type": "interrupted"}))
+                    pending_audio_chunks.clear()
+                    if turn_has_user_speech:
+                        await websocket.send_text(json.dumps({"type": "interrupted"}))
+                    turn_has_user_speech = False
         except WebSocketDisconnect:
             pass
         finally:
