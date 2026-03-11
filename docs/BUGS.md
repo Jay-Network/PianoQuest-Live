@@ -28,3 +28,19 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: Even after speech-optimized mic constraints, the browser continued streaming microphone frames while Gemini audio was playing. Playback bleed triggered live-session interruptions, causing Gemini to get chopped off every few seconds and resume from roughly the same point.
 - Fix: Browser now gates outgoing microphone PCM while agent playback is active, with a short post-playback hold window.
 - Prevention: In full-duplex live voice apps, treat output playback as a first-class signal in the input pipeline. Do not stream mic audio to the model while model audio is actively playing unless true echo cancellation has been verified.
+
+## BUG-004
+- Version found: `0.4.2`
+- Severity: High
+- Status: Fixed
+- Root cause: The UI had no explicit in-app camera control or visible hand-tracking confirmation, so the agent could continue making visual claims without giving the user a reliable way to disable the camera or verify what the model could actually see.
+- Fix: Added an in-UI camera toggle and a live hand-skeleton overlay with camera status badges so visual sensing is explicit and user-controlled.
+- Prevention: Any feature that drives model-side visual claims must expose both a user-facing kill switch and an on-screen indication of what is actually being tracked.
+
+## BUG-005
+- Version found: `0.4.2`
+- Severity: High
+- Status: Fixed
+- Root cause: The live agent prompt allowed finger-specific coaching whenever camera input existed, even if only one hand or no hands were actually detected.
+- Fix: Frontend now sends hand-detection state, backend forwards that state into the live session, and the agent instructions now forbid finger/fingering comments or `report_technique` unless both hands are detected.
+- Prevention: Visual coaching prompts must be gated by concrete detection state, not just by camera availability.

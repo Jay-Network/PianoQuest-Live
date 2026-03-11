@@ -88,6 +88,10 @@
     background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: var(--amber);
   }
   button.primary:hover { background: rgba(251,191,36,0.25); }
+  button.secondary {
+    background: rgba(96,165,250,0.12); border-color: rgba(96,165,250,0.25); color: var(--blue);
+  }
+  button.secondary:hover { background: rgba(96,165,250,0.2); }
   button.danger {
     background: rgba(251,113,133,0.1); border-color: rgba(251,113,133,0.25); color: var(--rose);
   }
@@ -168,12 +172,46 @@
   .video-container video {
     width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
   }
+  .video-container canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transform: scaleX(-1);
+  }
   .video-placeholder {
     position: absolute; inset: 0; display: flex; align-items: center;
     justify-content: center; flex-direction: column; gap: 6px;
     color: var(--text3); font-size: 11px;
   }
   .video-placeholder .icon { font-size: 28px; opacity: 0.3; }
+  .camera-badge {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 2;
+    padding: 6px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(10,10,20,0.72);
+    color: var(--text2);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    backdrop-filter: blur(10px);
+  }
+  .camera-badge.ready {
+    border-color: rgba(134,239,172,0.28);
+    color: var(--green);
+  }
+  .camera-badge.warn {
+    border-color: rgba(251,191,36,0.28);
+    color: var(--amber);
+  }
+  .camera-badge.off {
+    border-color: rgba(251,113,133,0.28);
+    color: var(--rose);
+  }
 
   .level-meter {
     padding: 6px 12px; display: flex; align-items: center; gap: 6px;
@@ -419,6 +457,7 @@
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="startSession()">Start Session</button>
+      <button class="secondary" id="btnCamera" onclick="toggleCamera()" disabled>Camera On</button>
       <button class="danger" id="btnStop" onclick="stopSession()" disabled>Stop</button>
     </div>
   </div>
@@ -462,10 +501,12 @@
         </div>
         <div class="video-container">
           <video id="cameraVideo" autoplay playsinline muted></video>
+          <canvas id="handOverlay"></canvas>
           <div class="video-placeholder" id="videoPlaceholder">
             <div class="icon">&#x1F4F9;</div>
             <div>Point camera at keyboard</div>
           </div>
+          <div class="camera-badge warn" id="cameraBadge">Show both hands for fingering feedback</div>
         </div>
         <div class="level-meter">
           <div class="dot" style="background:var(--amber);width:5px;height:5px;border-radius:50%"></div>
@@ -556,6 +597,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script>
 // ============================================================================
 // State
@@ -571,6 +613,17 @@ let animFrame = null;
 let nextPlayTime = 0;
 let sessionActive = false;
 let playbackActiveUntil = 0;
+let cameraEnabled = true;
+let handsTracker = null;
+let handTrackerReady = false;
+let handTrackerBusy = false;
+let lastHandProcessAt = 0;
+let handTrackingError = false;
+let handLandmarks = [];
+let detectedHandCount = 0;
+let bothHandsDetected = false;
+let lastSentHandState = '';
+let lastSentCameraState = '';
 
 let midiAccess = null;
 let midiInput = null;
@@ -617,6 +670,14 @@ const DYNAMICS_LABELS = [
   { vel: 90, label: 'f' },
   { vel: 112, label: 'ff' },
   { vel: 127, label: 'fff' }
+];
+const HAND_CONNECTIONS = [
+  [0, 1], [1, 2], [2, 3], [3, 4],
+  [0, 5], [5, 6], [6, 7], [7, 8],
+  [5, 9], [9, 10], [10, 11], [11, 12],
+  [9, 13], [13, 14], [14, 15], [15, 16],
+  [13, 17], [17, 18], [18, 19], [19, 20],
+  [0, 17]
 ];
 
 var KEYBOARD = buildKeyboard();
@@ -763,6 +824,7 @@ function handleToolEvent(msg) {
 }
 
 function showTechniqueReport(msg) {
+  if (!bothHandsDetected) return;
   var panel = document.getElementById('techniquePanel');
   // Clear placeholder text on first report
   if (!panel.querySelector('.technique-entry')) {
@@ -954,6 +1016,180 @@ function updatePedalStatus() {
   var el = document.getElementById('pedalStatus');
   el.textContent = pedalDown ? 'Pedal Down' : 'Pedal Up';
   el.className = pedalDown ? 'pedal-pill active' : 'pedal-pill';
+}
+
+function updateCameraUi() {
+  var btn = document.getElementById('btnCamera');
+  var placeholder = document.getElementById('videoPlaceholder');
+  var video = document.getElementById('cameraVideo');
+  var badge = document.getElementById('cameraBadge');
+  btn.textContent = cameraEnabled ? 'Camera On' : 'Camera Off';
+  btn.className = cameraEnabled ? 'secondary' : 'danger';
+  if (placeholder) {
+    placeholder.style.display = cameraEnabled ? 'none' : '';
+    placeholder.querySelector('div:last-child').textContent = cameraEnabled ? 'Point camera at keyboard' : 'Camera is off';
+  }
+  if (video) {
+    video.style.opacity = cameraEnabled ? '1' : '0.15';
+  }
+  if (badge) {
+    if (!cameraEnabled) {
+      badge.textContent = 'Camera is off';
+      badge.className = 'camera-badge off';
+    } else if (bothHandsDetected) {
+      badge.textContent = 'Both hands tracked';
+      badge.className = 'camera-badge ready';
+    } else if (detectedHandCount === 1) {
+      badge.textContent = 'Only one hand detected';
+      badge.className = 'camera-badge warn';
+    } else if (handTrackingError) {
+      badge.textContent = 'Hand tracking unavailable';
+      badge.className = 'camera-badge off';
+    } else {
+      badge.textContent = 'Show both hands for fingering feedback';
+      badge.className = 'camera-badge warn';
+    }
+  }
+}
+
+function sendCameraState() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  var stateKey = String(cameraEnabled);
+  if (lastSentCameraState === stateKey) return;
+  lastSentCameraState = stateKey;
+  ws.send(JSON.stringify({ type: 'camera_state', enabled: cameraEnabled }));
+}
+
+function sendHandState(force) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  var payload = {
+    type: 'hand_state',
+    detected_count: cameraEnabled ? detectedHandCount : 0,
+    both_hands_detected: cameraEnabled && bothHandsDetected
+  };
+  var stateKey = JSON.stringify(payload);
+  if (!force && lastSentHandState === stateKey) return;
+  lastSentHandState = stateKey;
+  ws.send(JSON.stringify(payload));
+}
+
+function toggleCamera() {
+  if (!mediaStream) return;
+  cameraEnabled = !cameraEnabled;
+  mediaStream.getVideoTracks().forEach(function(track) { track.enabled = cameraEnabled; });
+  if (!cameraEnabled) {
+    setHandTrackingState(0);
+    clearHandOverlay();
+  }
+  updateCameraUi();
+  lastSentCameraState = '';
+  sendCameraState();
+  sendHandState(true);
+}
+
+async function initHandTracking() {
+  if (handTrackerReady || handsTracker || !window.Hands) return;
+  try {
+    handsTracker = new window.Hands({
+      locateFile: function(file) {
+        return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/' + file;
+      }
+    });
+    handsTracker.setOptions({
+      maxNumHands: 2,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.65,
+      minTrackingConfidence: 0.55
+    });
+    handsTracker.onResults(function(results) {
+      handLandmarks = results.multiHandLandmarks || [];
+      handTrackingError = false;
+      setHandTrackingState(handLandmarks.length);
+      drawHandOverlay();
+    });
+    handTrackerReady = true;
+  } catch (err) {
+    handTrackingError = true;
+    console.error('Failed to initialize hand tracking', err);
+    updateCameraUi();
+  }
+}
+
+function setHandTrackingState(count) {
+  detectedHandCount = count;
+  bothHandsDetected = count >= 2 && cameraEnabled;
+  updateCameraUi();
+  sendHandState(false);
+}
+
+async function processHandTracking() {
+  if (!cameraEnabled || !handsTracker || !handTrackerReady || handTrackerBusy) return;
+  var video = document.getElementById('cameraVideo');
+  if (!video || !video.videoWidth || !video.videoHeight) return;
+
+  var now = Date.now();
+  if (now - lastHandProcessAt < 150) return;
+  lastHandProcessAt = now;
+  handTrackerBusy = true;
+  try {
+    await handsTracker.send({ image: video });
+  } catch (err) {
+    handTrackingError = true;
+    console.error('Hand tracking frame failed', err);
+    updateCameraUi();
+  } finally {
+    handTrackerBusy = false;
+  }
+}
+
+function clearHandOverlay() {
+  var canvas = document.getElementById('handOverlay');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
+}
+
+function drawHandOverlay() {
+  var canvas = document.getElementById('handOverlay');
+  var video = document.getElementById('cameraVideo');
+  if (!canvas || !video) return;
+
+  var rect = video.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  var width = Math.max(1, Math.round(rect.width * dpr));
+  var height = Math.max(1, Math.round(rect.height * dpr));
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  var ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, rect.width, rect.height);
+
+  if (!cameraEnabled || !handLandmarks.length) return;
+
+  handLandmarks.forEach(function(points, handIndex) {
+    var lineColor = handIndex === 0 ? 'rgba(96,165,250,0.92)' : 'rgba(251,191,36,0.92)';
+    var jointColor = handIndex === 0 ? 'rgba(191,219,254,0.98)' : 'rgba(254,240,138,0.98)';
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = lineColor;
+    HAND_CONNECTIONS.forEach(function(pair) {
+      var a = points[pair[0]];
+      var b = points[pair[1]];
+      if (!a || !b) return;
+      ctx.beginPath();
+      ctx.moveTo(a.x * rect.width, a.y * rect.height);
+      ctx.lineTo(b.x * rect.width, b.y * rect.height);
+      ctx.stroke();
+    });
+    points.forEach(function(point, idx) {
+      ctx.beginPath();
+      ctx.fillStyle = jointColor;
+      ctx.arc(point.x * rect.width, point.y * rect.height, idx === 0 ? 4.5 : 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  });
 }
 
 async function refreshMidiInputs() {
@@ -1173,7 +1409,15 @@ async function startSession() {
 
     var video = document.getElementById('cameraVideo');
     video.srcObject = mediaStream;
-    document.getElementById('videoPlaceholder').style.display = 'none';
+    cameraEnabled = true;
+    handLandmarks = [];
+    detectedHandCount = 0;
+    bothHandsDetected = false;
+    handTrackingError = false;
+    lastSentHandState = '';
+    lastSentCameraState = '';
+    updateCameraUi();
+    initHandTracking();
 
     audioCtx = new AudioContext({ sampleRate: 16000 });
     var source = audioCtx.createMediaStreamSource(mediaStream);
@@ -1204,6 +1448,8 @@ async function startSession() {
       document.getElementById('scoreNumber').textContent = '--';
       document.getElementById('scoreTrend').textContent = '';
       ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
+      sendCameraState();
+      sendHandState(true);
       refreshMidiInputs();
 
       processor.onaudioprocess = function(e) {
@@ -1223,6 +1469,7 @@ async function startSession() {
       var captureCtx = captureCanvas.getContext('2d');
       videoInterval = setInterval(function() {
         if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        if (!cameraEnabled) return;
         captureCtx.drawImage(video, 0, 0, 640, 480);
         var dataUrl = captureCanvas.toDataURL('image/jpeg', 0.6);
         var b64 = dataUrl.split(',')[1];
@@ -1252,6 +1499,7 @@ async function startSession() {
     console.error('Failed to start session:', err);
     setStatus('error');
     document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnCamera').disabled = false;
     document.getElementById('btnStop').disabled = true;
   }
 }
@@ -1272,8 +1520,16 @@ function stopSession() {
   if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
   if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
   document.getElementById('cameraVideo').srcObject = null;
-  document.getElementById('videoPlaceholder').style.display = '';
+  cameraEnabled = true;
+  handLandmarks = [];
+  detectedHandCount = 0;
+  bothHandsDetected = false;
+  lastSentHandState = '';
+  lastSentCameraState = '';
+  clearHandOverlay();
+  updateCameraUi();
   document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnCamera').disabled = true;
   document.getElementById('btnStop').disabled = true;
   resetMidiState();
   setStatus('disconnected');
@@ -1306,8 +1562,10 @@ function queueAudio(arrayBuf) {
 var scoreTimer = 0;
 function drawLoop() {
   if (!sessionActive) return;
+  processHandTracking();
   drawPianoRoll();
   drawKeyboard();
+  drawHandOverlay();
   updateLevelMeter();
   scoreTimer++;
   if (scoreTimer % 12 === 0) {
@@ -1591,6 +1849,7 @@ function addTranscript(role, text) {
 }
 
 refreshMidiInputs();
+updateCameraUi();
 </script>
 </body>
 </html>

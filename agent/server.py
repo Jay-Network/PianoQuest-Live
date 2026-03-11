@@ -190,6 +190,33 @@ async def websocket_dialog(websocket: WebSocket):
                         # Frontend uses raw MIDI events for UI rendering; snapshots are what
                         # get forwarded to the live agent as compact musical context.
                         pass
+                    elif msg.get("type") == "camera_state":
+                        enabled = bool(msg.get("enabled"))
+                        text = (
+                            "Camera is currently ON. You may use visual observations, but only if you are genuinely seeing the hands clearly."
+                            if enabled else
+                            "Camera is currently OFF. Do not claim to see fingers, wrists, or hand position until the camera is on again."
+                        )
+                        live_queue.send_content(
+                            types.Content(role="user", parts=[types.Part(text=text)])
+                        )
+                    elif msg.get("type") == "hand_state":
+                        detected_count = int(msg.get("detected_count") or 0)
+                        both_hands_detected = bool(msg.get("both_hands_detected"))
+                        if both_hands_detected:
+                            text = (
+                                "Both hands are currently detected in camera view. "
+                                "You may comment on fingering, finger movement, or hand shape only when your visual observations match the MIDI evidence."
+                            )
+                        else:
+                            text = (
+                                f"Both hands are not currently visible in camera view (detected hands: {detected_count}). "
+                                "Do not comment on finger movement, fingering, wrist motion, or hand shape until both hands are clearly detected again. "
+                                "Limit feedback to MIDI performance and spoken conversation."
+                            )
+                        live_queue.send_content(
+                            types.Content(role="user", parts=[types.Part(text=text)])
+                        )
                     elif msg.get("type") == "close":
                         live_queue.close()
                         break
