@@ -1,0 +1,33 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE}'
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=1Gi'
+      - '--cpu=2'
+      - '--timeout=300'
+      - '--max-instances=5'
+      - '--min-instances=1'
+      - '--session-affinity'
+      - '--set-env-vars=GOOGLE_API_KEY=${_API_KEY}'
+
+substitutions:
+  _REGION: us-east1
+  _REPO: pianoquest-live
+  _SERVICE: pianoquest-live
+  _API_KEY: ''
+
+options:
+  logging: CLOUD_LOGGING_ONLY
