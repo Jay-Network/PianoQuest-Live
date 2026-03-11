@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ## [0.2.0] - 2026-03-11
 
 ### Added
+- Blog post for Gemini Live Agent Challenge (`docs/blog-post.md`) covering 3x8 multimodal architecture
 - Full piano coaching + creative storyteller agent prompt (multimodal aware: vision + audio + voice)
 - Camera capture: sends JPEG frames to Gemini vision every 2s for finger/technique analysis
 - Audio capture: 16kHz PCM streaming to Gemini for piano + voice recognition
