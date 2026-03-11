@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "0dce6ede541f",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "agent/agent.py",
+    "docs/2026-03-11-win-first-prize-plan.md",
+    "static/index.html"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0d/ce6ede541f/0/metadata.json",
+      "transcript": "/0d/ce6ede541f/0/full.jsonl",
+      "context": "/0d/ce6ede541f/0/context.md",
+      "content_hash": "/0d/ce6ede541f/0/content_hash.txt",
+      "prompt": "/0d/ce6ede541f/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 19,
+    "cache_creation_tokens": 59725,
+    "cache_read_tokens": 1664554,
+    "output_tokens": 42160,
+    "api_call_count": 15
+  }
+}
