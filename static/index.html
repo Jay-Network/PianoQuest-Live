@@ -1,22 +1,804 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PianoQuest Live — Creative Musical Storytelling</title>
-    <style>
-        body { font-family: sans-serif; background: #0a0a0f; color: #e0e0e0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .container { text-align: center; max-width: 500px; padding: 40px; }
-        h1 { font-size: 24px; margin-bottom: 8px; }
-        p { color: #888; margin-bottom: 24px; }
-        .status { font-size: 14px; color: #666; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PianoQuest Live</title>
+<style>
+  :root {
+    --bg: #0c0c14;
+    --bg2: #12121e;
+    --bg3: #1a1a2e;
+    --border: rgba(255,255,255,0.08);
+    --text: #e2e8f0;
+    --text2: rgba(255,255,255,0.5);
+    --text3: rgba(255,255,255,0.3);
+    --amber: #fbbf24;
+    --purple: #a78bfa;
+    --rose: #fb7185;
+    --blue: #93c5fd;
+    --green: #86efac;
+    --gemini: #60a5fa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .header h1 span { color: var(--amber); }
+  .header-sub {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.04em;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #444;
+    transition: background 0.3s;
+  }
+  .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.error { background: var(--rose); }
+  .status-label {
+    font-size: 12px;
+    color: var(--text3);
+  }
+  button {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  button:hover { background: var(--bg3); border-color: rgba(255,255,255,0.15); }
+  button.primary {
+    background: rgba(251,191,36,0.15);
+    border-color: rgba(251,191,36,0.3);
+    color: var(--amber);
+  }
+  button.primary:hover {
+    background: rgba(251,191,36,0.25);
+  }
+  button.danger {
+    background: rgba(251,113,133,0.1);
+    border-color: rgba(251,113,133,0.25);
+    color: var(--rose);
+  }
+  button:disabled { opacity: 0.4; cursor: default; }
+
+  /* Main grid */
+  .main {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    flex: 1;
+  }
+
+  /* Camera panel */
+  .camera-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .panel {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-header .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .video-container {
+    position: relative;
+    background: #000;
+    aspect-ratio: 4/3;
+  }
+  .video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+  }
+  .video-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text3);
+    font-size: 12px;
+  }
+  .video-placeholder .icon { font-size: 32px; opacity: 0.3; }
+
+  /* Visualization panels */
+  .viz-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .viz-canvas-wrap {
+    padding: 12px;
+  }
+  canvas {
+    width: 100%;
+    display: block;
+    border-radius: 6px;
+  }
+
+  /* Transcript */
+  .transcript-panel {
+    flex: 1;
+    min-height: 200px;
+  }
+  .transcript-body {
+    padding: 12px 14px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .transcript-body::-webkit-scrollbar { width: 4px; }
+  .transcript-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  .msg {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .msg:last-child { border-bottom: none; }
+  .msg .role {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  .msg.user .role { color: var(--blue); }
+  .msg.agent .role { color: var(--amber); }
+  .msg .content { color: var(--text2); }
+  .msg.system { color: var(--text3); font-size: 11px; font-style: italic; }
+
+  /* Waveform / level meter */
+  .level-meter {
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .level-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .level-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--amber);
+    border-radius: 2px;
+    transition: width 0.05s;
+  }
+  .level-label {
+    font-size: 10px;
+    color: var(--text3);
+    min-width: 24px;
+    text-align: right;
+  }
+
+  /* BPM control */
+  .bpm-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .bpm-control label {
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .bpm-control input[type=range] {
+    width: 80px;
+    accent-color: var(--green);
+  }
+  .bpm-control .bpm-val {
+    font-size: 11px;
+    color: var(--green);
+    min-width: 24px;
+  }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .camera-panel { flex-direction: row; }
+    .video-container { width: 200px; aspect-ratio: 4/3; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>PianoQuest Live</h1>
-        <p>Creative Musical Storytelling — Coming Soon</p>
-        <p class="status">Placeholder UI — full implementation in progress</p>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>Piano<span>Quest</span> Live</h1>
+      <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING</div>
     </div>
+    <div class="controls">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-label" id="statusLabel">Disconnected</span>
+      <button class="primary" id="btnStart" onclick="startSession()">Start Session</button>
+      <button class="danger" id="btnStop" onclick="stopSession()" disabled>Stop</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+
+    <!-- Left: Camera + Level meter -->
+    <div class="camera-panel">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--rose)"></div>
+          CAMERA — FINGER VIEW
+        </div>
+        <div class="video-container">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <div class="video-placeholder" id="videoPlaceholder">
+            <div class="icon">&#x1F4F9;</div>
+            <div>Point camera at keyboard</div>
+          </div>
+        </div>
+        <div class="level-meter">
+          <div class="dot" style="background:var(--amber);width:6px;height:6px;border-radius:50%"></div>
+          <div class="level-bar-bg"><div class="level-bar" id="levelBar"></div></div>
+          <div class="level-label" id="levelLabel">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Visualizations + Transcript -->
+    <div class="viz-col">
+
+      <!-- MIDI Dynamic Bars -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--purple)"></div>
+          DYNAMIC RESPONSE — KEY STRENGTH
+        </div>
+        <div class="viz-canvas-wrap">
+          <canvas id="midiBars" height="140"></canvas>
+        </div>
+      </div>
+
+      <!-- Rhythm Accuracy Grid -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--green)"></div>
+          RHYTHM ACCURACY
+          <div class="bpm-control">
+            <label>BPM</label>
+            <input type="range" id="bpmSlider" min="40" max="200" value="90">
+            <span class="bpm-val" id="bpmVal">90</span>
+          </div>
+        </div>
+        <div class="viz-canvas-wrap">
+          <canvas id="rhythmGrid" height="80"></canvas>
+        </div>
+      </div>
+
+      <!-- Transcript -->
+      <div class="panel transcript-panel">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--blue)"></div>
+          CONVERSATION
+        </div>
+        <div class="transcript-body" id="transcript">
+          <div class="msg system">Session not started. Click "Start Session" to begin.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// State
+// ============================================================================
+let ws = null;
+let audioCtx = null;       // capture context (16kHz)
+let playbackCtx = null;    // playback context (24kHz)
+let mediaStream = null;
+let analyser = null;
+let processor = null;
+let videoStream = null;
+let videoInterval = null;
+let animFrame = null;
+let nextPlayTime = 0;
+let sessionActive = false;
+
+// Onset detection
+const onsets = [];          // { time: seconds since session start }
+let sessionStartTime = 0;
+let prevRms = 0;
+const ONSET_THRESHOLD = 0.06;
+const ONSET_COOLDOWN = 0.08;  // min seconds between onsets
+let lastOnsetTime = 0;
+
+// BPM
+const bpmSlider = document.getElementById('bpmSlider');
+const bpmVal = document.getElementById('bpmVal');
+bpmSlider.addEventListener('input', () => { bpmVal.textContent = bpmSlider.value; });
+
+// ============================================================================
+// Session management
+// ============================================================================
+async function startSession() {
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('btnStop').disabled = false;
+  setStatus('connecting');
+
+  try {
+    // Request camera + mic
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      video: { width: 640, height: 480, facingMode: 'user' }
+    });
+
+    // Show camera
+    const video = document.getElementById('cameraVideo');
+    video.srcObject = mediaStream;
+    document.getElementById('videoPlaceholder').style.display = 'none';
+
+    // Audio capture context at 16kHz
+    audioCtx = new AudioContext({ sampleRate: 16000 });
+    const source = audioCtx.createMediaStreamSource(mediaStream);
+
+    // Analyser for visualization (use higher FFT for piano frequency resolution)
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.8;
+    source.connect(analyser);
+
+    // ScriptProcessor for PCM capture → WebSocket
+    processor = audioCtx.createScriptProcessor(4096, 1, 1);
+    source.connect(processor);
+    processor.connect(audioCtx.destination);  // must connect for processing to work
+
+    // Playback context at 24kHz for agent voice
+    playbackCtx = new AudioContext({ sampleRate: 24000 });
+    nextPlayTime = 0;
+
+    // WebSocket
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${proto}://${location.host}/ws/dialog`);
+    ws.binaryType = 'arraybuffer';
+
+    ws.onopen = () => {
+      setStatus('connected');
+      sessionActive = true;
+      sessionStartTime = performance.now() / 1000;
+      onsets.length = 0;
+      addTranscript('system', 'Connected. Speak or play piano to begin.');
+      ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
+
+      // Start sending audio
+      processor.onaudioprocess = (e) => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        const input = e.inputBuffer.getChannelData(0);
+        const pcm16 = new Int16Array(input.length);
+        for (let i = 0; i < input.length; i++) {
+          pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(input[i] * 32767)));
+        }
+        ws.send(pcm16.buffer);
+      };
+
+      // Start sending video frames (1 frame every 2s)
+      const captureCanvas = document.createElement('canvas');
+      captureCanvas.width = 640;
+      captureCanvas.height = 480;
+      const captureCtx = captureCanvas.getContext('2d');
+      videoInterval = setInterval(() => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        captureCtx.drawImage(video, 0, 0, 640, 480);
+        const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.6);
+        const b64 = dataUrl.split(',')[1];
+        ws.send(JSON.stringify({ type: 'video_frame', data: b64 }));
+      }, 2000);
+
+      // Start visualizations
+      drawLoop();
+    };
+
+    ws.onmessage = (event) => {
+      if (event.data instanceof ArrayBuffer) {
+        // Audio from agent — play it
+        queueAudio(event.data);
+      } else {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'input_transcript') {
+          addTranscript('user', msg.text);
+        } else if (msg.type === 'output_transcript') {
+          addTranscript('agent', msg.text);
+        } else if (msg.type === 'turn_complete') {
+          // optional: visual indicator
+        } else if (msg.type === 'interrupted') {
+          // agent was interrupted by user speech
+        }
+      }
+    };
+
+    ws.onclose = () => {
+      setStatus('disconnected');
+      addTranscript('system', 'Disconnected.');
+    };
+
+    ws.onerror = () => {
+      setStatus('error');
+    };
+
+  } catch (err) {
+    console.error('Failed to start session:', err);
+    setStatus('error');
+    addTranscript('system', 'Error: ' + err.message);
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnStop').disabled = true;
+  }
+}
+
+function stopSession() {
+  sessionActive = false;
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'close' }));
+    ws.close();
+  }
+  ws = null;
+  if (videoInterval) { clearInterval(videoInterval); videoInterval = null; }
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  if (processor) { processor.disconnect(); processor = null; }
+  if (analyser) { analyser.disconnect(); analyser = null; }
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+  if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(t => t.stop());
+    mediaStream = null;
+  }
+  document.getElementById('cameraVideo').srcObject = null;
+  document.getElementById('videoPlaceholder').style.display = '';
+  document.getElementById('btnStart').disabled = false;
+  document.getElementById('btnStop').disabled = true;
+  setStatus('disconnected');
+}
+
+// ============================================================================
+// Audio playback (agent voice — 24kHz PCM)
+// ============================================================================
+function queueAudio(arrayBuf) {
+  if (!playbackCtx) return;
+  const int16 = new Int16Array(arrayBuf);
+  const float32 = new Float32Array(int16.length);
+  for (let i = 0; i < int16.length; i++) {
+    float32[i] = int16[i] / 32768;
+  }
+  const buffer = playbackCtx.createBuffer(1, float32.length, 24000);
+  buffer.copyToChannel(float32, 0);
+  const source = playbackCtx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(playbackCtx.destination);
+  const now = playbackCtx.currentTime;
+  const startTime = Math.max(now + 0.01, nextPlayTime);
+  source.start(startTime);
+  nextPlayTime = startTime + buffer.duration;
+}
+
+// ============================================================================
+// Visualizations
+// ============================================================================
+function drawLoop() {
+  if (!sessionActive) return;
+  drawMidiBars();
+  drawRhythmGrid();
+  detectOnset();
+  updateLevelMeter();
+  animFrame = requestAnimationFrame(drawLoop);
+}
+
+// --- MIDI Dynamic Bars ---
+function drawMidiBars() {
+  const canvas = document.getElementById('midiBars');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 140 * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width;
+  const H = 140;
+
+  ctx.clearRect(0, 0, W, H);
+
+  if (!analyser) return;
+  const freqData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(freqData);
+
+  // Map frequency bins to piano-relevant bands (27.5Hz A0 to 4186Hz C8)
+  // With 16kHz sample rate and FFT size 2048: bin resolution = 16000/2048 ≈ 7.8 Hz
+  // Piano range: bin ~3 (27.5Hz) to bin ~537 (4186Hz)
+  const binRes = 16000 / 2048;
+  const startBin = Math.floor(27.5 / binRes);
+  const endBin = Math.min(Math.ceil(4200 / binRes), freqData.length - 1);
+  const numBars = 48;
+  const binsPerBar = Math.max(1, Math.floor((endBin - startBin) / numBars));
+  const barWidth = (W - 20) / numBars;
+  const gap = 2;
+
+  for (let i = 0; i < numBars; i++) {
+    let sum = 0;
+    const from = startBin + i * binsPerBar;
+    const to = Math.min(from + binsPerBar, freqData.length);
+    for (let b = from; b < to; b++) sum += freqData[b];
+    const avg = sum / (to - from);
+    const normH = (avg / 255) * (H - 10);
+
+    // Color gradient: bass=blue/purple, mid=amber, treble=rose
+    const t = i / numBars;
+    let r, g, b_c;
+    if (t < 0.33) {
+      // purple to blue
+      const lt = t / 0.33;
+      r = 167 - lt * 20; g = 139 + lt * 58; b_c = 250;
+    } else if (t < 0.66) {
+      // blue to amber
+      const lt = (t - 0.33) / 0.33;
+      r = 147 + lt * 104; g = 197 - lt * 6; b_c = 253 - lt * 217;
+    } else {
+      // amber to rose
+      const lt = (t - 0.66) / 0.34;
+      r = 251; g = 191 - lt * 78; b_c = 36 + lt * 97;
+    }
+
+    const x = 10 + i * barWidth;
+    const barW = barWidth - gap;
+
+    // Glow effect
+    ctx.shadowBlur = normH > 40 ? 8 : 0;
+    ctx.shadowColor = `rgba(${r},${g},${b_c},0.4)`;
+
+    // Bar
+    const gradient = ctx.createLinearGradient(0, H, 0, H - normH);
+    gradient.addColorStop(0, `rgba(${r},${g},${b_c},0.15)`);
+    gradient.addColorStop(1, `rgba(${r},${g},${b_c},0.8)`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, H - normH, barW, normH);
+
+    // Top cap
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = `rgba(${r},${g},${b_c},0.9)`;
+    ctx.fillRect(x, H - normH, barW, 2);
+  }
+}
+
+// --- Rhythm Accuracy Grid ---
+function drawRhythmGrid() {
+  const canvas = document.getElementById('rhythmGrid');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 80 * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width;
+  const H = 80;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const bpm = parseInt(bpmSlider.value) || 90;
+  const beatInterval = 60 / bpm;  // seconds per beat
+  const now = performance.now() / 1000 - sessionStartTime;
+  const windowDuration = 8;  // show 8 seconds of history
+  const windowStart = Math.max(0, now - windowDuration);
+
+  // Draw beat grid lines
+  const firstBeat = Math.ceil(windowStart / beatInterval) * beatInterval;
+  for (let bt = firstBeat; bt < now + beatInterval; bt += beatInterval) {
+    const x = ((bt - windowStart) / windowDuration) * W;
+    if (x < 0 || x > W) continue;
+
+    // Strong beat (every 4)
+    const beatNum = Math.round(bt / beatInterval);
+    const isStrong = beatNum % 4 === 0;
+
+    ctx.strokeStyle = isStrong ? 'rgba(134,239,172,0.3)' : 'rgba(134,239,172,0.1)';
+    ctx.lineWidth = isStrong ? 1.5 : 0.5;
+    ctx.beginPath();
+    ctx.moveTo(x, 5);
+    ctx.lineTo(x, H - 5);
+    ctx.stroke();
+
+    // Beat number label
+    if (isStrong) {
+      ctx.fillStyle = 'rgba(134,239,172,0.3)';
+      ctx.font = '9px sans-serif';
+      ctx.fillText(beatNum / 4 + 1, x + 2, H - 2);
+    }
+  }
+
+  // Draw onset dots
+  for (const onset of onsets) {
+    if (onset.time < windowStart) continue;
+    const x = ((onset.time - windowStart) / windowDuration) * W;
+    if (x < 0 || x > W) continue;
+
+    // How close to nearest beat?
+    const nearestBeat = Math.round(onset.time / beatInterval) * beatInterval;
+    const offset = Math.abs(onset.time - nearestBeat);
+    const tolerance = beatInterval * 0.15;  // within 15% of beat interval
+
+    let color;
+    if (offset < tolerance) {
+      color = 'rgba(134,239,172,0.9)';  // green — on beat
+    } else if (offset < tolerance * 2.5) {
+      color = 'rgba(251,191,36,0.8)';   // amber — close
+    } else {
+      color = 'rgba(251,113,133,0.7)';  // rose — off beat
+    }
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(x, H / 2, 5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // Glow
+    ctx.beginPath();
+    ctx.arc(x, H / 2, 8, 0, Math.PI * 2);
+    ctx.fillStyle = color.replace(/[\d.]+\)$/, '0.15)');
+    ctx.fill();
+  }
+
+  // "Now" line
+  const nowX = ((now - windowStart) / windowDuration) * W;
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(nowX, 0);
+  ctx.lineTo(nowX, H);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Trim old onsets (keep last 30 seconds)
+  while (onsets.length > 0 && onsets[0].time < now - 30) {
+    onsets.shift();
+  }
+}
+
+// --- Onset Detection ---
+function detectOnset() {
+  if (!analyser) return;
+  const timeDomainData = new Uint8Array(analyser.fftSize);
+  analyser.getByteTimeDomainData(timeDomainData);
+
+  let sum = 0;
+  for (let i = 0; i < timeDomainData.length; i++) {
+    const v = (timeDomainData[i] - 128) / 128;
+    sum += v * v;
+  }
+  const rms = Math.sqrt(sum / timeDomainData.length);
+  const now = performance.now() / 1000 - sessionStartTime;
+
+  if (rms > ONSET_THRESHOLD && prevRms < ONSET_THRESHOLD * 0.7 && (now - lastOnsetTime) > ONSET_COOLDOWN) {
+    onsets.push({ time: now });
+    lastOnsetTime = now;
+  }
+  prevRms = rms;
+}
+
+// --- Level Meter ---
+function updateLevelMeter() {
+  if (!analyser) return;
+  const data = new Uint8Array(analyser.fftSize);
+  analyser.getByteTimeDomainData(data);
+  let max = 0;
+  for (let i = 0; i < data.length; i++) {
+    const v = Math.abs(data[i] - 128);
+    if (v > max) max = v;
+  }
+  const pct = Math.min(100, (max / 128) * 100);
+  document.getElementById('levelBar').style.width = pct + '%';
+  document.getElementById('levelLabel').textContent = Math.round(pct);
+}
+
+// ============================================================================
+// UI Helpers
+// ============================================================================
+function setStatus(state) {
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('statusLabel');
+  dot.className = 'status-dot';
+  if (state === 'connected') {
+    dot.classList.add('connected');
+    label.textContent = 'Connected';
+  } else if (state === 'connecting') {
+    label.textContent = 'Connecting...';
+  } else if (state === 'error') {
+    dot.classList.add('error');
+    label.textContent = 'Error';
+  } else {
+    label.textContent = 'Disconnected';
+  }
+}
+
+function addTranscript(role, text) {
+  const container = document.getElementById('transcript');
+  // Remove the initial system placeholder
+  const placeholder = container.querySelector('.msg.system');
+  if (placeholder && placeholder.textContent.includes('Session not started')) {
+    placeholder.remove();
+  }
+
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  if (role === 'system') {
+    div.textContent = text;
+  } else {
+    const roleLabel = document.createElement('div');
+    roleLabel.className = 'role';
+    roleLabel.textContent = role === 'user' ? 'YOU' : 'PIANOQUEST';
+    div.appendChild(roleLabel);
+    const content = document.createElement('div');
+    content.className = 'content';
+    content.textContent = text;
+    div.appendChild(content);
+  }
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+</script>
 </body>
 </html>

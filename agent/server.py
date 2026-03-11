@@ -1,9 +1,10 @@
 """
 FastAPI + WebSocket server for PianoQuest Live — Creative Musical Storytelling.
-Connects browser microphone → ADK streaming → Gemini Live API → audio output.
+Connects browser camera + microphone → ADK streaming → Gemini Live API → audio output.
 """
 
 import asyncio
+import base64
 import json
 import os
 import uuid
@@ -58,7 +59,7 @@ async def start_agent_session(session_id: str, live_queue: LiveRequestQueue, mod
         speech_config=types.SpeechConfig(
             voice_config=types.VoiceConfig(
                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                    voice_name="Aoede",
+                    voice_name="Puck",
                 )
             )
         ),
@@ -104,6 +105,11 @@ async def websocket_dialog(websocket: WebSocket):
                     if msg.get("type") == "text":
                         live_queue.send_content(
                             types.Content(role="user", parts=[types.Part(text=msg["content"])])
+                        )
+                    elif msg.get("type") == "video_frame":
+                        frame_data = base64.b64decode(msg["data"])
+                        live_queue.send_realtime(
+                            types.Blob(data=frame_data, mime_type="image/jpeg")
                         )
                     elif msg.get("type") == "set_mode":
                         mode = msg.get("mode", "storyteller")

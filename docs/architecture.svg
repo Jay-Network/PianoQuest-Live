@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" font-family="'DM Sans', -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0c0c14"/>
+      <stop offset="100%" stop-color="#060609"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4a3518"/>
+      <stop offset="100%" stop-color="#3a2a12"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2d1f4e"/>
+      <stop offset="100%" stop-color="#221840"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4a1a2e"/>
+      <stop offset="100%" stop-color="#3a1224"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#162d4a"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a3d2e"/>
+      <stop offset="100%" stop-color="#132e22"/>
+    </linearGradient>
+    <linearGradient id="geminiGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a4a6b"/>
+      <stop offset="100%" stop-color="#0f3550"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrowR" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0.5 L7,3 L0,5.5" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    </marker>
+    <marker id="arrowD" markerWidth="6" markerHeight="8" refX="3" refY="7" orient="auto">
+      <path d="M0.5,0 L3,7 L5.5,0" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    </marker>
+    <marker id="arrowU" markerWidth="6" markerHeight="8" refX="3" refY="1" orient="auto">
+      <path d="M0.5,8 L3,1 L5.5,8" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+    </marker>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <rect width="48" height="48" fill="none" stroke="rgba(255,255,255,0.015)" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="720" fill="url(#bgGrad)" rx="16"/>
+  <rect width="960" height="720" fill="url(#grid)" rx="16"/>
+
+  <!-- ==================== TITLE ==================== -->
+  <text x="480" y="38" text-anchor="middle" fill="#e2e8f0" font-size="20" font-weight="700" letter-spacing="-0.03em">PianoQuest Live — System Architecture</text>
+  <text x="480" y="58" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="11" letter-spacing="0.05em">CREATIVE STORYTELLER CHALLENGE · Google ADK + Cloud Run · Multimodal Streaming</text>
+
+  <!-- ==================== BROWSER CLIENT ==================== -->
+  <rect x="40" y="78" width="880" height="140" rx="12" fill="rgba(251,191,36,0.03)" stroke="rgba(251,191,36,0.2)" stroke-width="1"/>
+  <text x="62" y="100" fill="#fbbf24" font-size="12" font-weight="700" letter-spacing="0.04em">BROWSER CLIENT</text>
+  <text x="250" y="100" fill="rgba(251,191,36,0.4)" font-size="10">React · Next.js · Web Audio API · MediaDevices</text>
+
+  <!-- Camera (Video of Fingers) -->
+  <rect x="60" y="114" width="140" height="88" rx="8" fill="url(#roseGrad)" stroke="rgba(251,113,133,0.25)" stroke-width="1"/>
+  <circle cx="130" cy="140" r="14" fill="rgba(251,113,133,0.12)" stroke="rgba(251,113,133,0.3)" stroke-width="1"/>
+  <text x="130" y="145" text-anchor="middle" fill="#fb7185" font-size="14">📹</text>
+  <text x="130" y="168" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="11" font-weight="500">Camera</text>
+  <text x="130" y="183" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">video of fingers</text>
+  <text x="130" y="195" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="8">720p · 15fps</text>
+
+  <!-- Microphone (Piano Audio) -->
+  <rect x="220" y="114" width="140" height="88" rx="8" fill="url(#amberGrad)" stroke="rgba(251,191,36,0.2)" stroke-width="1"/>
+  <circle cx="290" cy="140" r="14" fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+  <text x="290" y="145" text-anchor="middle" fill="#fbbf24" font-size="14">🎹</text>
+  <text x="290" y="168" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="11" font-weight="500">Piano Audio</text>
+  <text x="290" y="183" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">instrument capture</text>
+  <text x="290" y="195" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="8">16-bit PCM · 16kHz</text>
+
+  <!-- Voice Chat -->
+  <rect x="380" y="114" width="140" height="88" rx="8" fill="url(#blueGrad)" stroke="rgba(147,197,253,0.2)" stroke-width="1"/>
+  <circle cx="450" cy="140" r="14" fill="rgba(147,197,253,0.12)" stroke="rgba(147,197,253,0.3)" stroke-width="1"/>
+  <text x="450" y="145" text-anchor="middle" fill="#93c5fd" font-size="14">🎤</text>
+  <text x="450" y="168" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="11" font-weight="500">Voice Chat</text>
+  <text x="450" y="183" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">student speech</text>
+  <text x="450" y="195" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="8">bidirectional audio</text>
+
+  <!-- Visual Output -->
+  <rect x="540" y="114" width="180" height="88" rx="8" fill="url(#purpleGrad)" stroke="rgba(168,139,250,0.2)" stroke-width="1"/>
+  <text x="630" y="136" text-anchor="middle" fill="rgba(168,139,250,0.9)" font-size="11" font-weight="600" letter-spacing="0.03em">VISUAL OUTPUT</text>
+  <rect x="556" y="146" width="68" height="20" rx="4" fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.25)" stroke-width="0.5"/>
+  <text x="590" y="160" text-anchor="middle" fill="rgba(251,191,36,0.8)" font-size="8" font-weight="500">MIDI Bars</text>
+  <rect x="630" y="146" width="74" height="20" rx="4" fill="rgba(134,239,172,0.12)" stroke="rgba(134,239,172,0.25)" stroke-width="0.5"/>
+  <text x="667" y="160" text-anchor="middle" fill="rgba(134,239,172,0.8)" font-size="8" font-weight="500">Rhythm Grid</text>
+  <text x="630" y="183" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">key strength · timing</text>
+  <text x="630" y="195" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="8">real-time visualization</text>
+
+  <!-- Speaker Output -->
+  <rect x="740" y="114" width="160" height="88" rx="8" fill="url(#greenGrad)" stroke="rgba(134,239,172,0.2)" stroke-width="1"/>
+  <circle cx="820" cy="140" r="14" fill="rgba(134,239,172,0.12)" stroke="rgba(134,239,172,0.3)" stroke-width="1"/>
+  <text x="820" y="145" text-anchor="middle" fill="#86efac" font-size="14">🔊</text>
+  <text x="820" y="168" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="11" font-weight="500">Voice Out</text>
+  <text x="820" y="183" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">narrator speech</text>
+  <text x="820" y="195" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="8">24kHz PCM · mono</text>
+
+  <!-- ==================== WEBSOCKET ==================== -->
+  <line x1="460" y1="218" x2="460" y2="262" stroke="rgba(251,191,36,0.3)" stroke-width="1.5" marker-end="url(#arrowD)"/>
+  <line x1="500" y1="262" x2="500" y2="218" stroke="rgba(134,239,172,0.3)" stroke-width="1.5" marker-end="url(#arrowU)"/>
+  <rect x="398" y="228" width="164" height="22" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+  <text x="480" y="243" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="500">WebSocket (wss://)</text>
+  <text x="448" y="257" text-anchor="middle" fill="rgba(251,191,36,0.35)" font-size="8">video+audio ↓</text>
+  <text x="516" y="257" text-anchor="middle" fill="rgba(134,239,172,0.35)" font-size="8">↑ voice+text</text>
+
+  <!-- ==================== CLOUD RUN ==================== -->
+  <rect x="40" y="270" width="880" height="340" rx="12" fill="rgba(134,239,172,0.02)" stroke="rgba(134,239,172,0.18)" stroke-width="1"/>
+  <rect x="40" y="270" width="880" height="28" rx="12" fill="rgba(134,239,172,0.05)"/>
+  <rect x="40" y="286" width="880" height="12" rx="0" fill="rgba(134,239,172,0.02)"/>
+  <text x="62" y="290" fill="#86efac" font-size="12" font-weight="700" letter-spacing="0.04em">GOOGLE CLOUD RUN</text>
+  <text x="820" y="290" text-anchor="end" fill="rgba(134,239,172,0.35)" font-size="10">Python 3.11 · FastAPI · uvicorn · Docker</text>
+
+  <!-- ==================== ADK STREAMING RUNTIME ==================== -->
+  <rect x="60" y="308" width="560" height="170" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <text x="82" y="328" fill="rgba(255,255,255,0.55)" font-size="11" font-weight="700" letter-spacing="0.03em">ADK STREAMING RUNTIME</text>
+  <text x="310" y="328" fill="rgba(255,255,255,0.25)" font-size="9">google.adk · Runner · LiveRequestQueue</text>
+
+  <!-- LiveRequestQueue -->
+  <rect x="80" y="342" width="160" height="52" rx="6" fill="url(#amberGrad)" stroke="rgba(251,191,36,0.2)" stroke-width="1"/>
+  <text x="160" y="364" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="11" font-weight="500">LiveRequestQueue</text>
+  <text x="160" y="380" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">video + audio → stream</text>
+
+  <!-- Arrow queue → runner -->
+  <line x1="240" y1="368" x2="280" y2="368" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" marker-end="url(#arrowR)"/>
+
+  <!-- Runner -->
+  <rect x="280" y="342" width="140" height="52" rx="6" fill="url(#purpleGrad)" stroke="rgba(168,139,250,0.25)" stroke-width="1"/>
+  <text x="350" y="364" text-anchor="middle" fill="rgba(168,139,250,0.9)" font-size="11" font-weight="600">Runner</text>
+  <text x="350" y="380" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9">multimodal routing</text>
+
+  <!-- Arrow runner → agent -->
+  <line x1="420" y1="368" x2="470" y2="368" stroke="rgba(251,191,36,0.35)" stroke-width="1.5" marker-end="url(#arrowR)"/>
+
+  <!-- Story Narrator Agent (featured) -->
+  <rect x="470" y="336" width="132" height="64" rx="6" fill="url(#amberGrad)" stroke="rgba(251,191,36,0.4)" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="536" y="358" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">Story Narrator</text>
+  <text x="536" y="374" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">creative practice</text>
+  <text x="536" y="389" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="8">weaves all modalities</text>
+  <text x="608" y="358" fill="#fbbf24" font-size="10">★</text>
+
+  <!-- Modality labels -->
+  <text x="80" y="416" fill="rgba(251,113,133,0.5)" font-size="9">📹 Video IN — finger position, technique</text>
+  <text x="80" y="432" fill="rgba(251,191,36,0.5)" font-size="9">🎹 Audio IN — piano notes, rhythm, dynamics</text>
+  <text x="80" y="448" fill="rgba(147,197,253,0.5)" font-size="9">🎤 Voice IN/OUT — conversation, narration</text>
+  <text x="80" y="464" fill="rgba(168,139,250,0.5)" font-size="9">📊 Viz OUT — MIDI bars, rhythm grid</text>
+
+  <!-- ==================== GEMINI MODEL ==================== -->
+  <rect x="660" y="308" width="240" height="120" rx="10" fill="url(#geminiGrad)" stroke="rgba(96,165,250,0.3)" stroke-width="1.5" filter="url(#glow)"/>
+  <text x="682" y="334" fill="rgba(96,165,250,0.6)" font-size="14">✦</text>
+  <text x="702" y="334" fill="rgba(96,165,250,0.9)" font-size="13" font-weight="700">Gemini 2.5 Flash</text>
+  <text x="682" y="354" fill="rgba(255,255,255,0.5)" font-size="10">Native Audio + Vision · Live API</text>
+  <line x1="676" y1="364" x2="884" y2="364" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+  <text x="682" y="382" fill="rgba(255,255,255,0.4)" font-size="9">▸ Video: finger tracking + technique</text>
+  <text x="682" y="397" fill="rgba(255,255,255,0.4)" font-size="9">▸ Audio: note detection + dynamics</text>
+  <text x="682" y="412" fill="rgba(255,255,255,0.4)" font-size="9">▸ Voice: narrative storytelling (Puck)</text>
+
+  <!-- Arrow agent → Gemini -->
+  <line x1="602" y1="368" x2="660" y2="368" stroke="rgba(96,165,250,0.3)" stroke-width="1.5" marker-end="url(#arrowR)"/>
+
+  <!-- ==================== CREATIVE LAYER ==================== -->
+  <rect x="60" y="494" width="840" height="48" rx="8" fill="rgba(251,191,36,0.03)" stroke="rgba(251,191,36,0.12)" stroke-width="1"/>
+  <text x="82" y="514" fill="rgba(251,191,36,0.65)" font-size="11" font-weight="600" letter-spacing="0.03em">CREATIVE STORYTELLING ENGINE</text>
+  <text x="340" y="514" fill="rgba(255,255,255,0.3)" font-size="10">baked into agent system prompt</text>
+  <text x="82" y="532" fill="rgba(255,255,255,0.35)" font-size="9.5">Adaptive narratives · Musical mood detection · Difficulty scaling · Practice session arcs · Dynamic encouragement · Story-driven exercises</text>
+
+  <!-- ==================== INFRASTRUCTURE ==================== -->
+  <text x="62" y="570" fill="rgba(255,255,255,0.25)" font-size="10" font-weight="600" letter-spacing="0.04em">INFRASTRUCTURE</text>
+
+  <rect x="60" y="580" width="195" height="48" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+  <text x="157" y="602" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="500">Session Management</text>
+  <text x="157" y="618" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="9">InMemorySessionService</text>
+
+  <rect x="270" y="580" width="195" height="48" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+  <text x="367" y="602" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="500">Cloud Build CI/CD</text>
+  <text x="367" y="618" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="9">cloudbuild.yaml → auto deploy</text>
+
+  <rect x="480" y="580" width="195" height="48" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+  <text x="577" y="602" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="500">Artifact Registry</text>
+  <text x="577" y="618" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="9">Docker container images</text>
+
+  <rect x="690" y="580" width="210" height="48" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+  <text x="795" y="602" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="10" font-weight="500">Cloud Logging</text>
+  <text x="795" y="618" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="9">structured session logs</text>
+
+  <!-- ==================== MODALITY LEGEND ==================== -->
+  <rect x="60" y="646" width="500" height="36" rx="6" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+  <text x="80" y="668" fill="rgba(255,255,255,0.3)" font-size="9" font-weight="600">MODALITIES</text>
+  <line x1="155" y1="665" x2="180" y2="665" stroke="rgba(251,113,133,0.5)" stroke-width="1.5"/>
+  <text x="188" y="669" fill="rgba(251,113,133,0.5)" font-size="9">Video</text>
+  <line x1="225" y1="665" x2="250" y2="665" stroke="rgba(251,191,36,0.5)" stroke-width="1.5"/>
+  <text x="258" y="669" fill="rgba(251,191,36,0.5)" font-size="9">Piano</text>
+  <line x1="300" y1="665" x2="325" y2="665" stroke="rgba(147,197,253,0.5)" stroke-width="1.5"/>
+  <text x="333" y="669" fill="rgba(147,197,253,0.5)" font-size="9">Voice</text>
+  <line x1="375" y1="665" x2="400" y2="665" stroke="rgba(168,139,250,0.5)" stroke-width="1.5"/>
+  <text x="408" y="669" fill="rgba(168,139,250,0.5)" font-size="9">Visualization</text>
+  <line x1="480" y1="665" x2="505" y2="665" stroke="rgba(134,239,172,0.5)" stroke-width="1.5"/>
+  <text x="513" y="669" fill="rgba(134,239,172,0.5)" font-size="9">Text</text>
+
+  <!-- ==================== FOOTER ==================== -->
+  <text x="480" y="706" text-anchor="middle" fill="rgba(255,255,255,0.2)" font-size="10">Built by Jay — STEM Educator · MIT · pianoquest.app</text>
+</svg>
