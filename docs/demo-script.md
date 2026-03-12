@@ -36,10 +36,10 @@
 **Agent (voice):** Greets warmly. "Welcome to the Harmony Garden — here, every note in your chord must bloom equally." Observes: "I can see your middle finger is flatter than the others, and I can hear the E getting lost."
 
 **What changes:**
-- **Scene card** transitions to "Harmony Garden" (green gradient)
-- **Quest map** advances to "Assessment" (line turns green)
-- **Coaching focus card** updates: "Try curving your middle finger more to get weight on the E"
-- **"First Note" badge** appears with animated popup
+- **Scene card** transitions to "Harmony Garden" (green gradient) via `set_scene` tool call
+- **Quest map** advances to "Assessment" (line turns green) via `advance_quest` tool call
+- **Coaching focus card** updates: "Try curving your middle finger more to get weight on the E" via `set_coaching_focus` tool call
+- **"First Note" badge** appears with animated popup via `award_badge` tool call
 
 ---
 
@@ -50,9 +50,9 @@
 **Agent (voice):** "Imagine you're whispering the C, speaking the E, and whispering the G. The E needs more finger weight, not more force. Try leading with your fingertip."
 
 **What changes:**
-- **Coaching focus** updates with the tip
-- **Quest map** advances to "Challenge"
-- **Scene** may shift to "Technique Tower" if agent mentions technique
+- **Coaching focus** updates with the tip via `set_coaching_focus` tool call
+- **Quest map** advances to "Challenge" via `advance_quest` tool call
+- **Scene** may shift to "Technique Tower" if agent calls `set_scene`
 
 **Player:** Tries again. Second attempt slightly better.
 
@@ -91,9 +91,9 @@
 **Agent:** "Chapter complete! From uneven chords to a resonant voice — what a journey. You've conquered the Harmony Garden."
 
 **What changes:**
-- **"Chapter Complete" badge** popup
-- **Quest map** reaches "Celebration" — all nodes green
-- **Scene** transitions to "Victory Hall" (gold gradient)
+- **"Chapter Complete" badge** popup via `award_badge` tool call
+- **Quest map** reaches "Celebration" — all nodes green via `advance_quest` tool call
+- **Scene** transitions to "Victory Hall" (gold gradient) via `set_scene` tool call
 
 **Player (voice):** "That was amazing. I could actually feel the improvement."
 

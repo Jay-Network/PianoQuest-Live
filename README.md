@@ -23,17 +23,19 @@ PianoQuest Live is a multimodal AI piano coach that combines **3 input streams**
 | **Audio** | Microphone | Piano notes, dynamics, rhythm, voice |
 | **Voice** | Microphone | User goals, questions, reactions |
 
-### Outputs (Interleaved Multimodal)
-| Modality | Type | Description |
-|----------|------|-------------|
-| **Voice Narration** | Audio | Real-time coaching wrapped in storytelling |
-| **Story Scenes** | Visual | 8 themed scene cards that transition with the narrative |
-| **MIDI Dynamic Bars** | Visual | 36-band frequency analysis mapped to piano range |
-| **Rhythm Accuracy Grid** | Visual | Onset detection vs. BPM grid with color-coded timing |
-| **Technique Score** | Data | Real-time 0-100 score (dynamics evenness + rhythm accuracy) |
-| **Coaching Focus** | Text | Current coaching instruction parsed from narration |
-| **Achievement Badges** | Visual | Animated popups for milestones (Resonant Triad, Steady Pulse, etc.) |
-| **Quest Journey Map** | Visual | 5-phase narrative arc: Opening → Assessment → Challenge → Mastery → Celebration |
+### Outputs
+| Modality | Source | Description |
+|----------|--------|-------------|
+| **Voice Narration** | Gemini audio | Real-time coaching wrapped in storytelling |
+| **Story Scenes** | Gemini → `set_scene()` tool | 8 themed scene cards triggered by agent tool calls |
+| **Achievement Badges** | Gemini → `award_badge()` tool | Animated popups when agent detects genuine improvement |
+| **Coaching Focus** | Gemini → `set_coaching_focus()` tool | Current technique tip set by agent |
+| **Quest Journey Map** | Gemini → `advance_quest()` tool | 5-phase arc: Opening → Assessment → Challenge → Mastery → Celebration |
+| **MIDI Dynamic Bars** | Client-side Web Audio | 36-band frequency analysis mapped to piano range |
+| **Rhythm Accuracy Grid** | Client-side Web Audio | Onset detection vs. BPM grid with color-coded timing |
+| **Technique Score** | Client-side computation | Real-time 0-100 score (dynamics evenness + rhythm accuracy) |
+
+Gemini drives the narrative UI through ADK tool calls. Audio analysis runs client-side for low latency.
 
 ### The Demo Arc
 
@@ -134,11 +136,11 @@ pianoquest-live/
 2. **WebSocket** streams audio (16kHz PCM) and video frames (JPEG every 2s) to server
 3. **ADK Runner** routes streams through `LiveRequestQueue` to Gemini Live API
 4. **Gemini 2.5 Flash** processes vision + audio + voice simultaneously, generates coaching narration
-5. **Voice response** (24kHz PCM) streams back to browser for gapless playback
-6. **Transcript** is parsed client-side for scene transitions, achievements, and coaching tips
+5. **Gemini calls ADK tools** (`set_scene`, `award_badge`, `set_coaching_focus`, `advance_quest`) to control the visual UI — tool events flow through a per-session `asyncio.Queue` via `contextvars`
+6. **Voice response** (24kHz PCM) and **tool events** (JSON) stream back to browser via WebSocket
 7. **Web Audio API** analyzes microphone input locally for MIDI bars and rhythm grid
 
-All processing happens in real-time with no turn-taking — the agent responds during natural pauses in playing.
+The agent controls the full experience — Gemini decides when to change scenes, award achievements, and update coaching tips through tool calls, not frontend keyword matching.
 
 ---
 

@@ -442,7 +442,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v0.4.6</div>
       </div>
       <div class="score-display" id="scoreDisplay">
         <div>
@@ -624,6 +624,7 @@ let detectedHandCount = 0;
 let bothHandsDetected = false;
 let lastSentHandState = '';
 let lastSentCameraState = '';
+let reconnectDelay = 1000;
 
 let midiAccess = null;
 let midiInput = null;
@@ -644,6 +645,7 @@ let currentScore = 0;
 let currentScene = 'default';
 let questPhase = 0;
 let earnedBadges = new Set();
+let evenStreakCount = 0;
 
 const TOTAL_KEYS = 88;
 const FIRST_MIDI = 21;
@@ -709,6 +711,50 @@ function buildKeyboard() {
 
 function noteName(note) {
   return NOTE_NAMES[note % 12] + (Math.floor(note / 12) - 1);
+}
+
+function detectTechniques() {
+  var notes = recentMidiNotes.slice(-12).map(function(item) { return item.note; });
+  var labels = [];
+  if (notes.length < 2) return labels;
+
+  var ascendingRun = 1;
+  var descendingRun = 1;
+  var repeatedRun = 1;
+  var arpeggioRun = 1;
+
+  function pushUnique(label) {
+    if (labels.indexOf(label) === -1) labels.push(label);
+  }
+
+  for (var i = 1; i < notes.length; i++) {
+    var diff = notes[i] - notes[i - 1];
+    var absDiff = Math.abs(diff);
+
+    if (diff === 1 || diff === 2) ascendingRun += 1;
+    else ascendingRun = 1;
+
+    if (diff === -1 || diff === -2) descendingRun += 1;
+    else descendingRun = 1;
+
+    if (ascendingRun >= 4) pushUnique('scale_run_ascending');
+    if (descendingRun >= 4) pushUnique('scale_run_descending');
+
+    if (notes[i] === notes[i - 1]) repeatedRun += 1;
+    else repeatedRun = 1;
+
+    if (repeatedRun >= 3) {
+      pushUnique('repeated_note(' + noteName(notes[i]) + 'x' + repeatedRun + ')');
+    }
+
+    if (absDiff === 3 || absDiff === 4) arpeggioRun += 1;
+    else arpeggioRun = 1;
+
+    if (arpeggioRun >= 3) pushUnique('arpeggio');
+    if (absDiff > 7) pushUnique('wide_leap');
+  }
+
+  return labels;
 }
 
 function dynamicsRgb(velocity) {
@@ -957,6 +1003,17 @@ function updateScore() {
   var variance = recentVelocities.reduce(function(a, v) { return a + Math.pow(v - mean, 2); }, 0) / recentVelocities.length;
   var deviation = Math.sqrt(variance);
   var evennessScore = Math.max(0, Math.min(100, 100 - deviation * 1.5));
+  if (recentVelocities.length >= 12 && deviation < 8) evenStreakCount += 1;
+  else evenStreakCount = 0;
+  if (evenStreakCount >= 3 && !earnedBadges.has('even_triad')) {
+    awardBadge('even_triad');
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'text',
+        content: '[System: user achieved even_triad — dynamics evenness confirmed by 3 consecutive low-deviation chords]'
+      }));
+    }
+  }
 
   var bpm = parseInt(bpmSlider.value, 10) || 90;
   var beatIntervalMs = 60000 / bpm;
@@ -1380,6 +1437,7 @@ function sendMidiSnapshot(force) {
     type: 'midi_snapshot',
     active_notes: activePayload,
     recent_notes: recentPayload,
+    detected_techniques: detectTechniques(),
     pedal_down: pedalDown,
     bpm: parseInt(bpmSlider.value, 10) || 90,
     score: currentScore
@@ -1431,70 +1489,98 @@ async function startSession() {
 
     playbackCtx = new AudioContext({ sampleRate: 24000 });
     nextPlayTime = 0;
+    processor.onaudioprocess = function(e) {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      if (playbackCtx && playbackCtx.currentTime < playbackActiveUntil) return;
+      var input = e.inputBuffer.getChannelData(0);
+      var pcm16 = new Int16Array(input.length);
+      for (var i = 0; i < input.length; i++) {
+        pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(input[i] * 32767)));
+      }
+      ws.send(pcm16.buffer);
+    };
 
-    var proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    ws = new WebSocket(proto + '://' + location.host + '/ws/dialog');
-    ws.binaryType = 'arraybuffer';
+    var captureCanvas = document.createElement('canvas');
+    captureCanvas.width = 640;
+    captureCanvas.height = 480;
+    var captureCtx = captureCanvas.getContext('2d');
 
-    ws.onopen = function() {
-      setStatus('connected');
-      sessionActive = true;
-      sessionStartTime = Date.now();
-      resetMidiState();
-      scoreHistory = [];
-      currentScore = 0;
-      questPhase = 0;
-      earnedBadges.clear();
-      document.getElementById('scoreNumber').textContent = '--';
-      document.getElementById('scoreTrend').textContent = '';
-      document.getElementById('btnCamera').disabled = false;
-      ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
-      sendCameraState();
-      sendHandState(true);
-      refreshMidiInputs();
+    function connectWebSocket(isReconnect) {
+      var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(proto + '://' + location.host + '/ws/dialog');
+      ws.binaryType = 'arraybuffer';
 
-      processor.onaudioprocess = function(e) {
-        if (!ws || ws.readyState !== WebSocket.OPEN) return;
-        if (playbackCtx && playbackCtx.currentTime < playbackActiveUntil) return;
-        var input = e.inputBuffer.getChannelData(0);
-        var pcm16 = new Int16Array(input.length);
-        for (var i = 0; i < input.length; i++) {
-          pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(input[i] * 32767)));
+      ws.onopen = function() {
+        setStatus('connected');
+        reconnectDelay = 1000;
+        sessionActive = true;
+        document.getElementById('btnCamera').disabled = false;
+        if (!isReconnect) {
+          sessionStartTime = Date.now();
+          resetMidiState();
+          scoreHistory = [];
+          currentScore = 0;
+          questPhase = 0;
+          earnedBadges.clear();
+          document.getElementById('scoreNumber').textContent = '--';
+          document.getElementById('scoreTrend').textContent = '';
         }
-        ws.send(pcm16.buffer);
+        ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
+        sendCameraState();
+        sendHandState(true);
+        refreshMidiInputs();
+
+        if (!videoInterval) {
+          videoInterval = setInterval(function() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            if (!cameraEnabled) return;
+            captureCtx.drawImage(video, 0, 0, 640, 480);
+            captureCanvas.toBlob(function(blob) {
+              if (!blob || !ws || ws.readyState !== WebSocket.OPEN) return;
+              var reader = new FileReader();
+              reader.onloadend = function() {
+                if (!reader.result || !ws || ws.readyState !== WebSocket.OPEN) return;
+                var b64 = reader.result.split(',')[1];
+                ws.send(JSON.stringify({ type: 'video_frame', data: b64 }));
+              };
+              reader.readAsDataURL(blob);
+            }, 'image/jpeg', 0.5);
+          }, 1000);
+        }
+
+        if (!animFrame) {
+          drawLoop();
+        }
       };
 
-      var captureCanvas = document.createElement('canvas');
-      captureCanvas.width = 640;
-      captureCanvas.height = 480;
-      var captureCtx = captureCanvas.getContext('2d');
-      videoInterval = setInterval(function() {
-        if (!ws || ws.readyState !== WebSocket.OPEN) return;
-        if (!cameraEnabled) return;
-        captureCtx.drawImage(video, 0, 0, 640, 480);
-        var dataUrl = captureCanvas.toDataURL('image/jpeg', 0.6);
-        var b64 = dataUrl.split(',')[1];
-        ws.send(JSON.stringify({ type: 'video_frame', data: b64 }));
-      }, 1000);
-
-      drawLoop();
-    };
-
-    ws.onmessage = function(event) {
-      if (event.data instanceof ArrayBuffer) {
-        queueAudio(event.data);
-      } else {
-        var msg = JSON.parse(event.data);
-        if (msg.type === 'story_scene' || msg.type === 'achievement' ||
-                   msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
-                   msg.type === 'technique_report') {
-          handleToolEvent(msg);
+      ws.onmessage = function(event) {
+        if (event.data instanceof ArrayBuffer) {
+          queueAudio(event.data);
+        } else {
+          var msg = JSON.parse(event.data);
+          if (msg.type === 'story_scene' || msg.type === 'achievement' ||
+                     msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
+                     msg.type === 'technique_report') {
+            handleToolEvent(msg);
+          }
         }
-      }
-    };
+      };
 
-    ws.onclose = function() { setStatus('disconnected'); };
-    ws.onerror = function() { setStatus('error'); };
+      ws.onclose = function() {
+        setStatus('disconnected');
+        if (sessionActive) {
+          setTimeout(function() {
+            if (!sessionActive) return;
+            reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+            connectWebSocket(true);
+          }, reconnectDelay);
+        }
+      };
+
+      ws.onerror = function() { setStatus('error'); };
+    }
+
+    connectWebSocket(false);
 
   } catch (err) {
     console.error('Failed to start session:', err);

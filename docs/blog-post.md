@@ -33,15 +33,15 @@ PianoQuest Live implements what I call a **3x8 architecture**: three distinct in
 3.  **Voice (User Speech):** Users can talk to the agent naturally. "How do I make this sound more mysterious?" or "I'm struggling with this bridge."
 
 ### 8 Interleaved Outputs
-Processing these inputs isn't enough; the agent must respond in a way that feels "alive." We achieved this by interleaving eight different output streams:
+Processing these inputs isn't enough; the agent must respond in a way that feels "alive." We achieved this by interleaving eight different output streams, driven dynamically by Google ADK tool calls (`set_scene`, `award_badge`, `set_coaching_focus`, `advance_quest`):
 *   **Voice Narration:** Real-time coaching wrapped in the storyteller's persona.
-*   **Story Scenes:** Visual "Scene Cards" (e.g., *Enchanted Forest*, *Victory Hall*) that transition automatically based on the agent's narration.
+*   **Story Scenes:** Visual "Scene Cards" (e.g., *Enchanted Forest*, *Victory Hall*) that transition automatically when the agent calls `set_scene`.
 *   **MIDI Dynamic Bars:** A frequency-mapped visualization showing the loudness of every note.
 *   **Rhythm Accuracy Grid:** A live overlay comparing user onsets against the beat.
 *   **Technique Score:** A real-time 0-100 score that quantifiably tracks improvement.
-*   **Coaching Focus:** Text-based "tip cards" parsed from the agent's speech for quick reference.
-*   **Achievement Badges:** Animated pop-ups when the agent detects a breakthrough (e.g., "Resonant Triad").
-*   **Quest Journey Map:** A visual roadmap showing the session's progress from *Opening* to *Mastery*.
+*   **Coaching Focus:** Text-based "tip cards" triggered by the agent via `set_coaching_focus`.
+*   **Achievement Badges:** Animated pop-ups triggered when the agent calls `award_badge` for a breakthrough.
+*   **Quest Journey Map:** A visual roadmap showing the session's progress from *Opening* to *Mastery*, updated via `advance_quest`.
 
 ---
 
@@ -64,6 +64,8 @@ What truly sets PianoQuest Live apart is the **bidirectional nature** of its mul
 Most "Creative Storyteller" entries take a single prompt and generate a rich output. PianoQuest is a **loop**. The user's physical actions (finger movement, piano notes) drive the AI's story, which in turn drives visual changes on the user's screen and auditory changes in their playing. 
 
 We don't just use the Gemini Live API for a "chatbot." We use it as a **low-latency sensory system**. Because Gemini 2.5 Flash can process audio and vision in a single context window, it can correlate *seeing* a finger move with *hearing* the resulting note. This allows for feedback like: *"I notice your wrist is dropping on that stretch—try keeping it level to help that G-natural sing."* This level of integrated feedback was previously impossible without a room full of specialized sensors.
+
+To maintain real-time performance across multiple concurrent practice sessions, we implemented a **`contextvars` per-session queue pattern**. This ensures that WebSocket streams and ADK tool calls (like `set_scene` or `award_badge`) are thread-safe and perfectly synchronized for each individual user, allowing the AI that develops human musical skill to scale seamlessly without ever crossing the streams.
 
 ---
 

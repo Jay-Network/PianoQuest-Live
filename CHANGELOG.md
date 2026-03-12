@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- `report_technique` tool for vision-audio correlation reporting
+- Finger Tracking UI panel
+
+### Changed
+- Increased video frame rate from every 2 seconds to every 1 second
+
+## [0.4.0] - 2026-03-11
+
+### Changed
+- **BREAKING**: Replaced frontend keyword matching with genuine ADK tool calls
+  - Agent now calls `set_scene()`, `award_badge()`, `set_coaching_focus()`, `advance_quest()` tools
+  - Gemini DECIDES when to trigger visual changes — not frontend string matching
+  - Visual events flow: Gemini → tool call → contextvars queue → WebSocket → frontend
+- Removed `google_search` tool (unused), replaced with 4 visual control tools
+- Rewrote agent prompt to instruct tool usage patterns throughout session arc
+- Frontend handles tool-driven WebSocket messages instead of parsing transcripts
+
+### Removed
+- `detectScene()`, `detectAchievement()`, `detectQuestPhase()`, `detectCoachingTip()` keyword functions
+- `QUEST_KEYWORDS` array
+- Scene vocabulary and achievement phrase sections from prompt (replaced by tool docs)
+
+## [0.3.0] - 2026-03-11
+
+### Added
+- Story Scene Cards: 8 themed visual environments driven by narrative
+- Coaching Focus Card: technique tips parsed from agent speech
+- Achievement Badges: 7 animated milestone popups
+- Quest Journey Map: 5-phase narrative arc visualization
+- Technique Score: composite dynamics + rhythm accuracy score (0-100)
+- Score trend indicator (up/down arrows)
+- Full dark theme with architecture diagram color palette
+
 ## [0.2.0] - 2026-03-11
 
 ### Added

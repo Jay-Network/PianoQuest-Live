@@ -57,6 +57,7 @@ def describe_midi_snapshot(
 ) -> str | None:
     recent_notes = msg.get("recent_notes") or []
     active_notes = msg.get("active_notes") or []
+    detected_techniques = msg.get("detected_techniques") or []
     pedal_down = bool(msg.get("pedal_down"))
     bpm = msg.get("bpm")
     score = msg.get("score")
@@ -95,6 +96,10 @@ def describe_midi_snapshot(
         details.append(f"target tempo {bpm} BPM")
     if score is not None:
         details.append(f"current technique score {score}")
+    if detected_techniques:
+        details.append(
+            "detected techniques: " + ", ".join(str(item) for item in detected_techniques[:6])
+        )
 
     if not details:
         return None
