@@ -1,0 +1,35 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "d309aeaf4078",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 9,
+  "files_touched": [
+    "CHANGELOG.md",
+    "README.md",
+    "agent/agent.py",
+    "agent/server.py",
+    "docs/2026-03-12-competition-plan.md",
+    "docs/IDEAS.md",
+    "docs/blog-post.md",
+    "docs/demo-script.md",
+    "docs/devpost-description.md",
+    "static/index.html"
+  ],
+  "sessions": [
+    {
+      "metadata": "/d3/09aeaf4078/0/metadata.json",
+      "transcript": "/d3/09aeaf4078/0/full.jsonl",
+      "context": "/d3/09aeaf4078/0/context.md",
+      "content_hash": "/d3/09aeaf4078/0/content_hash.txt",
+      "prompt": "/d3/09aeaf4078/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 249,
+    "cache_creation_tokens": 369655,
+    "cache_read_tokens": 17512042,
+    "output_tokens": 116278,
+    "api_call_count": 187
+  }
+}
