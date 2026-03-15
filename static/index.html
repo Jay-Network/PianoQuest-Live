@@ -6,15 +6,18 @@
 <title>PianoQuest Live</title>
 <style>
   :root {
-    --bg: #0c0c14;
-    --bg2: #12121e;
-    --bg3: #1a1a2e;
+    --bg: #000000;
+    --bg2: #0a0a0a;
+    --bg3: #111111;
     --border: rgba(255,255,255,0.08);
-    --text: #e2e8f0;
-    --text2: rgba(255,255,255,0.5);
-    --text3: rgba(255,255,255,0.3);
-    --amber: #fbbf24;
-    --purple: #a78bfa;
+    --text: #ffffff;
+    --text1: #ffffff;
+    --text2: rgba(255,255,255,0.60);
+    --text3: rgba(255,255,255,0.40);
+    --accent: #ffffff;
+    --accent-subtle: rgba(255,255,255,0.06);
+    --accent-border: rgba(255,255,255,0.15);
+    --purple: #a0a0a0;
     --rose: #fb7185;
     --blue: #93c5fd;
     --green: #86efac;
@@ -46,7 +49,7 @@
   }
   .header-left { display: flex; align-items: center; gap: 20px; }
   .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-  .header h1 span { color: var(--amber); }
+  .header h1 span { color: var(--accent); }
   .header-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.04em; }
 
   .controls { display: flex; gap: 10px; align-items: center; }
@@ -64,9 +67,9 @@
   }
   button:hover { background: var(--bg3); border-color: rgba(255,255,255,0.15); }
   button.primary {
-    background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); color: var(--amber);
+    background: #ffffff; border-color: #ffffff; color: #000000; font-weight: 600;
   }
-  button.primary:hover { background: rgba(251,191,36,0.25); }
+  button.primary:hover { background: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.85); }
   button.secondary {
     background: rgba(96,165,250,0.12); border-color: rgba(96,165,250,0.25); color: var(--blue);
   }
@@ -139,8 +142,8 @@
     color: var(--green);
   }
   .camera-badge.warn {
-    border-color: rgba(251,191,36,0.28);
-    color: var(--amber);
+    border-color: rgba(255,255,255,0.12);
+    color: var(--accent);
   }
   .camera-badge.off {
     border-color: rgba(251,113,133,0.28);
@@ -155,7 +158,7 @@
     border-radius: 2px; overflow: hidden;
   }
   .level-bar {
-    height: 100%; width: 0%; background: var(--amber);
+    height: 100%; width: 0%; background: var(--accent);
     border-radius: 2px; transition: width 0.05s;
   }
   .level-label { font-size: 9px; color: var(--text3); min-width: 20px; text-align: right; }
@@ -198,9 +201,9 @@
     letter-spacing: 0.04em;
   }
   .pedal-pill.active {
-    border-color: rgba(251,191,36,0.35);
-    background: rgba(251,191,36,0.12);
-    color: var(--amber);
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: var(--accent);
   }
   .midi-select {
     min-width: 180px;
@@ -219,7 +222,7 @@
   }
   .roll-wrap {
     padding: 0;
-    background: #1a1a2e;
+    background: #0a0a0a;
   }
   .keyboard-wrap {
     padding: 0;
@@ -247,15 +250,15 @@
   .technique-panel { margin-top: 4px; }
   .technique-entry {
     padding: 8px 10px; border-radius: 8px; margin-bottom: 6px;
-    background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.15);
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
     animation: techFadeIn 0.4s ease-out;
   }
-  .technique-entry:first-child { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.12); }
+  .technique-entry:first-child { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
   .technique-finger { font-size: 10px; font-weight: 700; color: var(--purple); letter-spacing: 0.03em; margin-bottom: 3px; }
   .technique-row { display: flex; gap: 8px; margin-bottom: 3px; }
   .technique-label { font-size: 8px; font-weight: 600; letter-spacing: 0.05em; padding: 1px 4px; border-radius: 3px; flex-shrink: 0; }
   .technique-label.eye { background: rgba(96,165,250,0.2); color: var(--blue); }
-  .technique-label.ear { background: rgba(251,191,36,0.2); color: var(--amber); }
+  .technique-label.ear { background: rgba(255,255,255,0.06); color: var(--accent); }
   .technique-obs { font-size: 11px; color: var(--text2); }
   .technique-suggestion { font-size: 11px; color: var(--green); margin-top: 3px; padding-left: 2px; }
   @keyframes techFadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
@@ -286,16 +289,16 @@
     padding: 1px 5px; border-radius: 4px; font-size: 8px; font-weight: 700;
     letter-spacing: 0.04em;
   }
-  .role-tag.mic { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .role-tag.mic { background: rgba(255,255,255,0.06); color: var(--accent); }
   .role-tag.cam { background: rgba(251,113,133,0.15); color: var(--rose); }
-  .role-tag.midi { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .role-tag.midi { background: rgba(255,255,255,0.06); color: var(--purple); }
   .room-bar {
     display: flex; align-items: center; gap: 8px;
     padding: 6px 10px; border-top: 1px solid var(--border);
     font-size: 10px; color: var(--text3);
   }
   .room-code {
-    font-weight: 700; font-size: 13px; color: var(--amber);
+    font-weight: 700; font-size: 13px; color: var(--accent);
     letter-spacing: 0.08em; font-family: monospace;
   }
   .room-bar .mini-btn { margin-left: auto; padding: 3px 8px; font-size: 9px; }
@@ -309,12 +312,12 @@
   }
   .secondary-header { text-align: center; }
   .secondary-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-  .secondary-header h2 span { color: var(--amber); }
+  .secondary-header h2 span { color: var(--accent); }
   .secondary-room-code {
     font-size: 11px; color: var(--text3); letter-spacing: 0.04em;
   }
   .secondary-room-code b {
-    font-size: 16px; color: var(--amber); letter-spacing: 0.08em; font-family: monospace;
+    font-size: 16px; color: var(--accent); letter-spacing: 0.08em; font-family: monospace;
   }
   .secondary-status {
     font-size: 12px; color: var(--text2); text-align: center;
@@ -365,7 +368,7 @@
     color: var(--text2); display: flex; align-items: center; gap: 4px;
   }
   .score-tree-file:hover { background: rgba(255,255,255,0.05); color: var(--text1); }
-  .score-tree-file.active { background: rgba(251,191,36,0.12); color: var(--amber); }
+  .score-tree-file.active { background: rgba(255,255,255,0.06); color: var(--accent); }
   .score-preview {
     padding: 8px; border-top: 1px solid var(--border);
   }
@@ -373,7 +376,7 @@
   .score-info .title { font-size: 14px; font-weight: 700; color: var(--text1); margin-bottom: 2px; }
   .score-info .composer { font-size: 11px; color: var(--text3); }
   .score-info .meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
-  .score-canvas-wrap { background: #111118; border-radius: 6px; margin-top: 6px; }
+  .score-canvas-wrap { background: #050505; border-radius: 6px; margin-top: 6px; }
   .score-canvas-wrap canvas { width: 100%; display: block; }
   .score-actions { display: flex; gap: 6px; padding: 6px 0; }
   .score-actions button {
@@ -381,7 +384,7 @@
     background: var(--bg2); color: var(--text2); font-size: 10px; font-weight: 600;
     cursor: pointer; transition: all 0.2s;
   }
-  .score-actions button:hover { border-color: var(--amber); color: var(--amber); }
+  .score-actions button:hover { border-color: var(--accent); color: var(--accent); }
   .score-actions button.active { border-color: var(--green); color: var(--green); background: rgba(134,239,172,0.08); }
 </style>
 </head>
@@ -429,7 +432,7 @@
           <button class="mini-btn" type="button" onclick="copyRoomLink()">Copy Link</button>
           <button class="mini-btn" type="button" onclick="toggleQr()">QR</button>
         </div>
-        <div id="qrPanel" style="display:none;text-align:center;padding:8px;background:#111118;border-radius:0 0 8px 8px;">
+        <div id="qrPanel" style="display:none;text-align:center;padding:8px;background:#050508;border-radius:0 0 8px 8px;">
           <img id="qrImg" style="width:180px;height:180px;border-radius:4px;" alt="QR code">
           <div style="font-size:10px;color:var(--text3);margin-top:4px;">Scan to join this session</div>
         </div>
@@ -449,7 +452,7 @@
           <div class="camera-badge warn" id="cameraBadge">Show both hands for fingering feedback</div>
         </div>
         <div class="level-meter">
-          <div class="dot" style="background:var(--amber);width:5px;height:5px;border-radius:50%"></div>
+          <div class="dot" style="background:var(--accent);width:5px;height:5px;border-radius:50%"></div>
           <div class="level-bar-bg"><div class="level-bar" id="levelBar"></div></div>
           <div class="level-label" id="levelLabel">0</div>
         </div>
@@ -482,22 +485,22 @@
     <div class="right-col">
 
       <div class="midi-stack">
-        <div class="roll-wrap" style="background:#1A1A2E;border-radius:12px 12px 0 0;overflow:hidden;">
+        <div class="roll-wrap" style="background:#0a0a0f;border-radius:12px 12px 0 0;overflow:hidden;">
           <canvas id="pianoRollCanvas"></canvas>
         </div>
         <div class="keyboard-wrap" style="background:#0a0a0a;">
           <canvas id="keyboardCanvas"></canvas>
         </div>
-        <div style="display:flex;background:#111118;border-radius:0 0 12px 12px;overflow:hidden;">
+        <div style="display:flex;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
           <div class="staff-controls" style="display:flex;flex-direction:column;gap:4px;padding:6px 4px;background:#0d0d16;min-width:42px;align-items:center;justify-content:center;">
-            <input type="number" id="staffTempo" min="20" max="300" value="100" title="Tempo" style="width:36px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:2px;font-size:9px;text-align:center;">
-            <select id="staffTimeSig" title="Time signature" style="width:36px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:9px;">
+            <input type="number" id="staffTempo" min="20" max="300" value="100" title="Tempo" style="width:36px;background:#0a0a0f;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:2px;font-size:9px;text-align:center;">
+            <select id="staffTimeSig" title="Time signature" style="width:36px;background:#0a0a0f;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:9px;">
               <option value="4/4">4/4</option>
               <option value="3/4">3/4</option>
               <option value="2/4">2/4</option>
               <option value="6/8">6/8</option>
             </select>
-            <select id="staffScale" title="Scale" style="width:36px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:8px;">
+            <select id="staffScale" title="Scale" style="width:36px;background:#0a0a0f;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:8px;">
               <option value="C major">C</option>
               <option value="G major">G</option>
               <option value="D major">D</option>
@@ -519,7 +522,7 @@
               <option value="C# minor">C#m</option>
             </select>
           </div>
-          <div class="staff-wrap" style="flex:1;padding:0;background:#111118;">
+          <div class="staff-wrap" style="flex:1;padding:0;background:#050508;">
             <canvas id="grandStaffCanvas"></canvas>
           </div>
         </div>
@@ -530,7 +533,7 @@
     <div class="score-col">
       <div class="panel" style="flex:1;display:flex;flex-direction:column;">
         <div class="panel-header">
-          <div class="dot" style="background:var(--amber)"></div>SCORE
+          <div class="dot" style="background:var(--accent)"></div>SCORE
         </div>
         <div class="score-browser">
           <div class="score-tree" id="scoreTree">
@@ -1006,7 +1009,7 @@ function drawHandOverlay() {
   if (!cameraEnabled || !handLandmarks.length) return;
 
   handLandmarks.forEach(function(points, handIndex) {
-    var lineColor = handIndex === 0 ? 'rgba(96,165,250,0.92)' : 'rgba(251,191,36,0.92)';
+    var lineColor = handIndex === 0 ? 'rgba(96,165,250,0.92)' : 'rgba(255,255,255,0.70)';
     var jointColor = handIndex === 0 ? 'rgba(191,219,254,0.98)' : 'rgba(254,240,138,0.98)';
     ctx.lineWidth = 2.2;
     ctx.strokeStyle = lineColor;
@@ -1504,7 +1507,7 @@ function drawPianoRoll() {
   var msPerBeat = 60000 / bpm;
 
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#1A1A2E';
+  ctx.fillStyle = '#0a0a0f';
   ctx.fillRect(0, 0, W, waterfallH);
 
   ctx.strokeStyle = '#24243C';
@@ -1648,7 +1651,7 @@ function drawPianoRoll() {
 
   var fadeH = waterfallH * 0.1;
   var fadeGrad = ctx.createLinearGradient(0, 0, 0, fadeH);
-  fadeGrad.addColorStop(0, '#1A1A2E');
+  fadeGrad.addColorStop(0, '#0a0a0f');
   fadeGrad.addColorStop(1, 'rgba(26,26,46,0)');
   ctx.fillStyle = fadeGrad;
   ctx.fillRect(0, 0, W, fadeH);
@@ -1768,7 +1771,7 @@ function drawGrandStaff() {
   var msPerMeasure = msPerBeat * beatsPerMeasure;
 
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#111118';
+  ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, W, H);
 
   // Diatonic layout: center on B3 (MIDI 59)
@@ -2065,7 +2068,7 @@ function drawGrandStaff() {
   }
 
   // Left margin overlay to clean up clef area
-  ctx.fillStyle = '#111118';
+  ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, marginLeft - 2, H);
 
   // Redraw clefs and key sig on top
@@ -2133,7 +2136,7 @@ function drawKeyboard() {
   ctx.clearRect(0, 0, W, totalH);
 
   // --- Dynamic bars zone (above keyboard) ---
-  ctx.fillStyle = '#111118';
+  ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, W, dynamicsH);
 
   // Dynamics guide lines
@@ -2162,7 +2165,7 @@ function drawKeyboard() {
       var barW = keyInfo.isBlack ? blackKeyW : whiteKeyW - 2;
       var color = fingerDownNotes.has(midi) ? dynamicsColor(note.velocity) : darkenedColor(note.velocity, 0.5);
       if (keyInfo.isBlack) {
-        ctx.fillStyle = '#111118';
+        ctx.fillStyle = '#050508';
         ctx.fillRect(barX, 0, barW, dynamicsH);
       }
       ctx.fillStyle = color;
@@ -2306,7 +2309,7 @@ function drawScorePreview(score) {
   var W = rect.width;
 
   ctx.clearRect(0, 0, W, totalH);
-  ctx.fillStyle = '#111118';
+  ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, W, totalH);
 
   var staffSpacing = 6;
@@ -2598,7 +2601,7 @@ function updateQr(roomCode) {
   var h2 = document.createElement('h2');
   var pianoText = document.createTextNode('Piano');
   var questSpan = document.createElement('span');
-  questSpan.style.color = 'var(--amber)';
+  questSpan.style.color = 'var(--accent)';
   questSpan.textContent = 'Quest';
   h2.appendChild(pianoText);
   h2.appendChild(questSpan);
@@ -2966,7 +2969,7 @@ function updateQr(roomCode) {
 
   // Replace page with minimal camera UI using safe DOM methods
   while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
-  document.body.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0c0c14;color:#e2e8f0;font-family:sans-serif';
+  document.body.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#000000;color:#ffffff;font-family:sans-serif';
 
   var heading = document.createElement('h2');
   heading.textContent = 'PianoQuest Camera';
