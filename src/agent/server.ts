@@ -763,9 +763,10 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   try {
     session = await client.live.connect({
       model: LIVE_MODEL,
-      // MINIMAL config — just audio response, nothing else
       config: {
         responseModalities: [Modality.AUDIO],
+        inputAudioTranscription: {},
+        outputAudioTranscription: {},
       },
       callbacks: {
         onopen: () => {

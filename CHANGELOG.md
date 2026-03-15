@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.7] - 2026-03-15
+
+### Added
+- Conversation panel with real-time speech transcription (user + Gemini messages)
+- Chat CSS adopted from JDialogs Copilot (message bubbles, scroll, animations)
+- `addMessage()` function for rendering chat messages with labels and timestamps
+- `inputAudioTranscription` and `outputAudioTranscription` enabled in Gemini config
+
+### Changed
+- WebSocket handler now processes `input_transcript` and `output_transcript` messages
+
 ## [1.8.6] - 2026-03-15
 
 ### Changed

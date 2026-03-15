@@ -405,6 +405,42 @@
   }
   .score-actions button:hover { border-color: var(--accent); color: var(--accent); }
   .score-actions button.active { border-color: var(--green); color: var(--green); background: rgba(134,239,172,0.08); }
+
+  /* Chat / Conversation */
+  .chat-area { scroll-behavior: smooth; }
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-track { background: transparent; }
+  .chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  .system-msg { font-size: 11px; color: rgba(255,255,255,0.4); font-style: italic; padding: 12px 0; text-align: center; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .chat-row { display: flex; gap: 6px; animation: msgIn 0.2s ease-out; }
+  .chat-row.user { flex-direction: row-reverse; }
+  .chat-row.bot { flex-direction: row; }
+  .chat-msg {
+    max-width: 80%; min-width: 60px; padding: 8px 12px;
+    border-radius: 14px; font-size: 13px; line-height: 1.5;
+  }
+  .chat-msg .msg-label {
+    font-size: 9px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.04em; margin-bottom: 2px; opacity: 0.5;
+  }
+  .chat-msg .msg-time {
+    font-size: 9px; margin-top: 3px; opacity: 0.3; font-variant-numeric: tabular-nums;
+  }
+  .chat-msg.user {
+    background: rgba(147,197,253,0.08); border: 1px solid rgba(147,197,253,0.15);
+    border-bottom-right-radius: 4px;
+  }
+  .chat-msg.user .msg-label { color: var(--blue); }
+  .chat-msg.user .msg-text { color: rgba(255,255,255,0.85); }
+  .chat-msg.user .msg-time { text-align: right; }
+  .chat-msg.bot {
+    background: rgba(134,239,172,0.06); border: 1px solid rgba(134,239,172,0.12);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-msg.bot .msg-label { color: var(--green); }
+  .chat-msg.bot .msg-text { color: rgba(255,255,255,0.85); }
+  .chat-msg.bot .msg-time { text-align: left; }
 </style>
 </head>
 <body>
@@ -415,7 +451,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.6</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.7</div>
       </div>
     </div>
     <div class="controls">
@@ -485,6 +521,15 @@
         </div>
         <div class="technique-panel" id="techniquePanel">
           <div style="font-size:11px;color:var(--text3);padding:4px 0;">Waiting for vision-audio analysis...</div>
+        </div>
+      </div>
+
+      <div class="panel" style="flex:1;display:flex;flex-direction:column;min-height:200px;">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--gemini)"></div>CONVERSATION
+        </div>
+        <div class="chat-area" id="chatArea" style="flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;">
+          <div class="system-msg" style="font-size:11px;color:var(--text3);text-align:center;padding:12px;">Start a session to begin conversation</div>
         </div>
       </div>
 
@@ -763,6 +808,43 @@ function darkenedColor(velocity, factor, alpha) {
   var b = Math.round(c.b * factor);
   if (alpha == null) return 'rgb(' + r + ',' + g + ',' + b + ')';
   return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+// ============================================================================
+// Chat / Conversation panel
+// ============================================================================
+function addMessage(text, type) {
+  var chat = document.getElementById('chatArea');
+  if (!chat) return;
+  var sys = chat.querySelector('.system-msg');
+  if (sys) sys.remove();
+
+  var side = type === 'input' ? 'user' : 'bot';
+
+  var row = document.createElement('div');
+  row.className = 'chat-row ' + side;
+
+  var div = document.createElement('div');
+  div.className = 'chat-msg ' + side;
+
+  var lbl = document.createElement('div');
+  lbl.className = 'msg-label';
+  lbl.textContent = side === 'user' ? 'You' : 'Gemini';
+  div.appendChild(lbl);
+
+  var p = document.createElement('div');
+  p.className = 'msg-text';
+  p.textContent = text;
+  div.appendChild(p);
+
+  var ts = document.createElement('div');
+  ts.className = 'msg-time';
+  ts.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  div.appendChild(ts);
+
+  row.appendChild(div);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
 }
 
 // ============================================================================
@@ -1397,6 +1479,10 @@ async function startSession() {
               updateCameraUi();
               document.getElementById('btnCamera').style.display = 'none';
             }
+          } else if (msg.type === 'input_transcript') {
+            if (msg.text) addMessage(msg.text, 'input');
+          } else if (msg.type === 'output_transcript') {
+            if (msg.text) addMessage(msg.text, 'output');
           } else if (msg.type === 'midi') {
             // Remote MIDI from Ubuntu bridge — feed into existing visualization
             var nowMs = msg.timestampMs || Date.now();
