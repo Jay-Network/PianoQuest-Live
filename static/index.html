@@ -432,6 +432,94 @@
       justify-content: flex-start;
     }
   }
+
+  /* Device Manager */
+  .device-manager-panel { }
+  .device-manager-content { padding: 8px 10px; }
+  .device-list-items { display: flex; flex-direction: column; gap: 6px; }
+  .device-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .device-item.is-primary {
+    border-color: rgba(251,191,36,0.2);
+    background: rgba(251,191,36,0.04);
+  }
+  .device-icon { font-size: 16px; flex-shrink: 0; }
+  .device-info { flex: 1; min-width: 0; }
+  .device-name { font-size: 11px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .device-type-label { font-size: 9px; color: var(--text3); }
+  .device-roles { display: flex; gap: 3px; flex-shrink: 0; }
+  .role-pill {
+    padding: 2px 6px; border-radius: 6px; font-size: 9px; font-weight: 700;
+    letter-spacing: 0.04em; cursor: pointer; border: 1px solid transparent;
+    transition: all 0.2s; user-select: none;
+    background: rgba(255,255,255,0.04); color: var(--text3);
+  }
+  .role-pill:hover { background: rgba(255,255,255,0.08); }
+  .role-pill.active {
+    background: rgba(134,239,172,0.15); border-color: rgba(134,239,172,0.3);
+    color: var(--green);
+  }
+  .role-pill.active.mic-pill { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.25); color: var(--amber); }
+  .role-pill.active.cam-pill { background: rgba(251,113,133,0.12); border-color: rgba(251,113,133,0.25); color: var(--rose); }
+  .role-pill.active.midi-pill { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.25); color: var(--purple); }
+  .room-code-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px; border-top: 1px solid var(--border);
+    font-size: 10px; color: var(--text3);
+  }
+  .room-code-value {
+    font-weight: 700; font-size: 13px; color: var(--amber);
+    letter-spacing: 0.08em; font-family: monospace;
+  }
+  .room-code-bar .mini-btn { margin-left: auto; padding: 3px 8px; font-size: 9px; }
+  .device-count { margin-left: auto; font-weight: 400; color: var(--text3); }
+
+  /* Secondary device mode */
+  .secondary-app {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; gap: 20px; padding: 24px;
+    background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif;
+  }
+  .secondary-header { text-align: center; }
+  .secondary-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .secondary-header h2 span { color: var(--amber); }
+  .secondary-room-code {
+    font-size: 11px; color: var(--text3); letter-spacing: 0.04em;
+  }
+  .secondary-room-code b {
+    font-size: 16px; color: var(--amber); letter-spacing: 0.08em; font-family: monospace;
+  }
+  .secondary-status {
+    font-size: 12px; color: var(--text2); text-align: center;
+  }
+  .secondary-roles {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .secondary-role-card {
+    padding: 16px 24px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--bg2);
+    text-align: center; min-width: 100px;
+    transition: all 0.3s;
+  }
+  .secondary-role-card.active {
+    border-color: rgba(134,239,172,0.3);
+    background: rgba(134,239,172,0.06);
+  }
+  .secondary-role-card .role-icon { font-size: 28px; margin-bottom: 6px; }
+  .secondary-role-card .role-name { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: var(--text2); }
+  .secondary-role-card.active .role-name { color: var(--green); }
+  .secondary-role-card .role-status { font-size: 9px; color: var(--text3); margin-top: 4px; }
+  .secondary-role-card.active .role-status { color: var(--green); }
+  .secondary-camera-preview {
+    width: 90vw; max-width: 480px; border-radius: 12px; background: #000;
+  }
+  .secondary-camera-preview video {
+    width: 100%; border-radius: 12px; display: block;
+  }
 </style>
 </head>
 <body>
@@ -442,7 +530,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.3.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.4.0</div>
       </div>
       <div class="score-display" id="scoreDisplay">
         <div>
@@ -495,6 +583,20 @@
 
     <!-- Left column: Camera + Coaching + Badges -->
     <div class="left-col">
+      <div class="panel device-manager-panel" id="deviceManagerPanel" style="display:none">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--green)"></div>DEVICE MANAGER
+          <span class="device-count" id="deviceCount">1 device</span>
+        </div>
+        <div class="device-manager-content">
+          <div class="device-list-items" id="deviceListItems"></div>
+        </div>
+        <div class="room-code-bar">
+          Room: <span class="room-code-value" id="roomCodeDisplay">----</span>
+          <button class="mini-btn" type="button" onclick="copyRoomLink()">Copy Link</button>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="panel-header">
           <div class="dot" style="background:var(--rose)"></div>CAMERA
@@ -625,6 +727,14 @@ let bothHandsDetected = false;
 let lastSentHandState = '';
 let lastSentCameraState = '';
 let reconnectDelay = 1000;
+
+// Device management state
+let isPrimaryDevice = false;
+let isSecondaryDevice = false;
+let myDeviceId = '';
+let myRoomCode = '';
+let myRoles = { mic: false, camera: false, midi: false };
+let deviceList = [];
 
 let midiAccess = null;
 let midiInput = null;
@@ -1515,7 +1625,7 @@ async function startSession() {
 
     function connectWebSocket(isReconnect) {
       var proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      ws = new WebSocket(proto + '://' + location.host + '/ws/dialog');
+      ws = new WebSocket(proto + '://' + location.host + '/ws/session');
       ws.binaryType = 'arraybuffer';
 
       ws.onopen = function() {
@@ -1570,10 +1680,29 @@ async function startSession() {
                      msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
                      msg.type === 'technique_report') {
             handleToolEvent(msg);
+          } else if (msg.type === 'you_are_primary') {
+            isPrimaryDevice = true;
+            myDeviceId = msg.deviceId;
+            myRoomCode = msg.room;
+            document.getElementById('deviceManagerPanel').style.display = '';
+            document.getElementById('roomCodeDisplay').textContent = msg.room;
           } else if (msg.type === 'room_code') {
-            var cameraUrl = location.origin + '/?camera=1&room=' + msg.room;
+            myRoomCode = msg.room;
             var label = document.getElementById('statusLabel');
-            if (label) label.textContent = 'Connected · Camera: ' + msg.room;
+            if (label) label.textContent = 'Connected · Room: ' + msg.room;
+          } else if (msg.type === 'device_list') {
+            deviceList = msg.devices || [];
+            renderDeviceList();
+          } else if (msg.type === 'role_assigned') {
+            myRoles = msg.roles;
+            // If primary lost mic/camera, stop sending
+            if (isPrimaryDevice) {
+              if (!myRoles.camera && cameraEnabled) {
+                cameraEnabled = false;
+                if (mediaStream) mediaStream.getVideoTracks().forEach(function(t) { t.enabled = false; });
+                updateCameraUi();
+              }
+            }
           } else if (msg.type === 'midi') {
             // Remote MIDI from Ubuntu bridge — feed into existing visualization
             var nowMs = msg.timestampMs || Date.now();
@@ -1960,6 +2089,387 @@ function addTranscript(role, text) {
 
 refreshMidiInputs();
 updateCameraUi();
+
+// ============================================================================
+// Device Manager (primary device)
+// ============================================================================
+function renderDeviceList() {
+  var container = document.getElementById('deviceListItems');
+  if (!container) return;
+  container.textContent = '';
+  var countEl = document.getElementById('deviceCount');
+  if (countEl) countEl.textContent = deviceList.length + (deviceList.length === 1 ? ' device' : ' devices');
+
+  deviceList.forEach(function(dev) {
+    var item = document.createElement('div');
+    item.className = 'device-item' + (dev.isPrimary ? ' is-primary' : '');
+
+    var icon = document.createElement('span');
+    icon.className = 'device-icon';
+    icon.textContent = dev.deviceType === 'desktop' ? '\uD83D\uDCBB' : dev.deviceType === 'tablet' ? '\uD83D\uDCF1' : dev.deviceType === 'phone' ? '\uD83D\uDCF7' : '\uD83D\uDD32';
+    item.appendChild(icon);
+
+    var info = document.createElement('div');
+    info.className = 'device-info';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'device-name';
+    nameEl.textContent = dev.name;
+    info.appendChild(nameEl);
+    var typeEl = document.createElement('div');
+    typeEl.className = 'device-type-label';
+    typeEl.textContent = dev.deviceType;
+    info.appendChild(typeEl);
+    item.appendChild(info);
+
+    var roles = document.createElement('div');
+    roles.className = 'device-roles';
+
+    ['mic', 'camera', 'midi'].forEach(function(role) {
+      var pill = document.createElement('span');
+      var label = role === 'mic' ? 'MIC' : role === 'camera' ? 'CAM' : 'MIDI';
+      var pillClass = role === 'mic' ? 'mic-pill' : role === 'camera' ? 'cam-pill' : 'midi-pill';
+      pill.className = 'role-pill ' + pillClass + (dev.roles[role] ? ' active' : '');
+      pill.textContent = label;
+      pill.onclick = function() {
+        if (!isPrimaryDevice || !ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({
+          type: 'set_device_role',
+          deviceId: dev.id,
+          role: role,
+          enabled: !dev.roles[role]
+        }));
+      };
+      roles.appendChild(pill);
+    });
+
+    item.appendChild(roles);
+    container.appendChild(item);
+  });
+}
+
+function copyRoomLink() {
+  if (!myRoomCode) return;
+  var url = location.origin + '/?room=' + myRoomCode;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      var btn = document.querySelector('.room-code-bar .mini-btn');
+      if (btn) { btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = 'Copy Link'; }, 1500); }
+    });
+  }
+}
+
+// ============================================================================
+// Secondary Device Mode — ?room=CODE
+// ============================================================================
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var room = params.get('room');
+  if (!room) return;
+  // Don't activate if spectator or camera legacy mode
+  if (params.get('spectator') === '1' || params.get('camera') === '1') return;
+
+  isSecondaryDevice = true;
+  myRoomCode = room;
+
+  // Replace page with secondary device UI using safe DOM methods
+  while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+
+  var app = document.createElement('div');
+  app.className = 'secondary-app';
+
+  var header = document.createElement('div');
+  header.className = 'secondary-header';
+  var h2 = document.createElement('h2');
+  var pianoText = document.createTextNode('Piano');
+  var questSpan = document.createElement('span');
+  questSpan.style.color = 'var(--amber)';
+  questSpan.textContent = 'Quest';
+  h2.appendChild(pianoText);
+  h2.appendChild(questSpan);
+  header.appendChild(h2);
+  var roomLabel = document.createElement('div');
+  roomLabel.className = 'secondary-room-code';
+  var roomPrefix = document.createTextNode('Room: ');
+  var roomBold = document.createElement('b');
+  roomBold.textContent = room;
+  roomLabel.appendChild(roomPrefix);
+  roomLabel.appendChild(roomBold);
+  header.appendChild(roomLabel);
+  app.appendChild(header);
+
+  var statusEl = document.createElement('div');
+  statusEl.className = 'secondary-status';
+  statusEl.id = 'secondaryStatus';
+  statusEl.textContent = 'Connecting...';
+  app.appendChild(statusEl);
+
+  var rolesContainer = document.createElement('div');
+  rolesContainer.className = 'secondary-roles';
+  rolesContainer.id = 'secondaryRoles';
+
+  var roleConfigs = [
+    { key: 'mic', icon: '\uD83C\uDF99\uFE0F', name: 'MIC' },
+    { key: 'camera', icon: '\uD83D\uDCF7', name: 'CAM' },
+    { key: 'midi', icon: '\uD83C\uDFB9', name: 'MIDI' }
+  ];
+  roleConfigs.forEach(function(rc) {
+    var card = document.createElement('div');
+    card.className = 'secondary-role-card';
+    card.id = 'secRole_' + rc.key;
+    var iconEl = document.createElement('div');
+    iconEl.className = 'role-icon';
+    iconEl.textContent = rc.icon;
+    card.appendChild(iconEl);
+    var nameEl = document.createElement('div');
+    nameEl.className = 'role-name';
+    nameEl.textContent = rc.name;
+    card.appendChild(nameEl);
+    var statusLine = document.createElement('div');
+    statusLine.className = 'role-status';
+    statusLine.textContent = 'Inactive';
+    statusLine.id = 'secRoleStatus_' + rc.key;
+    card.appendChild(statusLine);
+    rolesContainer.appendChild(card);
+  });
+  app.appendChild(rolesContainer);
+
+  // Camera preview area (shown when camera role is active)
+  var camPreview = document.createElement('div');
+  camPreview.className = 'secondary-camera-preview';
+  camPreview.id = 'secondaryCamPreview';
+  camPreview.style.display = 'none';
+  var camVideo = document.createElement('video');
+  camVideo.autoplay = true;
+  camVideo.playsInline = true;
+  camVideo.muted = true;
+  camVideo.id = 'secondaryCamVideo';
+  camPreview.appendChild(camVideo);
+  app.appendChild(camPreview);
+
+  document.body.appendChild(app);
+
+  // Audio playback context for secondary (to hear agent)
+  var secPlaybackCtx = null;
+  var secNextPlayTime = 0;
+
+  // Hardware state
+  var secMediaStream = null;
+  var secAudioCtx = null;
+  var secProcessor = null;
+  var secVideoInterval = null;
+  var secMidiAccess = null;
+  var secMidiInput = null;
+
+  var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  var roleHint = params.get('role') || '';
+  var wsUrl = proto + '://' + location.host + '/ws/session?room=' + encodeURIComponent(room);
+  if (roleHint) wsUrl += '&role=' + encodeURIComponent(roleHint);
+  var secWs = new WebSocket(wsUrl);
+  ws = secWs;
+  secWs.binaryType = 'arraybuffer';
+
+  secWs.onopen = function() {
+    statusEl.textContent = 'Connected \u2014 waiting for role assignment';
+    statusEl.style.color = 'var(--green)';
+  };
+
+  secWs.onmessage = function(event) {
+    if (event.data instanceof ArrayBuffer) {
+      if (!secPlaybackCtx) secPlaybackCtx = new AudioContext({ sampleRate: 24000 });
+      var i16 = new Int16Array(event.data);
+      var f32 = new Float32Array(i16.length);
+      for (var i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
+      var buf = secPlaybackCtx.createBuffer(1, f32.length, 24000);
+      buf.getChannelData(0).set(f32);
+      var src = secPlaybackCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(secPlaybackCtx.destination);
+      var now = secPlaybackCtx.currentTime;
+      var startAt = Math.max(now + 0.01, secNextPlayTime);
+      src.start(startAt);
+      secNextPlayTime = startAt + buf.duration;
+      return;
+    }
+
+    var msg = JSON.parse(event.data);
+
+    if (msg.type === 'you_are_secondary') {
+      myDeviceId = msg.deviceId;
+      statusEl.textContent = 'Connected as ' + msg.deviceType;
+    } else if (msg.type === 'role_assigned') {
+      myRoles = msg.roles;
+      updateSecondaryRoles();
+    } else if (msg.type === 'device_list') {
+      deviceList = msg.devices || [];
+      for (var d = 0; d < deviceList.length; d++) {
+        if (deviceList[d].id === myDeviceId) {
+          myRoles = deviceList[d].roles;
+          updateSecondaryRoles();
+          break;
+        }
+      }
+    } else if (msg.type === 'room_closed' || msg.type === 'error') {
+      statusEl.textContent = msg.message || 'Room closed';
+      statusEl.style.color = 'var(--rose)';
+      stopSecondaryHardware();
+    }
+  };
+
+  secWs.onclose = function() {
+    statusEl.textContent = 'Disconnected';
+    statusEl.style.color = 'var(--rose)';
+    stopSecondaryHardware();
+  };
+
+  var prevRoles = { mic: false, camera: false, midi: false };
+
+  function updateSecondaryRoles() {
+    ['mic', 'camera', 'midi'].forEach(function(role) {
+      var card = document.getElementById('secRole_' + role);
+      var rstatus = document.getElementById('secRoleStatus_' + role);
+      if (!card || !rstatus) return;
+      if (myRoles[role]) {
+        card.className = 'secondary-role-card active';
+        rstatus.textContent = 'Active';
+      } else {
+        card.className = 'secondary-role-card';
+        rstatus.textContent = 'Inactive';
+      }
+    });
+
+    if (myRoles.mic && !prevRoles.mic) startSecondaryMic();
+    if (!myRoles.mic && prevRoles.mic) stopSecondaryMic();
+    if (myRoles.camera && !prevRoles.camera) startSecondaryCamera();
+    if (!myRoles.camera && prevRoles.camera) stopSecondaryCamera();
+    if (myRoles.midi && !prevRoles.midi) startSecondaryMidi();
+    if (!myRoles.midi && prevRoles.midi) stopSecondaryMidi();
+
+    prevRoles = { mic: myRoles.mic, camera: myRoles.camera, midi: myRoles.midi };
+
+    if (myRoles.mic || myRoles.camera || myRoles.midi) {
+      var active = [];
+      if (myRoles.mic) active.push('Microphone');
+      if (myRoles.camera) active.push('Camera');
+      if (myRoles.midi) active.push('MIDI');
+      statusEl.textContent = active.join(' + ') + ' active';
+    } else {
+      statusEl.textContent = 'Connected \u2014 waiting for role assignment';
+    }
+  }
+
+  function startSecondaryMic() {
+    navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }
+    }).then(function(stream) {
+      secMediaStream = stream;
+      secAudioCtx = new AudioContext();
+      var nativeRate = secAudioCtx.sampleRate;
+      var source = secAudioCtx.createMediaStreamSource(stream);
+      secProcessor = secAudioCtx.createScriptProcessor(4096, 1, 1);
+      source.connect(secProcessor);
+      secProcessor.connect(secAudioCtx.destination);
+      var ratio = nativeRate / 16000;
+      secProcessor.onaudioprocess = function(e) {
+        if (!secWs || secWs.readyState !== WebSocket.OPEN || !myRoles.mic) return;
+        var f32arr = e.inputBuffer.getChannelData(0);
+        var sum2 = 0;
+        for (var j = 0; j < f32arr.length; j++) sum2 += f32arr[j] * f32arr[j];
+        if (Math.sqrt(sum2 / f32arr.length) < 0.01) return;
+        var outLen = Math.floor(f32arr.length / ratio);
+        var pcm16 = new Int16Array(outLen);
+        for (var k = 0; k < outLen; k++) {
+          var srcIdx = Math.floor(k * ratio);
+          pcm16[k] = Math.max(-32768, Math.min(32767, Math.round(f32arr[srcIdx] * 32767)));
+        }
+        secWs.send(pcm16.buffer);
+      };
+    }).catch(function(err) {
+      statusEl.textContent = 'Mic error: ' + err.message;
+    });
+  }
+
+  function stopSecondaryMic() {
+    if (secProcessor) { secProcessor.disconnect(); secProcessor = null; }
+    if (secAudioCtx) { secAudioCtx.close(); secAudioCtx = null; }
+    if (secMediaStream) {
+      secMediaStream.getAudioTracks().forEach(function(t) { t.stop(); });
+      if (!myRoles.camera) { secMediaStream = null; }
+    }
+  }
+
+  function startSecondaryCamera() {
+    var video = document.getElementById('secondaryCamVideo');
+    var preview = document.getElementById('secondaryCamPreview');
+    navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: 'environment' }
+    }).then(function(stream) {
+      video.srcObject = stream;
+      if (preview) preview.style.display = '';
+      var canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 480;
+      var ctx = canvas.getContext('2d');
+      secVideoInterval = setInterval(function() {
+        if (!secWs || secWs.readyState !== WebSocket.OPEN || !myRoles.camera) return;
+        if (video.readyState < 2) return;
+        ctx.drawImage(video, 0, 0, 640, 480);
+        canvas.toBlob(function(blob) {
+          if (!blob || !secWs || secWs.readyState !== WebSocket.OPEN) return;
+          var reader = new FileReader();
+          reader.onloadend = function() {
+            if (!reader.result) return;
+            var b64 = reader.result.split(',')[1];
+            secWs.send(JSON.stringify({ type: 'video_frame', data: b64 }));
+          };
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg', 0.5);
+      }, 1000);
+    }).catch(function(err) {
+      statusEl.textContent = 'Camera error: ' + err.message;
+    });
+  }
+
+  function stopSecondaryCamera() {
+    if (secVideoInterval) { clearInterval(secVideoInterval); secVideoInterval = null; }
+    var video = document.getElementById('secondaryCamVideo');
+    var preview = document.getElementById('secondaryCamPreview');
+    if (video && video.srcObject) {
+      video.srcObject.getVideoTracks().forEach(function(t) { t.stop(); });
+      video.srcObject = null;
+    }
+    if (preview) preview.style.display = 'none';
+  }
+
+  function startSecondaryMidi() {
+    if (!navigator.requestMIDIAccess) {
+      statusEl.textContent = 'Web MIDI not supported on this device';
+      return;
+    }
+    navigator.requestMIDIAccess().then(function(access) {
+      secMidiAccess = access;
+      var inputs = Array.from(access.inputs.values());
+      if (inputs.length > 0) {
+        secMidiInput = inputs[0];
+        secMidiInput.onmidimessage = function(midiEvent) {
+          handleMidiMessage(midiEvent);
+        };
+        statusEl.textContent = 'MIDI: ' + (secMidiInput.name || 'Connected');
+      }
+    }).catch(function(err) {
+      statusEl.textContent = 'MIDI error: ' + err.message;
+    });
+  }
+
+  function stopSecondaryMidi() {
+    if (secMidiInput) { secMidiInput.onmidimessage = null; secMidiInput = null; }
+  }
+
+  function stopSecondaryHardware() {
+    stopSecondaryMic();
+    stopSecondaryCamera();
+    stopSecondaryMidi();
+  }
+})();
 
 // ============================================================================
 // Spectator Mode — ?spectator=1

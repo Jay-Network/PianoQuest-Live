@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-15
+
+### Added
+- Dynamic Device Role Management: any device connects to unified `/ws/session` endpoint
+  - First device becomes primary (creates Gemini session, shows full UI + Device Manager panel)
+  - Subsequent devices join as secondary with `?room=CODE` parameter
+  - Primary device gets Device Manager panel showing all connected devices with toggle pills
+  - Three exclusive roles per device: MIC, CAM, MIDI — toggled by primary, server-enforced
+  - Toggling a role on one device auto-disables it on all others (no overlap)
+  - Secondary devices show minimal role-indicator UI, activate hardware on role assignment
+  - Secondary mic: getUserMedia audio with energy gate, downsample to 16kHz PCM
+  - Secondary camera: rear-facing camera, 1fps JPEG frames to Gemini
+  - Secondary MIDI: Web MIDI API forwarding to Gemini + room devices
+  - All devices receive audio playback + output events from Gemini
+- Room code "Copy Link" button for easy device onboarding
+- Auto-detect device type from User-Agent (desktop/tablet/phone) with icons
+- Role hint via URL parameter: `?room=CODE&role=camera` auto-assigns role on connect
+- `room_closed` message to gracefully disconnect secondaries when primary leaves
+- Backwards compatible: `/ws/dialog`, `/ws/camera`, `/ws/midi`, `/ws/spectator` still work
+
 ## [1.3.1] - 2026-03-15
 
 ### Fixed
