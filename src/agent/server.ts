@@ -116,6 +116,27 @@ function broadcast(data: Buffer | string, binary = false) {
 }
 
 // =========================================================================
+// Room-based session sharing — remote camera sends frames to primary session
+// =========================================================================
+
+interface RoomSession {
+  sendRealtimeInput: (input: any) => void;
+}
+
+const rooms = new Map<string, RoomSession>();
+
+function generateRoomCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  const arr = new Uint8Array(4);
+  require("crypto").randomFillSync(arr);
+  for (let i = 0; i < 4; i++) {
+    code += chars[arr[i] % chars.length];
+  }
+  return code;
+}
+
+// =========================================================================
 // Express + WebSocket server
 // =========================================================================
 
@@ -124,6 +145,7 @@ export function createApp() {
   const server = createServer(app);
   const wssDialog = new WebSocketServer({ noServer: true });
   const wssSpectator = new WebSocketServer({ noServer: true });
+  const wssCamera = new WebSocketServer({ noServer: true });
 
   app.get("/health", (_req, res) => {
     res.json({
@@ -131,6 +153,7 @@ export function createApp() {
       service: APP_NAME,
       modes: ["storyteller"],
       spectators: spectators.size,
+      rooms: rooms.size,
     });
   });
 
@@ -150,6 +173,12 @@ export function createApp() {
       wssSpectator.handleUpgrade(request, socket, head, (ws) => {
         wssSpectator.emit("connection", ws, request);
       });
+    } else if (url.pathname === "/ws/camera") {
+      const room = url.searchParams.get("room") ?? "";
+      wssCamera.handleUpgrade(request, socket, head, (ws) => {
+        (ws as any)._room = room;
+        wssCamera.emit("connection", ws, request);
+      });
     } else {
       socket.destroy();
     }
@@ -168,6 +197,41 @@ export function createApp() {
     });
     ws.on("error", () => {
       spectators.delete(ws);
+    });
+  });
+
+  wssCamera.on("connection", (ws: WebSocket) => {
+    const room = (ws as any)._room as string;
+    const session = rooms.get(room);
+    if (!session) {
+      console.log(`[${APP_NAME}] Camera rejected — room "${room}" not found`);
+      ws.send(JSON.stringify({ type: "error", message: `Room "${room}" not found` }));
+      ws.close();
+      return;
+    }
+
+    console.log(`[${APP_NAME}] Remote camera connected to room "${room}"`);
+    ws.send(JSON.stringify({ type: "camera_connected", room }));
+
+    ws.on("message", (data: Buffer | string) => {
+      if (typeof data === "string") {
+        try {
+          const msg = JSON.parse(data);
+          if (msg.type === "video_frame" && msg.data) {
+            const frameBytes = Buffer.from(msg.data, "base64");
+            session.sendRealtimeInput({
+              media: {
+                data: frameBytes.toString("base64"),
+                mimeType: "image/jpeg",
+              },
+            });
+          }
+        } catch {}
+      }
+    });
+
+    ws.on("close", () => {
+      console.log(`[${APP_NAME}] Remote camera disconnected from room "${room}"`);
     });
   });
 
@@ -240,6 +304,7 @@ async function handleWebSocket(ws: WebSocket) {
 
   const client = new GoogleGenAI({ apiKey });
   const sessionId = randomHex(4);
+  const roomCode = generateRoomCode();
   let closed = false;
 
   // Per-session state
@@ -253,7 +318,7 @@ async function handleWebSocket(ws: WebSocket) {
   let turnHasUserSpeech = false;
   const pendingAudioChunks: Buffer[] = [];
 
-  console.log(`[${APP_NAME}] Client connected: ${sessionId}`);
+  console.log(`[${APP_NAME}] Client connected: ${sessionId}, room: ${roomCode}`);
 
   const liveConfig: Record<string, unknown> = {
     response_modalities: ["AUDIO"],
@@ -280,7 +345,11 @@ async function handleWebSocket(ws: WebSocket) {
       config: liveConfig as any,
       callbacks: {
         onopen: () => {
-          console.log(`[${APP_NAME}] Gemini Live session opened: ${sessionId}`);
+          console.log(`[${APP_NAME}] Gemini Live session opened: ${sessionId}, room: ${roomCode}`);
+          // Register room so remote cameras can join
+          rooms.set(roomCode, session);
+          // Send room code to primary client
+          ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
         },
         onmessage: (msg: any) => {
           if (closed) return;
@@ -526,7 +595,8 @@ async function handleWebSocket(ws: WebSocket) {
       ws.send(JSON.stringify({ type: "error", message: String(e) }));
     } catch {}
   } finally {
-    console.log(`[${APP_NAME}] Client disconnected: ${sessionId}`);
+    rooms.delete(roomCode);
+    console.log(`[${APP_NAME}] Client disconnected: ${sessionId}, room ${roomCode} removed`);
     try {
       ws.close();
     } catch {}

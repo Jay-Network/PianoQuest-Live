@@ -442,7 +442,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.1.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.2.0</div>
       </div>
       <div class="score-display" id="scoreDisplay">
         <div>
@@ -1565,6 +1565,10 @@ async function startSession() {
                      msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
                      msg.type === 'technique_report') {
             handleToolEvent(msg);
+          } else if (msg.type === 'room_code') {
+            var cameraUrl = location.origin + '/?camera=1&room=' + msg.room;
+            var label = document.getElementById('statusLabel');
+            if (label) label.textContent = 'Connected · Camera: ' + msg.room;
           }
         }
       };
@@ -2007,6 +2011,86 @@ updateCameraUi();
   specWs.onclose = function() {
     setStatus('disconnected');
   };
+})();
+
+// ============================================================================
+// Remote Camera Mode — ?camera=1&room=CODE
+// ============================================================================
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('camera') !== '1') return;
+  var room = params.get('room') || '';
+  if (!room) return;
+
+  // Replace page with minimal camera UI using safe DOM methods
+  while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+  document.body.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0c0c14;color:#e2e8f0;font-family:sans-serif';
+
+  var heading = document.createElement('h2');
+  heading.textContent = 'PianoQuest Camera';
+  heading.style.marginBottom = '8px';
+  document.body.appendChild(heading);
+
+  var statusEl = document.createElement('div');
+  statusEl.style.cssText = 'margin-bottom:16px;color:rgba(255,255,255,0.5)';
+  statusEl.textContent = 'Connecting to room ' + room + '...';
+  document.body.appendChild(statusEl);
+
+  var video = document.createElement('video');
+  video.autoplay = true;
+  video.playsInline = true;
+  video.muted = true;
+  video.style.cssText = 'width:90vw;max-width:640px;border-radius:12px;background:#000';
+  document.body.appendChild(video);
+
+  var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  var wsUrl = proto + '://' + location.host + '/ws/camera?room=' + encodeURIComponent(room);
+  var camWs = new WebSocket(wsUrl);
+
+  camWs.onopen = function() {
+    statusEl.textContent = 'Connected to room ' + room;
+    statusEl.style.color = '#86efac';
+    startCamera();
+  };
+
+  camWs.onmessage = function(event) {
+    try {
+      var msg = JSON.parse(event.data);
+      if (msg.type === 'error') {
+        statusEl.textContent = msg.message;
+        statusEl.style.color = '#fb7185';
+      }
+    } catch {}
+  };
+
+  camWs.onclose = function() {
+    statusEl.textContent = 'Disconnected';
+    statusEl.style.color = '#fb7185';
+  };
+
+  function startCamera() {
+    navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: 'environment' }
+    }).then(function(stream) {
+      video.srcObject = stream;
+      var canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 480;
+      var ctx = canvas.getContext('2d');
+
+      setInterval(function() {
+        if (camWs.readyState !== WebSocket.OPEN) return;
+        if (video.readyState < 2) return;
+        ctx.drawImage(video, 0, 0, 640, 480);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+        var base64 = dataUrl.split(',')[1];
+        camWs.send(JSON.stringify({ type: 'video_frame', data: base64 }));
+      }, 1000);
+    }).catch(function(err) {
+      statusEl.textContent = 'Camera error: ' + err.message;
+      statusEl.style.color = '#fb7185';
+    });
+  }
 })();
 </script>
 </body>

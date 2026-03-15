@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-15
+
+### Added
+- Remote camera mode: phone at piano sends camera frames to iPad's Gemini session
+  - `/ws/camera?room=CODE` WebSocket path for camera-only connections
+  - Room-based session sharing: primary client gets a 4-char room code on connect
+  - `?camera=1&room=CODE` on index.html: minimal camera viewfinder UI, rear-facing camera, 1fps JPEG
+  - Room code displayed in primary client status bar
+- Health endpoint shows active room count
+
 ## [1.1.0] - 2026-03-14
 
 ### Added
