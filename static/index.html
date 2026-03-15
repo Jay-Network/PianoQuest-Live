@@ -406,9 +406,8 @@
       <span class="bpm-val" id="bpmVal" style="font-size:10px;color:var(--text3);min-width:20px;">90</span>
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
-      <button class="primary" id="btnStart" onclick="startSession()">Start Session</button>
+      <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
       <button class="secondary" id="btnCamera" onclick="toggleCamera()" disabled style="display:none">Camera On</button>
-      <button class="danger" id="btnStop" onclick="stopSession()" disabled>Stop</button>
     </div>
   </div>
 
@@ -652,6 +651,9 @@ bpmSlider.addEventListener('input', function() { bpmVal.textContent = bpmSlider.
 
 document.getElementById('midiInputSelect').addEventListener('change', function(e) {
   setMidiInput(e.target.value);
+});
+document.getElementById('midiInputSelect').addEventListener('focus', function() {
+  refreshMidiInputs();
 });
 
 // ============================================================================
@@ -1226,9 +1228,16 @@ function sendMidiSnapshot(force) {
 // ============================================================================
 // Session management
 // ============================================================================
+var sessionActive = false;
+function toggleSession() {
+  if (sessionActive) { stopSession(); return; }
+  startSession();
+}
 async function startSession() {
-  document.getElementById('btnStart').disabled = true;
-  document.getElementById('btnStop').disabled = false;
+  sessionActive = true;
+  var btn = document.getElementById('btnStart');
+  btn.textContent = 'Stop Session';
+  btn.className = 'danger';
   setStatus('connecting');
 
   try {
@@ -1402,10 +1411,15 @@ async function startSession() {
   } catch (err) {
     console.error('Failed to start session:', err);
     setStatus('error');
-    document.getElementById('btnStart').disabled = false;
-    document.getElementById('btnCamera').disabled = false;
-    document.getElementById('btnStop').disabled = true;
+    resetStartButton();
   }
+}
+
+function resetStartButton() {
+  sessionActive = false;
+  var btn = document.getElementById('btnStart');
+  btn.textContent = 'Start Session';
+  btn.className = 'primary';
 }
 
 function stopSession() {
@@ -1432,9 +1446,8 @@ function stopSession() {
   lastSentCameraState = '';
   clearHandOverlay();
   updateCameraUi();
-  document.getElementById('btnStart').disabled = false;
+  resetStartButton();
   document.getElementById('btnCamera').disabled = true;
-  document.getElementById('btnStop').disabled = true;
   resetMidiState();
   setStatus('disconnected');
 }
