@@ -2088,17 +2088,17 @@ function drawKeyboard() {
   ctx.fillRect(0, 0, W, dynamicsH);
 
   // Dynamics guide lines
-  ctx.font = '9px DM Sans, sans-serif';
+  ctx.font = 'bold 12px DM Sans, sans-serif';
   DYNAMICS_LABELS.forEach(function(dl) {
     var y = keyTop - (dl.vel / 127) * dynamicsH;
-    ctx.strokeStyle = dynamicsColor(dl.vel, 0.28);
-    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = dynamicsColor(dl.vel, 0.5);
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(W, y);
     ctx.stroke();
-    ctx.fillStyle = dynamicsColor(dl.vel, 0.4);
-    ctx.fillText(dl.label, 3, y - 2);
+    ctx.fillStyle = dynamicsColor(dl.vel, 0.7);
+    ctx.fillText(dl.label, 3, y - 3);
   });
 
   // Dynamic bars — grow upward from keyboard top
