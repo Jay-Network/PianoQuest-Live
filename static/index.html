@@ -49,27 +49,6 @@
   .header h1 span { color: var(--amber); }
   .header-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.04em; }
 
-  /* Progress Score */
-  .score-display {
-    display: flex; align-items: center; gap: 12px;
-    padding: 6px 16px;
-    border-radius: 10px;
-    border: 1px solid rgba(251,191,36,0.2);
-    background: rgba(251,191,36,0.05);
-  }
-  .score-number {
-    font-size: 32px; font-weight: 800; color: var(--amber);
-    font-variant-numeric: tabular-nums;
-    min-width: 56px; text-align: right;
-    line-height: 1;
-    transition: color 0.5s;
-  }
-  .score-number.high { color: var(--green); }
-  .score-meta { font-size: 10px; color: var(--text3); line-height: 1.4; }
-  .score-trend { font-size: 16px; margin-left: 2px; }
-  .score-trend.up { color: var(--green); }
-  .score-trend.down { color: var(--rose); }
-
   .controls { display: flex; gap: 10px; align-items: center; }
   .status-dot {
     width: 8px; height: 8px; border-radius: 50%; background: #444;
@@ -96,51 +75,6 @@
     background: rgba(251,113,133,0.1); border-color: rgba(251,113,133,0.25); color: var(--rose);
   }
   button:disabled { opacity: 0.4; cursor: default; }
-
-  /* Quest Journey Map */
-  .quest-map {
-    display: flex; align-items: center; gap: 0;
-    padding: 8px 16px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    overflow: hidden;
-  }
-  .quest-node {
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    min-width: 80px; position: relative; z-index: 1;
-  }
-  .quest-node .node-dot {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.15);
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; transition: all 0.5s;
-  }
-  .quest-node.completed .node-dot {
-    border-color: var(--green); background: rgba(134,239,172,0.15);
-    box-shadow: 0 0 8px rgba(134,239,172,0.3);
-  }
-  .quest-node.active .node-dot {
-    border-color: var(--amber); background: rgba(251,191,36,0.15);
-    box-shadow: 0 0 10px rgba(251,191,36,0.3);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  .quest-node .node-label {
-    font-size: 9px; color: var(--text3); letter-spacing: 0.03em;
-    text-align: center; white-space: nowrap;
-  }
-  .quest-node.active .node-label { color: var(--amber); font-weight: 600; }
-  .quest-node.completed .node-label { color: var(--green); }
-  .quest-line {
-    flex: 1; height: 2px; background: rgba(255,255,255,0.06); min-width: 20px;
-    position: relative;
-  }
-  .quest-line.completed { background: var(--green); }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(251,191,36,0.3); }
-    50% { box-shadow: 0 0 20px rgba(251,191,36,0.5); }
-  }
 
   /* Main grid */
   .main {
@@ -237,89 +171,8 @@
     color: var(--gemini); margin-bottom: 4px;
   }
 
-  /* Achievement Badges */
-  .badges-area {
-    padding: 10px 12px;
-    display: flex; flex-wrap: wrap; gap: 6px;
-    min-height: 40px;
-  }
-  .badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px; border-radius: 12px; font-size: 10px;
-    border: 1px solid rgba(251,191,36,0.25);
-    background: rgba(251,191,36,0.08);
-    color: var(--amber);
-    animation: badgeIn 0.5s ease-out;
-  }
-  @keyframes badgeIn {
-    from { transform: scale(0.5); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .badges-empty { font-size: 10px; color: var(--text3); font-style: italic; }
-
   /* Right column */
   .right-col { display: flex; flex-direction: column; gap: 12px; }
-
-  /* Story Scene Card */
-  .scene-card {
-    position: relative;
-    min-height: 120px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    transition: all 0.8s ease;
-  }
-  .scene-bg {
-    position: absolute; inset: 0;
-    transition: background 1s ease;
-  }
-  .scene-content {
-    position: relative; z-index: 1;
-    padding: 16px 20px;
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  .scene-chapter {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.4); text-transform: uppercase;
-  }
-  .scene-title {
-    font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
-    transition: color 0.8s;
-  }
-  .scene-desc {
-    font-size: 12px; color: var(--text2); max-width: 500px;
-    line-height: 1.5;
-  }
-  .scene-icon {
-    position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
-    font-size: 56px; opacity: 0.12;
-  }
-  .scene-card[data-scene="default"] .scene-bg { background: linear-gradient(135deg, #1a1a2e, #12121e); }
-  .scene-card[data-scene="default"] .scene-title { color: var(--text2); }
-  .scene-card[data-scene="enchanted_forest"] .scene-bg { background: linear-gradient(135deg, #0d2818, #1a3d2e, #0a1f12); }
-  .scene-card[data-scene="enchanted_forest"] { border-color: rgba(134,239,172,0.2); }
-  .scene-card[data-scene="enchanted_forest"] .scene-title { color: var(--green); }
-  .scene-card[data-scene="rhythm_dragon"] .scene-bg { background: linear-gradient(135deg, #3a1224, #4a1a2e, #2d0a18); }
-  .scene-card[data-scene="rhythm_dragon"] { border-color: rgba(251,113,133,0.25); }
-  .scene-card[data-scene="rhythm_dragon"] .scene-title { color: var(--rose); }
-  .scene-card[data-scene="crystal_cave"] .scene-bg { background: linear-gradient(135deg, #1a1a3e, #2d1f4e, #12122e); }
-  .scene-card[data-scene="crystal_cave"] { border-color: rgba(168,139,250,0.25); }
-  .scene-card[data-scene="crystal_cave"] .scene-title { color: var(--purple); }
-  .scene-card[data-scene="technique_tower"] .scene-bg { background: linear-gradient(135deg, #1e3a5f, #162d4a, #0f2035); }
-  .scene-card[data-scene="technique_tower"] { border-color: rgba(147,197,253,0.2); }
-  .scene-card[data-scene="technique_tower"] .scene-title { color: var(--blue); }
-  .scene-card[data-scene="harmony_garden"] .scene-bg { background: linear-gradient(135deg, #2a3518, #3a4a18, #1a2510); }
-  .scene-card[data-scene="harmony_garden"] { border-color: rgba(190,230,80,0.2); }
-  .scene-card[data-scene="harmony_garden"] .scene-title { color: #bef050; }
-  .scene-card[data-scene="victory_hall"] .scene-bg { background: linear-gradient(135deg, #3a2a12, #4a3518, #2d1f0a); }
-  .scene-card[data-scene="victory_hall"] { border-color: rgba(251,191,36,0.3); }
-  .scene-card[data-scene="victory_hall"] .scene-title { color: var(--amber); }
-  .scene-card[data-scene="shadow_passage"] .scene-bg { background: linear-gradient(135deg, #0a0a12, #14141e, #08080e); }
-  .scene-card[data-scene="shadow_passage"] { border-color: rgba(255,255,255,0.06); }
-  .scene-card[data-scene="shadow_passage"] .scene-title { color: rgba(255,255,255,0.4); }
-  .scene-card[data-scene="sunrise_peak"] .scene-bg { background: linear-gradient(135deg, #4a2810, #5a3818, #3a1a08); }
-  .scene-card[data-scene="sunrise_peak"] { border-color: rgba(251,146,60,0.25); }
-  .scene-card[data-scene="sunrise_peak"] .scene-title { color: #fb923c; }
 
   /* Piano MIDI stack */
   .midi-stack { display: flex; flex-direction: column; gap: 0; }
@@ -408,21 +261,6 @@
   .technique-suggestion { font-size: 11px; color: var(--green); margin-top: 3px; padding-left: 2px; }
   @keyframes techFadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Achievement popup */
-  .achievement-popup {
-    position: fixed; top: 20px; right: 20px; z-index: 100;
-    padding: 12px 20px; border-radius: 12px;
-    background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3);
-    backdrop-filter: blur(12px);
-    animation: achieveSlide 0.5s ease-out, achieveFade 0.5s 2.5s ease-in forwards;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .achievement-popup .ach-icon { font-size: 24px; }
-  .achievement-popup .ach-name { color: var(--amber); font-weight: 700; font-size: 12px; }
-  .achievement-popup .ach-sub { color: var(--text2); font-size: 10px; }
-  @keyframes achieveSlide { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes achieveFade { to { opacity: 0; transform: translateY(-10px); } }
-
   @media (max-width: 900px) {
     .main { grid-template-columns: 1fr; }
     .quest-map { overflow-x: auto; }
@@ -433,49 +271,34 @@
     }
   }
 
-  /* Device Manager */
-  .device-manager-panel { }
-  .device-manager-content { padding: 8px 10px; }
-  .device-list-items { display: flex; flex-direction: column; gap: 6px; }
+  /* Devices panel */
+  .devices-content { padding: 8px 10px; }
+  .device-list-items { display: flex; flex-direction: column; gap: 4px; }
   .device-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 6px 8px; border-radius: 8px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 6px; border-radius: 6px;
+    font-size: 11px; color: var(--text2);
   }
-  .device-item.is-primary {
-    border-color: rgba(251,191,36,0.2);
-    background: rgba(251,191,36,0.04);
+  .device-icon { flex-shrink: 0; }
+  .device-name { flex: 1; }
+  .device-roles-tags { display: flex; gap: 3px; }
+  .role-tag {
+    padding: 1px 5px; border-radius: 4px; font-size: 8px; font-weight: 700;
+    letter-spacing: 0.04em;
   }
-  .device-icon { font-size: 16px; flex-shrink: 0; }
-  .device-info { flex: 1; min-width: 0; }
-  .device-name { font-size: 11px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .device-type-label { font-size: 9px; color: var(--text3); }
-  .device-roles { display: flex; gap: 3px; flex-shrink: 0; }
-  .role-pill {
-    padding: 2px 6px; border-radius: 6px; font-size: 9px; font-weight: 700;
-    letter-spacing: 0.04em; cursor: pointer; border: 1px solid transparent;
-    transition: all 0.2s; user-select: none;
-    background: rgba(255,255,255,0.04); color: var(--text3);
-  }
-  .role-pill:hover { background: rgba(255,255,255,0.08); }
-  .role-pill.active {
-    background: rgba(134,239,172,0.15); border-color: rgba(134,239,172,0.3);
-    color: var(--green);
-  }
-  .role-pill.active.mic-pill { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.25); color: var(--amber); }
-  .role-pill.active.cam-pill { background: rgba(251,113,133,0.12); border-color: rgba(251,113,133,0.25); color: var(--rose); }
-  .role-pill.active.midi-pill { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.25); color: var(--purple); }
-  .room-code-bar {
+  .role-tag.mic { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .role-tag.cam { background: rgba(251,113,133,0.15); color: var(--rose); }
+  .role-tag.midi { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .room-bar {
     display: flex; align-items: center; gap: 8px;
     padding: 6px 10px; border-top: 1px solid var(--border);
     font-size: 10px; color: var(--text3);
   }
-  .room-code-value {
+  .room-code {
     font-weight: 700; font-size: 13px; color: var(--amber);
     letter-spacing: 0.08em; font-family: monospace;
   }
-  .room-code-bar .mini-btn { margin-left: auto; padding: 3px 8px; font-size: 9px; }
+  .room-bar .mini-btn { margin-left: auto; padding: 3px 8px; font-size: 9px; }
   .device-count { margin-left: auto; font-weight: 400; color: var(--text3); }
 
   /* Secondary device mode */
@@ -530,15 +353,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.4.0</div>
-      </div>
-      <div class="score-display" id="scoreDisplay">
-        <div>
-          <div class="score-number" id="scoreNumber">--</div>
-        </div>
-        <div class="score-meta">
-          TECHNIQUE<br>SCORE <span class="score-trend" id="scoreTrend"></span>
-        </div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.5.0</div>
       </div>
     </div>
     <div class="controls">
@@ -550,49 +365,21 @@
     </div>
   </div>
 
-  <!-- Quest Journey Map -->
-  <div class="quest-map" id="questMap">
-    <div class="quest-node active" id="qn-opening">
-      <div class="node-dot">&#x1F3B5;</div>
-      <div class="node-label">Opening</div>
-    </div>
-    <div class="quest-line" id="ql-1"></div>
-    <div class="quest-node" id="qn-assessment">
-      <div class="node-dot">&#x1F50D;</div>
-      <div class="node-label">Assessment</div>
-    </div>
-    <div class="quest-line" id="ql-2"></div>
-    <div class="quest-node" id="qn-challenge">
-      <div class="node-dot">&#x2694;&#xFE0F;</div>
-      <div class="node-label">Challenge</div>
-    </div>
-    <div class="quest-line" id="ql-3"></div>
-    <div class="quest-node" id="qn-mastery">
-      <div class="node-dot">&#x2B50;</div>
-      <div class="node-label">Mastery</div>
-    </div>
-    <div class="quest-line" id="ql-4"></div>
-    <div class="quest-node" id="qn-celebration">
-      <div class="node-dot">&#x1F3C6;</div>
-      <div class="node-label">Celebration</div>
-    </div>
-  </div>
-
   <!-- Main content -->
   <div class="main">
 
     <!-- Left column: Camera + Coaching + Badges -->
     <div class="left-col">
-      <div class="panel device-manager-panel" id="deviceManagerPanel" style="display:none">
+      <div class="panel" id="deviceManagerPanel" style="display:none">
         <div class="panel-header">
-          <div class="dot" style="background:var(--green)"></div>DEVICE MANAGER
-          <span class="device-count" id="deviceCount">1 device</span>
+          <div class="dot" style="background:var(--green)"></div>DEVICES
+          <span class="device-count" id="deviceCount">1</span>
         </div>
-        <div class="device-manager-content">
+        <div class="devices-content">
           <div class="device-list-items" id="deviceListItems"></div>
         </div>
-        <div class="room-code-bar">
-          Room: <span class="room-code-value" id="roomCodeDisplay">----</span>
+        <div class="room-bar">
+          Room: <span class="room-code" id="roomCodeDisplay">----</span>
           <button class="mini-btn" type="button" onclick="copyRoomLink()">Copy Link</button>
         </div>
       </div>
@@ -638,29 +425,10 @@
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-header">
-          <div class="dot" style="background:var(--amber)"></div>ACHIEVEMENTS
-        </div>
-        <div class="badges-area" id="badgesArea">
-          <div class="badges-empty">No badges yet</div>
-        </div>
-      </div>
     </div>
 
     <!-- Right column: Scene + MIDI UI -->
     <div class="right-col">
-
-      <!-- Story Scene Card -->
-      <div class="scene-card" id="sceneCard" data-scene="default">
-        <div class="scene-bg"></div>
-        <div class="scene-content">
-          <div class="scene-chapter" id="sceneChapter">YOUR QUEST AWAITS</div>
-          <div class="scene-title" id="sceneTitle">The Musical Journey Begins</div>
-          <div class="scene-desc" id="sceneDesc">Start a session and play piano to begin your quest. The AI narrator will guide your journey.</div>
-        </div>
-        <div class="scene-icon" id="sceneIcon">&#x1F3B9;</div>
-      </div>
 
       <div class="midi-stack">
         <div class="panel midi-panel">
@@ -750,12 +518,7 @@ const noteHistory = [];
 const recentMidiNotes = [];
 let pedalDown = false;
 
-let scoreHistory = [];
 let currentScore = 0;
-let currentScene = 'default';
-let questPhase = 0;
-let earnedBadges = new Set();
-let evenStreakCount = 0;
 
 const TOTAL_KEYS = 88;
 const FIRST_MIDI = 21;
@@ -899,89 +662,20 @@ function darkenedColor(velocity, factor, alpha) {
   return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
 }
 
-var SCENES = {
-  enchanted_forest: {
-    keywords: ['enchanted forest', 'forest', 'woods', 'trees', 'nature', 'garden path'],
-    chapter: 'THE ENCHANTED FOREST', title: 'Into the Musical Woods',
-    desc: 'Gentle melodies echo through ancient trees. Let your fingers find the path.',
-    icon: '\uD83C\uDF32'
-  },
-  rhythm_dragon: {
-    keywords: ['rhythm dragon', 'dragon', 'battle', 'fight', 'conquer', 'beast'],
-    chapter: 'THE RHYTHM DRAGON', title: 'Face the Beat',
-    desc: 'A fearsome challenge of timing and precision. Keep your rhythm steady!',
-    icon: '\uD83D\uDC09'
-  },
-  crystal_cave: {
-    keywords: ['crystal cave', 'cave', 'crystal', 'echo', 'resonance', 'chamber'],
-    chapter: 'THE CRYSTAL CAVE', title: 'Echoes of Resonance',
-    desc: 'Every note rings pure in this chamber. Listen to the clarity of each tone.',
-    icon: '\uD83D\uDC8E'
-  },
-  technique_tower: {
-    keywords: ['technique tower', 'tower', 'climb', 'ascend', 'skill', 'precision'],
-    chapter: 'THE TECHNIQUE TOWER', title: 'Ascending with Skill',
-    desc: 'Each floor demands more precise technique. Curve those fingers!',
-    icon: '\uD83C\uDFF0'
-  },
-  harmony_garden: {
-    keywords: ['harmony garden', 'harmony', 'chord', 'triad', 'together', 'blend', 'uniform', 'even'],
-    chapter: 'THE HARMONY GARDEN', title: 'Where Notes Bloom Together',
-    desc: 'In this garden, every voice in a chord must sing equally. Find the balance.',
-    icon: '\uD83C\uDF3A'
-  },
-  victory_hall: {
-    keywords: ['victory', 'celebration', 'congratulations', 'champion', 'mastered', 'conquered', 'well done', 'amazing', 'brilliant'],
-    chapter: 'THE VICTORY HALL', title: 'A Quest Fulfilled',
-    desc: 'Your musical journey reaches its triumphant conclusion!',
-    icon: '\uD83C\uDFC6'
-  },
-  shadow_passage: {
-    keywords: ['shadow', 'dark', 'minor', 'mysterious', 'eerie', 'struggle'],
-    chapter: 'THE SHADOW PASSAGE', title: 'Through the Darkness',
-    desc: 'The passage narrows. Play through the challenge \u2014 light awaits beyond.',
-    icon: '\uD83C\uDF11'
-  },
-  sunrise_peak: {
-    keywords: ['sunrise', 'peak', 'bright', 'major', 'joyful', 'warm', 'breakthrough', 'improvement', 'better', 'progress'],
-    chapter: 'SUNRISE PEAK', title: 'The Light of Progress',
-    desc: 'Dawn breaks over the mountain. Your improvement shines through every note.',
-    icon: '\uD83C\uDF05'
-  }
-};
-
-var ACHIEVEMENTS = {
-  first_note:       { icon: '\uD83C\uDFB5', name: 'First Note',       desc: 'Started your musical quest' },
-  even_triad:       { icon: '\uD83C\uDFB6', name: 'Resonant Triad',   desc: 'Played an even chord' },
-  steady_pulse:     { icon: '\u2764\uFE0F', name: 'Steady Pulse',     desc: 'Maintained consistent rhythm' },
-  singing_legato:   { icon: '\uD83C\uDFB6', name: 'Singing Legato',   desc: 'Smooth connected playing' },
-  dragon_slayer:    { icon: '\u2694\uFE0F', name: 'Dragon Slayer',    desc: 'Conquered a rhythm challenge' },
-  technique_master: { icon: '\uD83C\uDF1F', name: 'Technique Master', desc: 'Excellent hand position' },
-  chapter_complete: { icon: '\uD83D\uDCD6', name: 'Chapter Complete', desc: 'Finished a story chapter' }
-};
-
-
 // ============================================================================
-// Tool-driven events — Gemini calls ADK tools which push events via WebSocket
-// No keyword matching — the agent DECIDES when to change scenes/award badges
+// Tool-driven events — coaching focus + technique reports
 // ============================================================================
 function handleToolEvent(msg) {
-  if (msg.type === 'story_scene') {
-    setScene(msg.scene_id);
-  } else if (msg.type === 'achievement') {
-    awardBadge(msg.badge_id);
-  } else if (msg.type === 'coaching_focus') {
-    setCoachingFocus(msg.text);
-  } else if (msg.type === 'quest_advance') {
-    advanceQuest(msg.phase);
+  if (msg.type === 'coaching_focus') {
+    document.getElementById('coachingText').textContent = msg.text;
   } else if (msg.type === 'technique_report') {
     showTechniqueReport(msg);
   }
+  // scene, badge, quest events silently ignored (gamification stripped for now)
 }
 
 function showTechniqueReport(msg) {
   var panel = document.getElementById('techniquePanel');
-  // Clear placeholder text on first report
   if (!panel.querySelector('.technique-entry')) {
     panel.textContent = '';
   }
@@ -1022,144 +716,9 @@ function showTechniqueReport(msg) {
   sugEl.textContent = msg.suggestion;
   entry.appendChild(sugEl);
 
-  // Newest at top, max 5 entries
   panel.insertBefore(entry, panel.firstChild);
   while (panel.children.length > 5) {
     panel.removeChild(panel.lastChild);
-  }
-}
-
-// ============================================================================
-// UI Updates for interleaved output features
-// ============================================================================
-function setScene(sceneId) {
-  currentScene = sceneId;
-  var scene = SCENES[sceneId];
-  if (!scene) return;
-  document.getElementById('sceneCard').setAttribute('data-scene', sceneId);
-  document.getElementById('sceneChapter').textContent = scene.chapter;
-  document.getElementById('sceneTitle').textContent = scene.title;
-  document.getElementById('sceneDesc').textContent = scene.desc;
-  document.getElementById('sceneIcon').textContent = scene.icon;
-}
-
-function setCoachingFocus(text) {
-  document.getElementById('coachingText').textContent = text;
-}
-
-function awardBadge(badgeId) {
-  if (earnedBadges.has(badgeId)) return;
-  earnedBadges.add(badgeId);
-  var info = ACHIEVEMENTS[badgeId];
-  if (!info) return;
-
-  // Add to badge shelf
-  var area = document.getElementById('badgesArea');
-  var empty = area.querySelector('.badges-empty');
-  if (empty) empty.remove();
-  var badge = document.createElement('div');
-  badge.className = 'badge';
-  badge.textContent = info.icon + ' ' + info.name;
-  area.appendChild(badge);
-
-  // Show popup notification
-  var popup = document.createElement('div');
-  popup.className = 'achievement-popup';
-  var iconEl = document.createElement('div');
-  iconEl.className = 'ach-icon';
-  iconEl.textContent = info.icon;
-  var textEl = document.createElement('div');
-  var nameEl = document.createElement('div');
-  nameEl.className = 'ach-name';
-  nameEl.textContent = 'Achievement Unlocked: ' + info.name;
-  var subEl = document.createElement('div');
-  subEl.className = 'ach-sub';
-  subEl.textContent = info.desc;
-  textEl.appendChild(nameEl);
-  textEl.appendChild(subEl);
-  popup.appendChild(iconEl);
-  popup.appendChild(textEl);
-  document.body.appendChild(popup);
-  setTimeout(function() { popup.remove(); }, 3500);
-}
-
-function advanceQuest(phase) {
-  if (phase <= questPhase) return;
-  questPhase = phase;
-  var nodeIds = ['qn-opening', 'qn-assessment', 'qn-challenge', 'qn-mastery', 'qn-celebration'];
-  var lineIds = ['ql-1', 'ql-2', 'ql-3', 'ql-4'];
-  for (var i = 0; i < nodeIds.length; i++) {
-    var node = document.getElementById(nodeIds[i]);
-    node.className = 'quest-node';
-    if (i < phase) node.classList.add('completed');
-    else if (i === phase) node.classList.add('active');
-  }
-  for (var j = 0; j < lineIds.length; j++) {
-    var line = document.getElementById(lineIds[j]);
-    line.className = 'quest-line';
-    if (j < phase) line.classList.add('completed');
-  }
-  if (phase >= 1 && !earnedBadges.has('first_note')) awardBadge('first_note');
-}
-
-function updateScore() {
-  var nowMs = Date.now();
-  var recentHistory = noteHistory.filter(function(n) { return nowMs - n.startMs < 8000; });
-  if (recentHistory.length === 0) return;
-
-  var recentVelocities = recentHistory.slice(-12).map(function(n) { return n.velocity; });
-  var mean = recentVelocities.reduce(function(a, b) { return a + b; }, 0) / recentVelocities.length;
-  var variance = recentVelocities.reduce(function(a, v) { return a + Math.pow(v - mean, 2); }, 0) / recentVelocities.length;
-  var deviation = Math.sqrt(variance);
-  var evennessScore = Math.max(0, Math.min(100, 100 - deviation * 1.5));
-  if (recentVelocities.length >= 12 && deviation < 8) evenStreakCount += 1;
-  else evenStreakCount = 0;
-  if (evenStreakCount >= 3 && !earnedBadges.has('even_triad')) {
-    awardBadge('even_triad');
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'text',
-        content: '[System: user achieved even_triad — dynamics evenness confirmed by 3 consecutive low-deviation chords]'
-      }));
-    }
-  }
-
-  var bpm = parseInt(bpmSlider.value, 10) || 90;
-  var beatIntervalMs = 60000 / bpm;
-  var recentOnsets = onsets.filter(function(t) { return nowMs - t < 10000; });
-  var rhythmScore = 60;
-  if (recentOnsets.length >= 3) {
-    var tolerance = beatIntervalMs * 0.15;
-    var onBeat = 0;
-    for (var r = 0; r < recentOnsets.length; r++) {
-      var nearest = Math.round(recentOnsets[r] / beatIntervalMs) * beatIntervalMs;
-      if (Math.abs(recentOnsets[r] - nearest) < tolerance) onBeat++;
-    }
-    rhythmScore = (onBeat / recentOnsets.length) * 100;
-  }
-
-  var raw = evennessScore * 0.65 + rhythmScore * 0.35;
-  scoreHistory.push(raw);
-  if (scoreHistory.length > 60) scoreHistory.shift();
-
-  var slice = scoreHistory.slice(-10);
-  var smoothed = slice.reduce(function(a, b) { return a + b; }, 0) / slice.length;
-  currentScore = Math.round(smoothed);
-
-  var el = document.getElementById('scoreNumber');
-  el.textContent = currentScore;
-  el.className = 'score-number' + (currentScore >= 70 ? ' high' : '');
-
-  var trend = document.getElementById('scoreTrend');
-  if (scoreHistory.length > 10) {
-    var oldSlice = scoreHistory.slice(-20, -10);
-    if (oldSlice.length > 0) {
-      var oldAvg = oldSlice.reduce(function(a, b) { return a + b; }, 0) / oldSlice.length;
-      var newAvg = smoothed;
-      if (newAvg > oldAvg + 3) { trend.textContent = '\u2191'; trend.className = 'score-trend up'; }
-      else if (newAvg < oldAvg - 3) { trend.textContent = '\u2193'; trend.className = 'score-trend down'; }
-      else { trend.textContent = ''; }
-    }
   }
 }
 
@@ -1636,12 +1195,7 @@ async function startSession() {
         if (!isReconnect) {
           sessionStartTime = Date.now();
           resetMidiState();
-          scoreHistory = [];
           currentScore = 0;
-          questPhase = 0;
-          earnedBadges.clear();
-          document.getElementById('scoreNumber').textContent = '--';
-          document.getElementById('scoreTrend').textContent = '';
         }
         ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
         sendCameraState();
@@ -1798,7 +1352,6 @@ function queueAudio(arrayBuf) {
 // ============================================================================
 // Visualization loop
 // ============================================================================
-var scoreTimer = 0;
 function drawLoop() {
   if (!sessionActive) return;
   processHandTracking();
@@ -1806,10 +1359,6 @@ function drawLoop() {
   drawKeyboard();
   drawHandOverlay();
   updateLevelMeter();
-  scoreTimer++;
-  if (scoreTimer % 12 === 0) {
-    updateScore();
-  }
   animFrame = requestAnimationFrame(drawLoop);
 }
 
@@ -2098,51 +1647,29 @@ function renderDeviceList() {
   if (!container) return;
   container.textContent = '';
   var countEl = document.getElementById('deviceCount');
-  if (countEl) countEl.textContent = deviceList.length + (deviceList.length === 1 ? ' device' : ' devices');
+  if (countEl) countEl.textContent = String(deviceList.length);
 
   deviceList.forEach(function(dev) {
     var item = document.createElement('div');
-    item.className = 'device-item' + (dev.isPrimary ? ' is-primary' : '');
+    item.className = 'device-item';
 
     var icon = document.createElement('span');
     icon.className = 'device-icon';
     icon.textContent = dev.deviceType === 'desktop' ? '\uD83D\uDCBB' : dev.deviceType === 'tablet' ? '\uD83D\uDCF1' : dev.deviceType === 'phone' ? '\uD83D\uDCF7' : '\uD83D\uDD32';
     item.appendChild(icon);
 
-    var info = document.createElement('div');
-    info.className = 'device-info';
-    var nameEl = document.createElement('div');
+    var nameEl = document.createElement('span');
     nameEl.className = 'device-name';
     nameEl.textContent = dev.name;
-    info.appendChild(nameEl);
-    var typeEl = document.createElement('div');
-    typeEl.className = 'device-type-label';
-    typeEl.textContent = dev.deviceType;
-    info.appendChild(typeEl);
-    item.appendChild(info);
+    item.appendChild(nameEl);
 
-    var roles = document.createElement('div');
-    roles.className = 'device-roles';
+    var tags = document.createElement('span');
+    tags.className = 'device-roles-tags';
+    if (dev.roles.mic) { var t = document.createElement('span'); t.className = 'role-tag mic'; t.textContent = 'MIC'; tags.appendChild(t); }
+    if (dev.roles.camera) { var t = document.createElement('span'); t.className = 'role-tag cam'; t.textContent = 'CAM'; tags.appendChild(t); }
+    if (dev.roles.midi) { var t = document.createElement('span'); t.className = 'role-tag midi'; t.textContent = 'MIDI'; tags.appendChild(t); }
+    item.appendChild(tags);
 
-    ['mic', 'camera', 'midi'].forEach(function(role) {
-      var pill = document.createElement('span');
-      var label = role === 'mic' ? 'MIC' : role === 'camera' ? 'CAM' : 'MIDI';
-      var pillClass = role === 'mic' ? 'mic-pill' : role === 'camera' ? 'cam-pill' : 'midi-pill';
-      pill.className = 'role-pill ' + pillClass + (dev.roles[role] ? ' active' : '');
-      pill.textContent = label;
-      pill.onclick = function() {
-        if (!isPrimaryDevice || !ws || ws.readyState !== WebSocket.OPEN) return;
-        ws.send(JSON.stringify({
-          type: 'set_device_role',
-          deviceId: dev.id,
-          role: role,
-          enabled: !dev.roles[role]
-        }));
-      };
-      roles.appendChild(pill);
-    });
-
-    item.appendChild(roles);
     container.appendChild(item);
   });
 }

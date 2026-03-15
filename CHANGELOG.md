@@ -6,15 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-03-15
+
+### Removed
+- Scoring & gamification: score display, quest journey map (5 phases), achievement badges (7 types), story scene cards (8 scenes)
+- Tools: `set_scene`, `award_badge`, `advance_quest` — agent now uses only `set_coaching_focus` and `report_technique`
+- All scene-specific CSS gradients and achievement popup animations
+
+### Changed
+- Device Manager: simplified from interactive toggle pills to read-only role tags
+- System instruction: streamlined to reference only 2 tools, conversation-first coaching focus
+- Frontend: cleaner UI focused on coaching panels, piano roll, and hand tracking
+
 ## [1.4.0] - 2026-03-15
 
 ### Added
 - Dynamic Device Role Management: any device connects to unified `/ws/session` endpoint
   - First device becomes primary (creates Gemini session, shows full UI + Device Manager panel)
   - Subsequent devices join as secondary with `?room=CODE` parameter
-  - Primary device gets Device Manager panel showing all connected devices with toggle pills
-  - Three exclusive roles per device: MIC, CAM, MIDI — toggled by primary, server-enforced
-  - Toggling a role on one device auto-disables it on all others (no overlap)
+  - Primary device gets Device Manager panel showing all connected devices with role tags
+  - Three exclusive roles per device: MIC, CAM, MIDI — server-enforced, no overlap
   - Secondary devices show minimal role-indicator UI, activate hardware on role assignment
   - Secondary mic: getUserMedia audio with energy gate, downsample to 16kHz PCM
   - Secondary camera: rear-facing camera, 1fps JPEG frames to Gemini

@@ -24,14 +24,6 @@ export function executeToolLocally(
   args: Record<string, unknown>
 ): Record<string, unknown> {
   switch (name) {
-    case "set_scene": {
-      const sceneId = args.scene_id as string;
-      return { status: "ok", scene: sceneId };
-    }
-    case "award_badge": {
-      const badgeId = args.badge_id as string;
-      return { status: "ok", badge: badgeId };
-    }
     case "set_coaching_focus": {
       const instruction = args.instruction as string;
       return { status: "ok", instruction };
@@ -42,10 +34,6 @@ export function executeToolLocally(
       const audio = args.audio_observation as string;
       const suggestion = args.suggestion as string;
       return { status: "ok", finger, visual, audio, suggestion };
-    }
-    case "advance_quest": {
-      const phase = args.phase as number;
-      return { status: "ok", phase };
     }
     default:
       return { error: `Unknown tool: ${name}` };
@@ -61,10 +49,6 @@ export function toolCallToVisualEvent(
   args: Record<string, unknown>
 ): Record<string, unknown> | null {
   switch (name) {
-    case "set_scene":
-      return { type: "story_scene", scene_id: args.scene_id };
-    case "award_badge":
-      return { type: "achievement", badge_id: args.badge_id };
     case "set_coaching_focus":
       return { type: "coaching_focus", text: args.instruction };
     case "report_technique":
@@ -75,8 +59,6 @@ export function toolCallToVisualEvent(
         audio: args.audio_observation,
         suggestion: args.suggestion,
       };
-    case "advance_quest":
-      return { type: "quest_advance", phase: args.phase };
     default:
       return null;
   }
@@ -90,43 +72,6 @@ export function buildToolDeclarations() {
   return [
     {
       functionDeclarations: [
-        {
-          name: "set_scene",
-          description:
-            "Change the visual story scene displayed to the user. " +
-            "Call this when the narrative shifts to a new environment. " +
-            "Valid scene_id values: enchanted_forest, harmony_garden, rhythm_dragon, " +
-            "crystal_cave, technique_tower, shadow_passage, sunrise_peak, victory_hall",
-          parameters: {
-            type: Type.OBJECT,
-            properties: {
-              scene_id: {
-                type: Type.STRING,
-                description: "The scene identifier to display.",
-              },
-            },
-            required: ["scene_id"],
-          },
-        },
-        {
-          name: "award_badge",
-          description:
-            "Award an achievement badge to the user for genuine improvement. " +
-            "Only call this when you can hear or see real progress. Each badge can " +
-            "only be awarded once per session. " +
-            "Valid badge_id values: even_triad, steady_pulse, singing_legato, " +
-            "dragon_slayer, technique_master, chapter_complete, first_note",
-          parameters: {
-            type: Type.OBJECT,
-            properties: {
-              badge_id: {
-                type: Type.STRING,
-                description: "The badge identifier to award.",
-              },
-            },
-            required: ["badge_id"],
-          },
-        },
         {
           name: "set_coaching_focus",
           description:
@@ -182,23 +127,6 @@ export function buildToolDeclarations() {
             ],
           },
         },
-        {
-          name: "advance_quest",
-          description:
-            "Advance the quest journey map to the next phase. " +
-            "Phases: 0=Opening, 1=Assessment, 2=Challenge, 3=Mastery, 4=Celebration. " +
-            "Only advance forward — never go backwards.",
-          parameters: {
-            type: Type.OBJECT,
-            properties: {
-              phase: {
-                type: Type.NUMBER,
-                description: "The phase number (0-4).",
-              },
-            },
-            required: ["phase"],
-          },
-        },
       ],
     },
   ];
@@ -243,46 +171,21 @@ Never invent visual observations.
 
 ## TOOLS — USE SPARINGLY
 
-You have tools to enhance the visual experience. Use them at natural moments, not constantly.
+You have two tools. Use them at natural moments, not constantly.
 
-- set_scene: Change the visual backdrop when the mood shifts. Scenes: enchanted_forest, \
-harmony_garden, rhythm_dragon, crystal_cave, technique_tower, shadow_passage, sunrise_peak, \
-victory_hall.
-- award_badge: Reward genuine improvement. Only when earned. Badges: first_note, even_triad, \
-steady_pulse, singing_legato, dragon_slayer, technique_master, chapter_complete.
 - set_coaching_focus: Update the tip card when you give a specific actionable tip.
-- advance_quest: Move the journey forward (0=Opening, 1=Assessment, 2=Challenge, 3=Mastery, \
-4=Celebration). Advance naturally as the session progresses.
 - report_technique: When you see AND hear something connected (finger position → sound quality), \
 report it. This is your most valuable tool — use it when you have a real correlation to share.
 
-## SESSION ARC
+## SESSION FLOW
 
-Opening → listen and observe → coach one thing → celebrate improvement → wrap up. \
+Listen and observe → coach one thing → celebrate improvement → continue. \
 Let the conversation guide the pace, not a script.
 `;
 
 // =========================================================================
 // ADK Agent definition (structural — for future runLive support)
 // =========================================================================
-
-const setSceneTool = new FunctionTool({
-  name: "set_scene",
-  description: "Change the visual story scene displayed to the user.",
-  parameters: z.object({
-    scene_id: z.string().describe("The scene identifier to display."),
-  }) as any,
-  execute: (input: any) => ({ status: "ok", scene: input.scene_id }),
-});
-
-const awardBadgeTool = new FunctionTool({
-  name: "award_badge",
-  description: "Award an achievement badge to the user.",
-  parameters: z.object({
-    badge_id: z.string().describe("The badge identifier to award."),
-  }) as any,
-  execute: (input: any) => ({ status: "ok", badge: input.badge_id }),
-});
 
 const setCoachingFocusTool = new FunctionTool({
   name: "set_coaching_focus",
@@ -311,24 +214,12 @@ const reportTechniqueTool = new FunctionTool({
   }),
 });
 
-const advanceQuestTool = new FunctionTool({
-  name: "advance_quest",
-  description: "Advance the quest journey map to the next phase (0-4).",
-  parameters: z.object({
-    phase: z.number().describe("The phase number (0-4)."),
-  }) as any,
-  execute: (input: any) => ({ status: "ok", phase: input.phase }),
-});
-
 export const storytellerAgent = new LlmAgent({
   name: "pianoquest_storyteller",
   model: LIVE_MODEL,
   instruction: STORYTELLER_INSTRUCTION,
   tools: [
-    setSceneTool,
-    awardBadgeTool,
     setCoachingFocusTool,
     reportTechniqueTool,
-    advanceQuestTool,
   ],
 });
