@@ -784,7 +784,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   geminiWs.on("open", () => {
     console.log(`[${APP_NAME}] Gemini WS open, sending setup: ${sessionId}`);
     // Send setup message
-    geminiSend({
+    // Minimal setup first — add fields back once connection is confirmed stable
+    const setupMsg = {
       setup: {
         model: `models/${LIVE_MODEL}`,
         generationConfig: {
@@ -795,18 +796,17 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             },
           },
         },
-        inputAudioTranscription: {},
-        outputAudioTranscription: {},
         systemInstruction: { parts: [{ text: STORYTELLER_INSTRUCTION }] },
         tools: buildToolDeclarations(),
         realtimeInputConfig: {
           automaticActivityDetection: {
             disabled: false,
-            silenceDurationMs: 1000,
           },
         },
       },
-    });
+    };
+    console.log(`[${APP_NAME}] Setup JSON: ${JSON.stringify(setupMsg).substring(0, 500)}`);
+    geminiSend(setupMsg);
   });
 
   geminiWs.on("message", (data: Buffer) => {
@@ -959,8 +959,12 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   });
 
   geminiWs.on("close", (code: number, reason: Buffer) => {
-    console.log(`[${APP_NAME}] Gemini Live session closed: ${sessionId} code=${code} reason=${reason.toString()}`);
+    const reasonStr = reason.toString();
+    console.error(`[${APP_NAME}] *** Gemini closed: session=${sessionId} code=${code} reason=${reasonStr}`);
+    console.error(`[${APP_NAME}] *** Model was: models/${LIVE_MODEL}`);
     closed = true;
+    // Tell client why
+    try { ws.send(JSON.stringify({ type: "gemini_error", code, reason: reasonStr })); } catch {}
     try { ws.close(); } catch {}
   });
 

@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-03-15
+
+### Fixed
+- **CRITICAL**: Gemini model name `gemini-2.5-flash-native-audio-latest` → `gemini-2.5-flash-native-audio-preview-12-2025` (latest alias doesn't exist)
+- **CRITICAL**: Setup JSON snake_case → camelCase (generationConfig, responseModalities, etc.)
+- **CRITICAL**: Duplicate JS variable declarations (sessionActive, currentScore) killed all JavaScript
+- Grand staff gap: shifted center up (0.5→0.42) to minimize gap below keyboard
+- Grand staff: past notes of same pitch no longer disappear when key pressed
+- Fur Elise: proper treble/bass clef separation, correct 3/8 timing, accidentals
+
+### Added
+- B&W monotone color scheme matching jayismocking.com (designed by jworks:81 + jworks:97)
+- Score panel draggable resize handle
+- Score renderer: clef symbols, accidental marks (♯/♭), hollow noteheads for long notes
+- Start/Stop merged into single toggle button
+- MIDI dropdown auto-refreshes on focus
+
+### Changed
+- All panels 2x larger on desktop (waterfall 560px, grand staff 520px, dynamics 144px, keyboard 200px)
+- Score panel widened to 560px
+- App max-width 1920px
+- Panel headers removed (Piano Roll, Keyboard, Grand Staff labels stripped)
+- Grand staff controls moved to left sidebar
+- Dynamic bars moved from piano roll to keyboard canvas
+
+### Removed
+- All amber/yellow colors — replaced with white accent
+- Separate Stop button (merged into Start toggle)
+- Panel header labels from midi stack
+
 ## [1.7.0] - 2026-03-15
 
 ### Added
