@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.6] - 2026-03-15
+
+### Changed
+- Unified BPM: single slider controls both waterfall and grand staff tempo
+- BPM slider, time signature, and scale selector moved to footer bar below midi stack
+- Removed staff-controls sidebar from grand staff (was left sidebar with tiny inputs)
+- BPM slider range extended to 40-300
+
+### Removed
+- BPM slider from header
+- Tempo input from grand staff sidebar
+
 ## [1.8.5] - 2026-03-15
 
 ### Added

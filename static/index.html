@@ -415,7 +415,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.5</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.6</div>
       </div>
     </div>
     <div class="controls">
@@ -424,8 +424,6 @@
       </select>
       <span class="pedal-pill" id="pedalStatus">Pedal Up</span>
       <span id="midiStatus" style="display:none;"></span>
-      <input type="range" id="bpmSlider" min="40" max="200" value="90" style="width:60px;height:14px;">
-      <span class="bpm-val" id="bpmVal" style="font-size:10px;color:var(--text3);min-width:20px;">90</span>
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <div class="gemini-speaking" id="geminiSpeaking">
@@ -502,41 +500,43 @@
         <div class="keyboard-wrap" style="background:#0a0a0a;">
           <canvas id="keyboardCanvas"></canvas>
         </div>
-        <div style="display:flex;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
-          <div class="staff-controls" style="display:flex;flex-direction:column;gap:4px;padding:6px 4px;background:#0d0d16;min-width:42px;align-items:center;justify-content:center;">
-            <input type="number" id="staffTempo" min="20" max="300" value="100" title="Tempo" style="width:36px;background:#0a0a0f;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:2px;font-size:9px;text-align:center;">
-            <select id="staffTimeSig" title="Time signature" style="width:36px;background:#0a0a0f;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:9px;">
-              <option value="4/4">4/4</option>
-              <option value="3/4">3/4</option>
-              <option value="2/4">2/4</option>
-              <option value="6/8">6/8</option>
-            </select>
-            <select id="staffScale" title="Scale" style="width:36px;background:#0a0a0f;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:8px;">
-              <option value="C major">C</option>
-              <option value="G major">G</option>
-              <option value="D major">D</option>
-              <option value="A major">A</option>
-              <option value="E major">E</option>
-              <option value="B major">B</option>
-              <option value="F major">F</option>
-              <option value="Bb major">Bb</option>
-              <option value="Eb major">Eb</option>
-              <option value="Ab major">Ab</option>
-              <option value="A minor">Am</option>
-              <option value="E minor">Em</option>
-              <option value="B minor">Bm</option>
-              <option value="D minor">Dm</option>
-              <option value="G minor">Gm</option>
-              <option value="C minor">Cm</option>
-              <option value="F minor">Fm</option>
-              <option value="F# minor">F#m</option>
-              <option value="C# minor">C#m</option>
-            </select>
-          </div>
-          <div class="staff-wrap" style="flex:1;padding:0;background:#050508;">
-            <canvas id="grandStaffCanvas"></canvas>
-          </div>
+        <div class="staff-wrap" style="padding:0;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
+          <canvas id="grandStaffCanvas"></canvas>
         </div>
+      </div>
+      <div class="midi-footer" style="display:flex;align-items:center;gap:12px;padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);">
+          BPM
+          <input type="range" id="bpmSlider" min="40" max="300" value="90" style="width:80px;height:14px;">
+          <span id="bpmVal" style="font-size:11px;color:var(--text1);min-width:24px;">90</span>
+        </label>
+        <select id="staffTimeSig" title="Time signature" style="font-size:11px;padding:2px 4px;background:var(--bg3);border:1px solid var(--border);color:var(--text1);border-radius:4px;">
+          <option value="4/4">4/4</option>
+          <option value="3/4">3/4</option>
+          <option value="2/4">2/4</option>
+          <option value="6/8">6/8</option>
+        </select>
+        <select id="staffScale" title="Scale" style="font-size:11px;padding:2px 4px;background:var(--bg3);border:1px solid var(--border);color:var(--text1);border-radius:4px;">
+          <option value="C major">C</option>
+          <option value="G major">G</option>
+          <option value="D major">D</option>
+          <option value="A major">A</option>
+          <option value="E major">E</option>
+          <option value="B major">B</option>
+          <option value="F major">F</option>
+          <option value="Bb major">Bb</option>
+          <option value="Eb major">Eb</option>
+          <option value="Ab major">Ab</option>
+          <option value="A minor">Am</option>
+          <option value="E minor">Em</option>
+          <option value="B minor">Bm</option>
+          <option value="D minor">Dm</option>
+          <option value="G minor">Gm</option>
+          <option value="C minor">Cm</option>
+          <option value="F minor">Fm</option>
+          <option value="F# minor">F#m</option>
+          <option value="C# minor">C#m</option>
+        </select>
       </div>
     </div>
 
@@ -1652,7 +1652,7 @@ function drawPianoRoll() {
   drawHistory(true);
 
   // Target notes flowing down from top
-  var targetTempo = parseInt(document.getElementById('staffTempo').value, 10) || 100;
+  var targetTempo = parseInt(document.getElementById('bpmSlider').value, 10) || 90;
   var targetMsPerBeat = 60000 / targetTempo;
   for (var ti = 0; ti < targetNotes.length; ti++) {
     var tn = targetNotes[ti];
@@ -1753,7 +1753,7 @@ function startTargetNotes() {
 }
 
 function addTargetNote(midi, beatIndex, durationBeats) {
-  var tempo = parseInt(document.getElementById('staffTempo').value, 10) || 100;
+  var tempo = parseInt(document.getElementById('bpmSlider').value, 10) || 90;
   var msPerBeat = 60000 / tempo;
   targetNotes.push({
     midi: midi,
@@ -1800,7 +1800,7 @@ function drawGrandStaff() {
   var H = desiredH;
 
   // Read settings
-  var tempo = parseInt(document.getElementById('staffTempo').value, 10) || 100;
+  var tempo = parseInt(document.getElementById('bpmSlider').value, 10) || 90;
   var timeSig = (document.getElementById('staffTimeSig').value || '4/4').split('/');
   var beatsPerMeasure = parseInt(timeSig[0], 10) || 4;
   var beatUnit = parseInt(timeSig[1], 10) || 4;
@@ -2530,7 +2530,8 @@ function loadScoreToTargets() {
   var startMs = Date.now() + 2000; // 2 second lead-in
 
   // Set staff tempo/time sig/scale to match score
-  document.getElementById('staffTempo').value = tempo;
+  document.getElementById('bpmSlider').value = tempo;
+  document.getElementById('bpmVal').textContent = tempo;
   var timeSigSelect = document.getElementById('staffTimeSig');
   for (var i = 0; i < timeSigSelect.options.length; i++) {
     if (timeSigSelect.options[i].value === currentScore.timeSig) {
