@@ -1,0 +1,47 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "7c43d51a06f8",
+  "session_id": "3ea7c7e1-ab9b-4570-b22e-6738322348e1",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-15T03:53:46.653769644Z",
+  "branch": "main",
+  "checkpoints_count": 8,
+  "files_touched": [
+    ".dockerignore",
+    "CHANGELOG.md",
+    "Dockerfile",
+    "VERSION",
+    "agent/__init__.py",
+    "agent/__main__.py",
+    "agent/agent.py",
+    "agent/server.py",
+    "docs/IDEAS.md",
+    "docs/demo-script.md",
+    "package-lock.json",
+    "package.json",
+    "requirements.txt",
+    "src/agent/agent.ts",
+    "src/agent/server.ts",
+    "src/index.ts",
+    "static/index.html",
+    "tsconfig.json"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "3a30a0625521",
+  "token_usage": {
+    "input_tokens": 121,
+    "cache_creation_tokens": 995227,
+    "cache_read_tokens": 9348728,
+    "output_tokens": 43612,
+    "api_call_count": 101
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-15T03:53:45.589725122Z",
+    "agent_lines": 8884,
+    "human_added": 13,
+    "human_modified": 4,
+    "human_removed": 0,
+    "total_committed": 8901,
+    "agent_percentage": 99.80901022357038
+  }
+}

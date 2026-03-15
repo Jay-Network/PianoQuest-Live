@@ -1,0 +1,226 @@
+Implement the following plan:
+
+# PianoQuest Live: Python → TypeScript ADK Migration Plan
+
+## Context
+
+Jay directed immediate migration from Python ADK to TypeScript ADK (`@google/adk`). The existing Python app (v0.4.7) uses FastAPI + WebSocket + Google ADK with 5 tool functions. ADK TS v0.5 does NOT have `Runner.runLive()` (TODO in source). BookSage_Live solved this by using `@google/genai` Live API directly with manual tool declarations — we follow the same pattern.
+
+## Critical Finding
+
+**`Runner.runLive()` is not implemented in ADK TS v0.5** (line 292 of runner.js: `// TODO - b/425992518`). BookSage_Live's working pattern: use `@google/genai`'s `client.live.connect()` directly, declare tools as `functionDeclarations`, execute tools locally, and send `toolResponse` back to Gemini. We adopt this exact pattern.
+
+## Architecture
+
+- **Runtime**: Node.js + Express + `ws` (raw WebSocket)
+- **AI**: `@google/genai` Live API (NOT ADK Runner for live streaming)
+- **Tools**: Manual `functionDeclarations` + local execution (same pattern as BookSage)
+- **ADK**: `LlmAgent` + `FunctionTool` definitions kept for structure/future `runLive` support
+- **Frontend**: `static/index.html` — UNCHANGED (same WebSocket protocol)
+
+## Reference Implementation
+
+BookSage_Live (`/home/takuma/1_jworks/A_ai/7_LiveAgents/BookSage_Live/`) is the template:
+- `src/agent/adk-server.ts` — Express + ws + `@google/genai` Live API with tool execution
+- `src/agent/adk-agent.ts` — `LlmAgent` + `FunctionTool` with Zod schemas
+- `src/index.ts` — entry point
+- `package.json`, `tsconfig.json`, `Dockerfile` — all reusable patterns
+
+## Files to Create
+
+### 1. `package.json`
+```
+name: pianoquest-live
+dependencies: @google/adk ^0.5.0, @google/genai ^1.37.0, dotenv, express, ws, zod
+devDependencies: @types/express, @types/node, @types/ws, typescript
+scripts: build (tsc), start (node dist/index.js), dev (tsc --watch)
+```
+
+### 2. `tsconfig.json`
+Copy from BookSage: ES2022 target, NodeNext module, outDir: dist, rootDir: src
+
+### 3. `src/index.ts`
+Entry point: load dotenv, import server, listen on PORT (default 8080)
+
+### 4. `src/agent/agent.ts`
+Port from `agent/agent.py`:
+- 5 tools as `FunctionTool` with Zod schemas: `setScene`, `awardBadge`, `setCoachingFocus`, `advanceQuest`, `reportTechnique`
+- Each tool pushes to a `Map<string, Array>` keyed by session ID (replaces Python `contextvars`)
+- `STORYTELLER_INSTRUCTION` — copy verbatim from Python
+- `LlmAgent` definition (for structure, not used for live streaming directly)
+- Export `buildToolDeclarations()` for Gemini Live config
+- Export `executeToolLocally(sessionId, name, args)` for tool dispatch
+
+### 5. `src/agent/server.ts`
+Port from `agent/server.py`:
+- Express app + `http.createServer` + `WebSocketServer`
+- `handleWebSocket(ws)`:
+  - `@google/genai` `client.live.connect()` with LIVE_MODEL + liveConfig (tools, voice, transcription)
+  - Two concurrent loops: `receiveFromClient()` and `sendToClient()`
+- **receiveFromClient**: handles same message types as Python:
+  - Binary → `session.sendRealtimeInput({ audio })` (PCM 16kHz)
+  - `video_frame` → `session.sendRealtimeInput({ media })` (JPEG)
+  - `text` → `session.sendClientContent()`
+  - `midi_snapshot` → `describeMidiSnapshot()` → `session.sendClientContent()`
+  - `midi_event` → pass
+  - `camera_state` → update local state
+  - `hand_state` → update local state
+  - `set_mode` → ignored (single agent)
+  - `close` → close session
+- **sendToClient**: handles Gemini Live responses:
+  - `response.data` → ws.send binary (audio)
+  - `response.serverContent.inputTranscription` → `input_transcript` JSON
+  - `response.text` → `output_transcript` JSON
+  - `response.toolCall` → execute locally, send tool_call/tool_result to client, send toolResponse to Gemini
+  - `response.serverContent.turnComplete` → `turn_complete` JSON
+- `describeMidiSnapshot()` — port from Python, same logic
+- Health endpoint at `/health`
+- Root serves `static/index.html`
+- Static files at `/static`
+
+### 6. `Dockerfile` (modify existing)
+```dockerfile
+FROM node:20-slim
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --production=false
+COPY . .
+RUN npm run build
+RUN npm prune --production
+EXPOSE 8080
+CMD ["node", "dist/index.js"]
+```
+
+### 7. `.dockerignore` (create)
+```
+node_modules
+dist
+.git
+```
+
+## Files to Keep (Unchanged)
+- `static/index.html` — frontend, no changes needed
+- `cloudbuild.yaml` — Cloud Build config stays the same
+- `docs/*` — all documentation stays
+- `VERSION` — will be updated to 1.0.0
+- `CHANGELOG.md` — will be updated
+
+## Files to Remove
+- `agent/agent.py` — replaced by `src/agent/agent.ts`
+- `agent/server.py` — replaced by `src/agent/server.ts`
+- `agent/__init__.py`
+- `agent/__main__.py`
+- `requirements.txt` — replaced by `package.json`
+
+## Key Mapping: Python → TypeScript
+
+| Python | TypeScript |
+|--------|-----------|
+| `contextvars.ContextVar` (visual queue) | `Map<string, Array>` keyed by session ID |
+| `asyncio.Queue` | Simple array with push/shift |
+| `FastAPI + WebSocket` | Express + `ws` library |
+| `Runner.run_live()` | `client.live.connect()` from `@google/genai` |
+| `LiveRequestQueue.send_realtime()` | `session.sendRealtimeInput()` |
+| `LiveRequestQueue.send_content()` | `session.sendClientContent()` |
+| `types.Blob` | `{ data: base64string, mimeType }` |
+| `types.Content` | `{ turns: { role, parts }, turnComplete }` |
+| ADK `Agent()` | `LlmAgent()` (structural only) |
+| Python docstring tools | `FunctionTool` + Zod schema / `functionDeclarations` |
+| `event.input_transcription` | `response.serverContent.inputTranscription` |
+| `event.output_transcription` | `response.text` or output transcription |
+| `event.content.parts[].inline_data` | `response.data` (binary audio) |
+| `event.turn_complete` | `response.serverContent.turnComplete` |
+
+## WebSocket Protocol (UNCHANGED)
+
+Client → Server:
+- Binary: PCM audio at 16kHz
+- `{type: "video_frame", data: base64}`: Camera JPEG
+- `{type: "text", content: string}`: Text message
+- `{type: "midi_snapshot", ...}`: MIDI data
+- `{type: "camera_state", enabled: bool}`: Camera toggle
+- `{type: "hand_state", detected_count, both_hands_detected}`: Hand tracking
+- `{type: "set_mode", mode}`: Agent mode
+- `{type: "close"}`: Disconnect
+
+Server → Client:
+- Binary: PCM audio at 24kHz (Gemini output)
+- `{type: "input_transcript", text}`: User speech
+- `{type: "output_transcript", text}`: Agent speech
+- `{type: "turn_complete"}`: Turn done
+- `{type: "story_scene", scene_id}`: Tool: scene change
+- `{type: "achievement", badge_id}`: Tool: badge
+- `{type: "coaching_focus", text}`: Tool: coaching tip
+- `{type: "quest_advance", phase}`: Tool: quest progress
+- `{type: "technique_report", finger, visual, audio, suggestion}`: Tool: technique
+
+## Key Difference from Python Version
+
+The Python version used ADK's `Runner.run_live()` which managed the Gemini Live session internally, yielding ADK `Event` objects. In TypeScript, we use `@google/genai`'s `client.live.connect()` directly, which means:
+
+1. **Tool execution is manual** — we intercept `response.toolCall`, execute locally, send `session.sendToolResponse()`
+2. **Transcription handling differs** — access via `response.serverContent.inputTranscription` instead of ADK event fields
+3. **Audio is raw** — `response.data` is binary audio, sent directly to client
+4. **No ADK event abstraction** — we handle the raw Gemini Live protocol
+
+This is exactly how BookSage_Live works and is proven in production.
+
+## Migration Sequence
+
+1. Create `package.json`, `tsconfig.json`, `.dockerignore`
+2. Create `src/index.ts`
+3. Create `src/agent/agent.ts` — tools + instruction + tool declarations
+4. Create `src/agent/server.ts` — Express + WebSocket + Gemini Live
+5. `npm install`
+6. `tsc` — verify compilation
+7. Test locally: `node dist/index.js`
+8. Update `Dockerfile` for Node.js
+9. Update `VERSION` to 1.0.0
+10. Update `CHANGELOG.md`
+11. Remove Python files (`agent/*.py`, `requirements.txt`)
+12. Commit as v1.0.0
+13. Deploy to Cloud Run
+
+## Verification
+
+1. **Compile**: `npm run build` succeeds with no errors
+2. **Health**: `curl localhost:8080/health` returns JSON with status ok
+3. **Frontend**: `curl localhost:8080/` returns index.html
+4. **WebSocket**: Connect to `ws://localhost:8080/ws/dialog`, send `set_mode` message, verify connection
+5. **End-to-end**: Open in browser, verify camera/mic/MIDI inputs work, verify tool calls produce UI events
+6. **Cloud Run**: `gcloud builds submit` via cloudbuild.yaml, verify deployed health endpoint
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/takuma/.claude/projects/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d081915f-1902-4e4b-b940-b4361f6d1110.jsonl
+
+---
+
+how do i nteract with the live agent? what can it d for me?
+
+---
+
+[inbox from jworks:99]
+
+---
+
+[inbox from jworks:99]
+
+---
+
+[inbox from jworks:99]
+
+---
+
+[inbox from jworks:99]
+
+---
+
+[inbox from jworks:99]
+
+---
+
+[inbox from jworks:99]
+
+---
+
+[inbox from jworks:99]
