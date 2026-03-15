@@ -2340,6 +2340,13 @@ function drawScorePreview(score) {
       ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W - 10, y); ctx.stroke();
     }
 
+    // Clef symbols
+    ctx.fillStyle = '#888';
+    ctx.font = '18px serif';
+    ctx.fillText('\uD834\uDD1E', 2, baseY + 3 * staffSpacing + 2); // treble clef
+    ctx.font = '14px serif';
+    ctx.fillText('\uD834\uDD22', 2, bassBaseY + 2 * staffSpacing + 2); // bass clef
+
     // Draw notes for each measure in this line
     for (var m = 0; m < measuresPerLine; m++) {
       var mIdx = line * measuresPerLine + m;
@@ -2356,24 +2363,39 @@ function drawScorePreview(score) {
       ctx.stroke();
 
       // Draw notes
-      var timeSigParts = score.timeSig.split('/');
-      var beatsInMeasure = parseInt(timeSigParts[0]);
+      var beatsInMeasure = score.beatsPerMeasure || parseInt(score.timeSig.split('/')[0]);
       measure.notes.forEach(function(note) {
-        var noteX = mX + 12 + (note.beat / beatsInMeasure) * (measureW - 20);
-        var noteY = scoreNoteY(note.midi, baseY, bassBaseY, staffSpacing);
+        var noteX = mX + 16 + (note.beat / beatsInMeasure) * (measureW - 24);
+        // Use clef field to force staff, else auto by MIDI
+        var forceBass = note.clef === 'bass';
+        var noteY = forceBass
+          ? scoreNoteY(note.midi, bassBaseY - 100, bassBaseY, staffSpacing) // force bass rendering
+          : scoreNoteY(note.midi, baseY, bassBaseY, staffSpacing);
 
         // Color mode: velocity-based coloring
         if (scoreColorMode) {
           var vel = note.vel || 80;
           ctx.fillStyle = dynamicsColor(vel);
         } else {
-          ctx.fillStyle = note.midi >= 60 ? '#DDDDDD' : '#BBBBBB';
+          ctx.fillStyle = note.clef === 'bass' ? '#999999' : '#DDDDDD';
         }
 
-        // Note head
+        // Accidental symbol
+        if (note.acc) {
+          ctx.font = '10px serif';
+          ctx.fillText(note.acc === '#' ? '\u266F' : '\u266D', noteX - 10, noteY + 3);
+        }
+
+        // Note head — filled for short, hollow for long
         ctx.beginPath();
-        ctx.ellipse(noteX, noteY, 4, 3, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.ellipse(noteX, noteY, 4, 3, -0.3, 0, Math.PI * 2);
+        if (note.dur >= 2) {
+          ctx.strokeStyle = ctx.fillStyle;
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        } else {
+          ctx.fill();
+        }
 
         // Stem
         ctx.strokeStyle = ctx.fillStyle;
@@ -2396,25 +2418,22 @@ function drawScorePreview(score) {
 }
 
 function scoreNoteY(midi, trebleBaseY, bassBaseY, sp) {
-  // Map MIDI to staff position using diatonic system
-  // Treble: F5(77)=top line, E4(64)=bottom line
-  // Bass: A3(57)=top line, G2(43)=bottom line
+  // Map MIDI to staff Y using diatonic coordinate system
+  // Treble lines: E4(64)=bottom, F5(77)=top
+  // Bass lines: G2(43)=bottom, A3(57)=top
   var NOTE_OFFSETS = { 0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6 }; // C,D,E,F,G,A,B
   var pc = midi % 12;
   var octave = Math.floor(midi / 12) - 1;
-  var diatonic = NOTE_OFFSETS[pc] !== undefined ? NOTE_OFFSETS[pc] : NOTE_OFFSETS[pc - 1] + 0.5;
-  var stepsFromC4 = (octave - 4) * 7 + diatonic; // diatonic steps from C4(midi 60)
+  // Black keys map to the lower natural's diatonic position
+  var diatonic = NOTE_OFFSETS[pc] !== undefined ? NOTE_OFFSETS[pc] : NOTE_OFFSETS[pc - 1];
+  var stepsFromC4 = (octave - 4) * 7 + diatonic;
 
-  if (midi >= 60) {
-    // Treble: B4 = middle line (step 6 from C4)
-    // E4(step 2) = bottom line = trebleBaseY + 4*sp
-    var y = trebleBaseY + 4 * sp - (stepsFromC4 - 2) * (sp / 2);
-    return y;
-  } else {
-    // Bass: D3(step -5) = middle line = bassBaseY + 2*sp
-    var y = bassBaseY + 2 * sp - (stepsFromC4 + 5) * (sp / 2);
-    return y;
+  // Treble: E4 = step 2, bottom line (trebleBaseY + 4*sp)
+  if (trebleBaseY < bassBaseY && midi >= 60) {
+    return trebleBaseY + 4 * sp - (stepsFromC4 - 2) * (sp / 2);
   }
+  // Bass: D3 = step -5, middle line (bassBaseY + 2*sp)
+  return bassBaseY + 2 * sp - (stepsFromC4 + 5) * (sp / 2);
 }
 
 function drawScoreLedgerLines(ctx, x, y, trebleBase, bassBase, sp) {

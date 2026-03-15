@@ -787,22 +787,22 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
     geminiSend({
       setup: {
         model: `models/${LIVE_MODEL}`,
-        generation_config: {
-          response_modalities: ["AUDIO"],
-          speech_config: {
-            voice_config: {
-              prebuilt_voice_config: { voice_name: "Puck" },
+        generationConfig: {
+          responseModalities: ["AUDIO"],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: "Puck" },
             },
           },
         },
-        input_audio_transcription: {},
-        output_audio_transcription: {},
-        system_instruction: { parts: [{ text: STORYTELLER_INSTRUCTION }] },
+        inputAudioTranscription: {},
+        outputAudioTranscription: {},
+        systemInstruction: { parts: [{ text: STORYTELLER_INSTRUCTION }] },
         tools: buildToolDeclarations(),
-        realtime_input_config: {
-          automatic_activity_detection: {
+        realtimeInputConfig: {
+          automaticActivityDetection: {
             disabled: false,
-            silence_duration_ms: 1000,
+            silenceDurationMs: 1000,
           },
         },
       },

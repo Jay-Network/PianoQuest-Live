@@ -2,67 +2,95 @@
   "title": "Fur Elise",
   "composer": "Ludwig van Beethoven",
   "key": "A minor",
-  "tempo": 70,
+  "tempo": 65,
   "timeSig": "3/8",
+  "beatsPerMeasure": 3,
   "measures": [
-    { "notes": [
-      { "midi": 76, "beat": 0, "dur": 0.5 },
-      { "midi": 75, "beat": 0.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 76, "beat": 0, "dur": 0.5 },
-      { "midi": 75, "beat": 0.5, "dur": 0.5 },
-      { "midi": 76, "beat": 1, "dur": 0.5 },
-      { "midi": 71, "beat": 1.5, "dur": 0.5 },
-      { "midi": 74, "beat": 2, "dur": 0.5 },
-      { "midi": 72, "beat": 2.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 69, "beat": 0, "dur": 1.5 },
-      { "midi": 45, "beat": 0, "dur": 1.5 },
-      { "midi": 52, "beat": 1.5, "dur": 0.5 },
-      { "midi": 57, "beat": 2, "dur": 0.5 },
-      { "midi": 60, "beat": 2.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 64, "beat": 0, "dur": 1.5 },
-      { "midi": 40, "beat": 0, "dur": 1.5 },
-      { "midi": 52, "beat": 1.5, "dur": 0.5 },
-      { "midi": 56, "beat": 2, "dur": 0.5 },
-      { "midi": 64, "beat": 2.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 76, "beat": 0, "dur": 1.5 },
-      { "midi": 45, "beat": 0, "dur": 1.5 },
-      { "midi": 52, "beat": 1.5, "dur": 0.5 },
-      { "midi": 64, "beat": 2, "dur": 0.5 },
-      { "midi": 75, "beat": 2.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 76, "beat": 0, "dur": 0.5 },
-      { "midi": 75, "beat": 0.5, "dur": 0.5 },
-      { "midi": 76, "beat": 1, "dur": 0.5 },
-      { "midi": 71, "beat": 1.5, "dur": 0.5 },
-      { "midi": 74, "beat": 2, "dur": 0.5 },
-      { "midi": 72, "beat": 2.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 69, "beat": 0, "dur": 1.5 },
-      { "midi": 45, "beat": 0, "dur": 1.5 },
-      { "midi": 52, "beat": 1.5, "dur": 0.5 },
-      { "midi": 57, "beat": 2, "dur": 0.5 },
-      { "midi": 60, "beat": 2.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 64, "beat": 0, "dur": 1.5 },
-      { "midi": 40, "beat": 0, "dur": 1.5 },
-      { "midi": 52, "beat": 1.5, "dur": 0.5 },
-      { "midi": 56, "beat": 2, "dur": 0.5 },
-      { "midi": 64, "beat": 2.5, "dur": 0.5 }
-    ]},
-    { "notes": [
-      { "midi": 71, "beat": 0, "dur": 1.5 },
-      { "midi": 45, "beat": 0, "dur": 1.5 }
-    ]}
+    {
+      "_": "Pickup: E5 D#5",
+      "notes": [
+        { "midi": 76, "beat": 1, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 1.5, "dur": 0.5, "clef": "treble", "acc": "#" }
+      ]
+    },
+    {
+      "_": "m1: E5 D#5 E5 B4 D5 C5",
+      "notes": [
+        { "midi": 76, "beat": 0, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 0.5, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 76, "beat": 1, "dur": 0.5, "clef": "treble" },
+        { "midi": 71, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 74, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2.5, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m2: A4 (rest) C4 E4 A4",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 1.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 1.5, "clef": "bass" },
+        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
+        { "midi": 57, "beat": 1.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 60, "beat": 2, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m3: B4 (rest) E4 G#4 B4",
+      "notes": [
+        { "midi": 71, "beat": 0, "dur": 1.5, "clef": "treble" },
+        { "midi": 40, "beat": 0, "dur": 1.5, "clef": "bass" },
+        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
+        { "midi": 56, "beat": 1.5, "dur": 0.5, "clef": "bass", "acc": "#" },
+        { "midi": 59, "beat": 2, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m4: C5 (rest) E4 E5 D#5",
+      "notes": [
+        { "midi": 72, "beat": 0, "dur": 1.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 1.5, "clef": "bass" },
+        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
+        { "midi": 76, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 2.5, "dur": 0.5, "clef": "treble", "acc": "#" }
+      ]
+    },
+    {
+      "_": "m5: E5 D#5 E5 B4 D5 C5 (repeat)",
+      "notes": [
+        { "midi": 76, "beat": 0, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 0.5, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 76, "beat": 1, "dur": 0.5, "clef": "treble" },
+        { "midi": 71, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 74, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2.5, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m6: A4 (rest) C4 E4 A4",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 1.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 1.5, "clef": "bass" },
+        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
+        { "midi": 57, "beat": 1.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 60, "beat": 2, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m7: B4 (rest) E4 C5 B4",
+      "notes": [
+        { "midi": 71, "beat": 0, "dur": 1.5, "clef": "treble" },
+        { "midi": 40, "beat": 0, "dur": 1.5, "clef": "bass" },
+        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
+        { "midi": 72, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 71, "beat": 2.5, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m8: A4 (held)",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 3, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 3, "clef": "bass" }
+      ]
+    }
   ]
 }
