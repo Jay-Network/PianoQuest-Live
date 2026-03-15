@@ -24,7 +24,7 @@ steps:
       - '--set-env-vars=GOOGLE_API_KEY=${_API_KEY}'
 
 substitutions:
-  _REGION: us-east1
+  _REGION: us-central1
   _REPO: pianoquest-live
   _SERVICE: pianoquest-live
   _API_KEY: ''
