@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-03-15
+
+### Fixed
+- **CRITICAL**: Replace raw WebSocket to Gemini with @google/genai SDK `live.connect()` — raw WS was closing instantly; SDK works (confirmed by JayWalks, BookSage)
+- Grand staff gap: position top treble line at ~15px from canvas top to eliminate gap below keyboard
+
+### Changed
+- Gemini Live connection now uses SDK callbacks (onopen, onmessage, onerror, onclose) instead of manual WebSocket protocol
+
 ## [1.8.0] - 2026-03-15
 
 ### Fixed

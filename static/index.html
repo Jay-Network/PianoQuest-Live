@@ -403,7 +403,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.1</div>
       </div>
     </div>
     <div class="controls">
@@ -1782,16 +1782,18 @@ function drawGrandStaff() {
   ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, W, H);
 
-  // Diatonic layout: center on B3 (MIDI 59), shifted up to minimize top gap
+  // Diatonic layout: center on B3 (MIDI 59), position so top treble line is near canvas top
   var centerMidi = 59;
   var centerDiatonic = diatonicIndex(centerMidi);
-  var centerY = H * 0.42; // shift up from 0.5 to reduce gap above treble staff
+  // We'll set centerY after computing halfStep so top treble line lands at ~15px from top
 
   var trebleTopDi = diatonicIndex(TREBLE_LINE_MIDIS[4]);
   var trebleBottomDi = diatonicIndex(TREBLE_LINE_MIDIS[0]);
   var staffSpanDi = trebleTopDi - trebleBottomDi;
   var lineSpacing = Math.min(12, (H * 0.28) / staffSpanDi);
   var halfStep = lineSpacing / 2;
+  // Position centerY so top treble line (F5) is ~15px from canvas top
+  var centerY = 15 + (trebleTopDi - centerDiatonic) * halfStep;
 
   function midiToY(midi) {
     var di = diatonicIndex(midi);
