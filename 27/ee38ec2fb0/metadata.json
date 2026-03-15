@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "27ee38ec2fb0",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "CHANGELOG.md",
+    "VERSION",
+    "package.json",
+    "sheets/classical/fur-elise.json",
+    "src/agent/server.ts",
+    "static/index.html"
+  ],
+  "sessions": [
+    {
+      "metadata": "/27/ee38ec2fb0/0/metadata.json",
+      "transcript": "/27/ee38ec2fb0/0/full.jsonl",
+      "context": "/27/ee38ec2fb0/0/context.md",
+      "content_hash": "/27/ee38ec2fb0/0/content_hash.txt",
+      "prompt": "/27/ee38ec2fb0/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 36,
+    "cache_creation_tokens": 18523,
+    "cache_read_tokens": 2787008,
+    "output_tokens": 11787,
+    "api_call_count": 36
+  }
+}
