@@ -60,6 +60,18 @@
   .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
   .status-dot.error { background: var(--rose); }
   .status-label { font-size: 12px; color: var(--text3); }
+  .gemini-speaking {
+    display: flex; align-items: center; gap: 4px; padding: 2px 8px;
+    border-radius: 10px; background: rgba(255,255,255,0.06); font-size: 11px; color: var(--text2);
+  }
+  .gemini-speaking .vol-bar {
+    width: 40px; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden;
+  }
+  .gemini-speaking .vol-fill {
+    height: 100%; width: 0%; background: var(--green); border-radius: 3px; transition: width 0.05s;
+  }
+  .gemini-speaking.active { color: var(--text1); }
+  .gemini-speaking.active .vol-fill { background: var(--green); }
   button {
     padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--bg2); color: var(--text); font-size: 13px; font-weight: 500;
@@ -403,7 +415,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.4</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.5</div>
       </div>
     </div>
     <div class="controls">
@@ -416,6 +428,10 @@
       <span class="bpm-val" id="bpmVal" style="font-size:10px;color:var(--text3);min-width:20px;">90</span>
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
+      <div class="gemini-speaking" id="geminiSpeaking">
+        <span id="geminiSpeakLabel">Silent</span>
+        <div class="vol-bar"><div class="vol-fill" id="geminiVolFill"></div></div>
+      </div>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
       <button class="secondary" id="btnCamera" onclick="toggleCamera()" disabled style="display:none">Camera On</button>
     </div>
@@ -462,18 +478,6 @@
           <div class="dot" style="background:var(--accent);width:5px;height:5px;border-radius:50%"></div>
           <div class="level-bar-bg"><div class="level-bar" id="levelBar"></div></div>
           <div class="level-label" id="levelLabel">0</div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <div class="dot" style="background:var(--gemini)"></div>COACHING FOCUS
-        </div>
-        <div class="coaching-card">
-          <div class="coaching-focus" id="coachingFocus">
-            <div class="focus-label">CURRENT FOCUS</div>
-            <div id="coachingText">Start a session to receive coaching guidance.</div>
-          </div>
         </div>
       </div>
 
@@ -1475,7 +1479,21 @@ function queueAudio(arrayBuf) {
   if (!playbackCtx) return;
   var int16 = new Int16Array(arrayBuf);
   var float32 = new Float32Array(int16.length);
-  for (var i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
+  var rms = 0;
+  for (var i = 0; i < int16.length; i++) {
+    float32[i] = int16[i] / 32768;
+    rms += float32[i] * float32[i];
+  }
+  rms = Math.sqrt(rms / int16.length);
+  // Update speaking indicator
+  var speakEl = document.getElementById('geminiSpeaking');
+  var labelEl = document.getElementById('geminiSpeakLabel');
+  var fillEl = document.getElementById('geminiVolFill');
+  if (speakEl && fillEl) {
+    speakEl.className = 'gemini-speaking active';
+    labelEl.textContent = 'Speaking';
+    fillEl.style.width = Math.min(100, rms * 500) + '%';
+  }
   var buffer = playbackCtx.createBuffer(1, float32.length, 24000);
   buffer.copyToChannel(float32, 0);
   var src = playbackCtx.createBufferSource();
@@ -1485,8 +1503,15 @@ function queueAudio(arrayBuf) {
   var startTime = Math.max(now + 0.01, nextPlayTime);
   src.start(startTime);
   nextPlayTime = startTime + buffer.duration;
-  // Gate mic streaming while agent audio is playing to avoid self-interruption.
   playbackActiveUntil = nextPlayTime + 0.2;
+  // Reset indicator when playback ends
+  src.onended = function() {
+    if (playbackCtx && playbackCtx.currentTime >= playbackActiveUntil - 0.25) {
+      if (speakEl) speakEl.className = 'gemini-speaking';
+      if (labelEl) labelEl.textContent = 'Silent';
+      if (fillEl) fillEl.style.width = '0%';
+    }
+  };
 }
 
 // ============================================================================
@@ -1836,37 +1861,41 @@ function drawGrandStaff() {
 
   var middleCY = midiToY(60);
 
-  // Clef symbols — proper music notation placement
-  ctx.fillStyle = '#AAAAAA';
+  // Clef and time signature references
   var trebleMidY = (trebleTop + trebleBottom) / 2;
   var bassMidY = (bassTop + bassBottom) / 2;
-  // Treble clef: curl centers on G4 line (2nd line from bottom)
-  var trebleG4Y = midiToY(67); // G4
-  ctx.font = (lineSpacing * 6) + 'px serif';
-  ctx.fillText('\uD834\uDD1E', 2, trebleG4Y + lineSpacing * 1.5);
-  // Bass clef: starts at F3 line (2nd line from top = BASS_LINE_MIDIS[3])
-  var bassF3Y = midiToY(53); // F3
-  ctx.font = (lineSpacing * 3.5) + 'px serif';
-  ctx.fillText('\uD834\uDD22', 2, bassF3Y + lineSpacing * 0.4);
+  var trebleG4Y = midiToY(67); // G4 — treble clef reference line
+  var bassF3Y = midiToY(53); // F3 — bass clef reference line
+  var staffH = trebleBottom - trebleTop; // pixel height of one staff
 
-  // Time signature — top number in upper half, bottom in lower half of each staff
-  // Treble: line 4 = D5 (idx 3), line 2 = G4 (idx 1)
-  var trebleLine4Y = midiToY(TREBLE_LINE_MIDIS[3]); // D5
-  var trebleLine2Y = midiToY(TREBLE_LINE_MIDIS[1]); // G4
-  // Bass: line 4 = F3 (idx 3), line 2 = B2 (idx 1)
-  var bassLine4Y = midiToY(BASS_LINE_MIDIS[3]); // F3
-  var bassLine2Y = midiToY(BASS_LINE_MIDIS[1]); // B2
+  // Treble clef — Unicode 𝄞, baseline = G4 line
+  ctx.fillStyle = '#AAAAAA';
+  ctx.font = Math.round(staffH * 1.6) + 'px serif';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('\uD834\uDD1E', 1, trebleG4Y);
+  // Bass clef — Unicode 𝄢, top dot at F3 line
+  ctx.font = Math.round(staffH * 0.95) + 'px serif';
+  ctx.fillText('\uD834\uDD22', 1, bassF3Y + staffH * 0.08);
+  ctx.textBaseline = 'alphabetic';
+
+  // Time signature — each number fills half the staff height
+  // Standard: top number between lines 3-5, bottom between lines 1-3
   var tsX = clefW + 2;
-  var tsFontSize = Math.round(lineSpacing * 2);
+  var tsFontSize = Math.round(staffH * 0.48);
   ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
   ctx.textAlign = 'center';
-  // Each number vertically centered between its two staff lines
-  ctx.fillText(timeSig[0], tsX + 6, (trebleLine4Y + trebleTop) / 2 + tsFontSize * 0.35);
-  ctx.fillText(timeSig[1], tsX + 6, (trebleLine2Y + trebleBottom) / 2 + tsFontSize * 0.35);
-  ctx.fillText(timeSig[0], tsX + 6, (bassLine4Y + bassTop) / 2 + tsFontSize * 0.35);
-  ctx.fillText(timeSig[1], tsX + 6, (bassLine2Y + bassBottom) / 2 + tsFontSize * 0.35);
+  ctx.textBaseline = 'middle';
+  // Treble staff: top number centered between lines 3(B4) and 5(F5), bottom between 1(E4) and 3(B4)
+  var trebleLine3Y = midiToY(TREBLE_LINE_MIDIS[2]); // B4
+  ctx.fillText(timeSig[0], tsX + 6, (trebleTop + trebleLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 6, (trebleLine3Y + trebleBottom) / 2);
+  // Bass staff: top between lines 3(D3) and 5(A3), bottom between 1(G2) and 3(D3)
+  var bassLine3Y = midiToY(BASS_LINE_MIDIS[2]); // D3
+  ctx.fillText(timeSig[0], tsX + 6, (bassTop + bassLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 6, (bassLine3Y + bassBottom) / 2);
   ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
 
   // Key signature accidentals
   var ksX = clefW + timeSigW;
@@ -2105,22 +2134,26 @@ function drawGrandStaff() {
   ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, marginLeft - 2, H);
 
-  // Redraw clefs and key sig on top (same placement as above)
+  // Redraw clefs and key sig on top (same as initial draw)
   ctx.fillStyle = '#AAAAAA';
-  ctx.font = (lineSpacing * 6) + 'px serif';
-  ctx.fillText('\uD834\uDD1E', 2, trebleG4Y + lineSpacing * 1.5);
-  ctx.font = (lineSpacing * 3.5) + 'px serif';
-  ctx.fillText('\uD834\uDD22', 2, bassF3Y + lineSpacing * 0.4);
+  ctx.textBaseline = 'middle';
+  ctx.font = Math.round(staffH * 1.6) + 'px serif';
+  ctx.fillText('\uD834\uDD1E', 1, trebleG4Y);
+  ctx.font = Math.round(staffH * 0.95) + 'px serif';
+  ctx.fillText('\uD834\uDD22', 1, bassF3Y + staffH * 0.08);
+  ctx.textBaseline = 'alphabetic';
 
   // Redraw time sig
   ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
   ctx.textAlign = 'center';
-  ctx.fillText(timeSig[0], tsX + 6, (trebleLine4Y + trebleTop) / 2 + tsFontSize * 0.35);
-  ctx.fillText(timeSig[1], tsX + 6, (trebleLine2Y + trebleBottom) / 2 + tsFontSize * 0.35);
-  ctx.fillText(timeSig[0], tsX + 6, (bassLine4Y + bassTop) / 2 + tsFontSize * 0.35);
-  ctx.fillText(timeSig[1], tsX + 6, (bassLine2Y + bassBottom) / 2 + tsFontSize * 0.35);
+  ctx.textBaseline = 'middle';
+  ctx.fillText(timeSig[0], tsX + 6, (trebleTop + trebleLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 6, (trebleLine3Y + trebleBottom) / 2);
+  ctx.fillText(timeSig[0], tsX + 6, (bassTop + bassLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 6, (bassLine3Y + bassBottom) / 2);
   ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
 
   // Redraw key sig
   if (absKeySig > 0) {

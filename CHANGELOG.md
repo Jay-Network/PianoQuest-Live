@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.5] - 2026-03-15
+
+### Added
+- Gemini speaking indicator with volume bar in header (shows Speaking/Silent + green volume fill)
+
+### Fixed
+- Grand staff clef placement: treble clef uses textBaseline='middle' at G4, bass clef at F3 with staffH-proportional font sizes
+- Time signature: numbers centered between lines 3-5 (top) and 1-3 (bottom) using middle line as split
+
+### Removed
+- COACHING FOCUS panel from left sidebar
+
 ## [1.8.4] - 2026-03-15
 
 ### Fixed
