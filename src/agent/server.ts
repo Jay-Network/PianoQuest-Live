@@ -771,9 +771,9 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
               prebuilt_voice_config: { voice_name: "Puck" },
             },
           },
-          input_audio_transcription: {},
-          output_audio_transcription: {},
         },
+        input_audio_transcription: {},
+        output_audio_transcription: {},
         system_instruction: { parts: [{ text: STORYTELLER_INSTRUCTION }] },
         tools: buildToolDeclarations(),
         realtime_input_config: {

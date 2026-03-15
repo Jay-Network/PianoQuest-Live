@@ -177,7 +177,8 @@
   /* Piano MIDI stack */
   .midi-stack { display: flex; flex-direction: column; gap: 0; }
   .midi-panel { border-radius: 12px 12px 0 0; }
-  .keyboard-panel { border-radius: 0 0 12px 12px; border-top: none; }
+  .keyboard-panel { border-radius: 0; border-top: none; }
+  .staff-panel { border-radius: 0 0 12px 12px; border-top: none; }
   .midi-header-tools {
     margin-left: auto;
     display: flex;
@@ -354,7 +355,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.6.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.6.2</div>
       </div>
     </div>
     <div class="controls">
@@ -459,6 +460,16 @@
           </div>
         </div>
 
+        <div class="panel keyboard-panel" style="border-radius:0;border-top:none;">
+          <div class="panel-header">
+            <div class="dot" style="background:var(--blue)"></div>KEYBOARD
+          </div>
+          <div class="keyboard-wrap">
+            <canvas id="keyboardCanvas"></canvas>
+          </div>
+          <div class="keyboard-hint">Digital piano MIDI drives the keyboard, waterfall, dynamics, and technique score. Microphone input is reserved for speech.</div>
+        </div>
+
         <div class="panel staff-panel" style="border-radius:0;border-top:none;">
           <div class="panel-header">
             <div class="dot" style="background:var(--green)"></div>GRAND STAFF
@@ -499,16 +510,6 @@
           <div class="staff-wrap" style="padding:0;background:#111118;">
             <canvas id="grandStaffCanvas"></canvas>
           </div>
-        </div>
-
-        <div class="panel keyboard-panel">
-          <div class="panel-header">
-            <div class="dot" style="background:var(--blue)"></div>KEYBOARD
-          </div>
-          <div class="keyboard-wrap">
-            <canvas id="keyboardCanvas"></canvas>
-          </div>
-          <div class="keyboard-hint">Digital piano MIDI drives the keyboard, waterfall, dynamics, and technique score. Microphone input is reserved for speech.</div>
         </div>
       </div>
     </div>
@@ -1445,9 +1446,7 @@ function drawPianoRoll() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   var W = rect.width;
   var H = canvas.height / dpr;
-  var waterfallH = H * 0.78;
-  var dynamicsH = H * 0.22;
-  var dynamicsY = waterfallH;
+  var waterfallH = H;  // full height — dynamics moved to keyboard canvas
   var whiteKeyW = W / WHITE_KEYS_COUNT;
   var blackKeyW = whiteKeyW * 0.65;
   var pixelsPerMs = waterfallH / 5000;
@@ -1605,49 +1604,6 @@ function drawPianoRoll() {
   ctx.fillStyle = fadeGrad;
   ctx.fillRect(0, 0, W, fadeH);
 
-  ctx.fillStyle = '#111118';
-  ctx.fillRect(0, dynamicsY, W, dynamicsH);
-  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, dynamicsY);
-  ctx.lineTo(W, dynamicsY);
-  ctx.stroke();
-
-  ctx.font = '9px DM Sans, sans-serif';
-  DYNAMICS_LABELS.forEach(function(dl) {
-    var y = dynamicsY + dynamicsH - (dl.vel / 127) * dynamicsH;
-    ctx.strokeStyle = dynamicsColor(dl.vel, 0.28);
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(W, y);
-    ctx.stroke();
-    ctx.fillStyle = dynamicsColor(dl.vel, 0.4);
-    ctx.fillText(dl.label, 3, y - 2);
-  });
-
-  function drawBars(blackOnly) {
-    activeNotes.forEach(function(note, midi) {
-      var keyInfo = KEY_BY_MIDI.get(midi);
-      if (!keyInfo || keyInfo.isBlack !== blackOnly) return;
-      var barH = (note.velocity / 127) * (dynamicsH - 4);
-      var barX = keyInfo.isBlack
-        ? (keyInfo.whiteIndex + 1) * whiteKeyW - blackKeyW / 2
-        : keyInfo.whiteIndex * whiteKeyW + 1;
-      var barW = keyInfo.isBlack ? blackKeyW : whiteKeyW - 2;
-      var color = fingerDownNotes.has(midi) ? dynamicsColor(note.velocity) : darkenedColor(note.velocity, 0.5);
-      if (keyInfo.isBlack) {
-        ctx.fillStyle = '#111118';
-        ctx.fillRect(barX, dynamicsY + 1, barW, dynamicsH - 2);
-      }
-      ctx.fillStyle = color;
-      ctx.fillRect(barX, dynamicsY + dynamicsH - barH - 2, barW, barH);
-    });
-  }
-
-  drawBars(false);
-  drawBars(true);
 }
 
 // ============================================================================
@@ -1787,7 +1743,7 @@ function drawGrandStaff() {
   var timeSigW = 16;
   var keySigW = Math.abs(keySigNum) * 10 + 4;
   var marginLeft = clefW + timeSigW + keySigW + 4;
-  var playLineX = marginLeft + (W - marginLeft) * 0.12; // where notes should be played
+  var playLineX = marginLeft + (W - marginLeft) * 0.5; // center of staff
   var nowMs = Date.now();
 
   // Draw staff lines
@@ -1995,11 +1951,24 @@ function drawGrandStaff() {
     drawStem(tnX, tnY, tnColor, noteRadius);
   }
 
-  // --- PLAYED NOTES (active) at play line ---
+  // --- PLAYED NOTES (active) at play line, elongating left ---
   activeNotes.forEach(function(noteData, midi) {
     if (midi < FIRST_MIDI || midi > FIRST_MIDI + TOTAL_KEYS - 1) return;
     var noteY = midiToY(midi);
     var color = fingerDownNotes.has(midi) ? dynamicsColor(noteData.velocity) : darkenedColor(noteData.velocity, 0.5);
+    var holdMs = nowMs - noteData.timestamp;
+    var tailPx = holdMs * pxPerMs; // elongate left at tempo-matched speed
+    var tailX = Math.max(marginLeft, playLineX - tailPx);
+
+    // Draw elongation tail (rounded rect from tailX to playLineX)
+    if (tailPx > 2) {
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.roundRect(tailX, noteY - noteRadius * 0.7, playLineX - tailX, noteRadius * 1.4, noteRadius * 0.7);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
 
     drawLedgerLines(playLineX, noteY);
     drawAccidental(playLineX, noteY, midi, color);
@@ -2007,21 +1976,39 @@ function drawGrandStaff() {
     drawStem(playLineX, noteY, color, noteRadius);
   });
 
-  // --- NOTE HISTORY scrolling left from play line ---
-  var historyWindow = 4000;
+  // --- NOTE HISTORY scrolling left from play line at tempo speed ---
+  var maxLeftPx = playLineX - marginLeft;
   for (var i = noteHistory.length - 1; i >= 0; i--) {
     var entry = noteHistory[i];
     var age = nowMs - entry.startMs;
-    if (age > historyWindow) break;
+    var offsetPx = age * pxPerMs; // same speed as measure bar flow
+    if (offsetPx > maxLeftPx) break;
     if (activeNotes.has(entry.note)) continue;
 
     var noteY = midiToY(entry.note);
-    var t = age / historyWindow;
-    // Scroll LEFT from play line
-    var noteX = playLineX - t * (playLineX - marginLeft);
+    var noteX = playLineX - offsetPx;
     if (noteX < marginLeft) continue;
+
+    // Draw duration tail for history notes
+    var duration = (entry.endMs || nowMs) - entry.startMs;
+    var durationPx = duration * pxPerMs;
+    var tailRight = noteX;
+    var tailLeft = Math.max(marginLeft, noteX - durationPx + offsetPx > marginLeft ? playLineX - (age - duration) * pxPerMs : marginLeft);
+    // Simpler: tail from noteX to noteX + durationPx, but capped
+    var tailEndX = Math.min(playLineX, noteX + durationPx);
+
+    var t = offsetPx / maxLeftPx;
     var alpha = Math.max(0.1, 1 - t);
     var color = dynamicsColor(entry.velocity, alpha);
+
+    if (durationPx > 2) {
+      ctx.fillStyle = color;
+      ctx.globalAlpha = alpha * 0.5;
+      ctx.beginPath();
+      ctx.roundRect(noteX, noteY - noteRadius * 0.7, tailEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
 
     if (alpha > 0.3) drawLedgerLines(noteX, noteY);
     if (alpha > 0.3) drawAccidental(noteX, noteY, entry.note, dynamicsColor(entry.velocity, alpha * 0.8));
@@ -2082,18 +2069,63 @@ function drawKeyboard() {
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
+  var dynamicsH = 48; // dynamic bars zone above keyboard
+  var keyboardH = Math.max(100, rect.width * 0.13);
+  var totalH = dynamicsH + keyboardH;
   canvas.width = rect.width * dpr;
-  canvas.height = Math.max(128, rect.width * 0.16) * dpr;
+  canvas.height = totalH * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   var W = rect.width;
-  var H = canvas.height / dpr;
+  var keyTop = dynamicsH; // keys start below dynamics zone
   var whiteKeyW = W / WHITE_KEYS_COUNT;
   var blackKeyW = whiteKeyW * 0.6;
-  var blackKeyH = H * 0.62;
+  var blackKeyH = keyboardH * 0.62;
 
-  ctx.clearRect(0, 0, W, H);
+  ctx.clearRect(0, 0, W, totalH);
+
+  // --- Dynamic bars zone (above keyboard) ---
+  ctx.fillStyle = '#111118';
+  ctx.fillRect(0, 0, W, dynamicsH);
+
+  // Dynamics guide lines
+  ctx.font = '9px DM Sans, sans-serif';
+  DYNAMICS_LABELS.forEach(function(dl) {
+    var y = keyTop - (dl.vel / 127) * dynamicsH;
+    ctx.strokeStyle = dynamicsColor(dl.vel, 0.28);
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+    ctx.fillStyle = dynamicsColor(dl.vel, 0.4);
+    ctx.fillText(dl.label, 3, y - 2);
+  });
+
+  // Dynamic bars — grow upward from keyboard top
+  function drawDynBars(blackOnly) {
+    activeNotes.forEach(function(note, midi) {
+      var keyInfo = KEY_BY_MIDI.get(midi);
+      if (!keyInfo || keyInfo.isBlack !== blackOnly) return;
+      var barH = (note.velocity / 127) * (dynamicsH - 2);
+      var barX = keyInfo.isBlack
+        ? (keyInfo.whiteIndex + 1) * whiteKeyW - blackKeyW / 2
+        : keyInfo.whiteIndex * whiteKeyW + 1;
+      var barW = keyInfo.isBlack ? blackKeyW : whiteKeyW - 2;
+      var color = fingerDownNotes.has(midi) ? dynamicsColor(note.velocity) : darkenedColor(note.velocity, 0.5);
+      if (keyInfo.isBlack) {
+        ctx.fillStyle = '#111118';
+        ctx.fillRect(barX, 0, barW, dynamicsH);
+      }
+      ctx.fillStyle = color;
+      ctx.fillRect(barX, keyTop - barH, barW, barH);
+    });
+  }
+  drawDynBars(false);
+  drawDynBars(true);
+
+  // --- Keyboard keys ---
   ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillRect(0, keyTop, W, keyboardH);
 
   KEYBOARD.forEach(function(key) {
     if (key.isBlack) return;
@@ -2110,10 +2142,10 @@ function drawKeyboard() {
       ctx.shadowBlur = 0;
     }
 
-    ctx.fillRect(x + 0.5, 0, whiteKeyW - 1, H - 1);
+    ctx.fillRect(x + 0.5, keyTop, whiteKeyW - 1, keyboardH - 1);
     ctx.strokeStyle = 'rgba(0,0,0,0.22)';
     ctx.lineWidth = 0.5;
-    ctx.strokeRect(x + 0.5, 0, whiteKeyW - 1, H - 1);
+    ctx.strokeRect(x + 0.5, keyTop, whiteKeyW - 1, keyboardH - 1);
   });
 
   ctx.shadowBlur = 0;
@@ -2131,10 +2163,10 @@ function drawKeyboard() {
       ctx.fillStyle = '#111111';
     }
 
-    ctx.fillRect(x, 0, blackKeyW, blackKeyH);
+    ctx.fillRect(x, keyTop, blackKeyW, blackKeyH);
     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 0.5;
-    ctx.strokeRect(x, 0, blackKeyW, blackKeyH);
+    ctx.strokeRect(x, keyTop, blackKeyW, blackKeyH);
   });
 }
 

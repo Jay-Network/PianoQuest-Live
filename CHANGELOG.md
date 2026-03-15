@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-03-15
+
+### Fixed
+- **CRITICAL**: Move `input_audio_transcription` and `output_audio_transcription` from `generation_config` to `setup` level in Gemini BidiGenerateContent setup message (caused instant close with code 1007)
+- Grand staff play line moved to center (was at 12% from left)
+- Active notes now elongate leftward while held, at tempo-matched speed (pxPerMs)
+- Note history scrolls left at tempo-matched speed (same as measure bar flow)
+- History notes show duration tails (rounded rectangles) proportional to hold time
+
 ## [1.6.1] - 2026-03-15
 
 ### Fixed
