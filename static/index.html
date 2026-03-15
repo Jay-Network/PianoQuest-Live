@@ -403,7 +403,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.3</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.4</div>
       </div>
     </div>
     <div class="controls">
@@ -1836,24 +1836,36 @@ function drawGrandStaff() {
 
   var middleCY = midiToY(60);
 
-  // Clef symbols
+  // Clef symbols — proper music notation placement
   ctx.fillStyle = '#AAAAAA';
   var trebleMidY = (trebleTop + trebleBottom) / 2;
   var bassMidY = (bassTop + bassBottom) / 2;
-  ctx.font = '22px serif';
-  ctx.fillText('\uD834\uDD1E', 2, trebleMidY + 8);
-  ctx.font = '18px serif';
-  ctx.fillText('\uD834\uDD22', 2, bassMidY + 6);
+  // Treble clef: curl centers on G4 line (2nd line from bottom)
+  var trebleG4Y = midiToY(67); // G4
+  ctx.font = (lineSpacing * 6) + 'px serif';
+  ctx.fillText('\uD834\uDD1E', 2, trebleG4Y + lineSpacing * 1.5);
+  // Bass clef: starts at F3 line (2nd line from top = BASS_LINE_MIDIS[3])
+  var bassF3Y = midiToY(53); // F3
+  ctx.font = (lineSpacing * 3.5) + 'px serif';
+  ctx.fillText('\uD834\uDD22', 2, bassF3Y + lineSpacing * 0.4);
 
-  // Time signature
+  // Time signature — top number in upper half, bottom in lower half of each staff
+  // Treble: line 4 = D5 (idx 3), line 2 = G4 (idx 1)
+  var trebleLine4Y = midiToY(TREBLE_LINE_MIDIS[3]); // D5
+  var trebleLine2Y = midiToY(TREBLE_LINE_MIDIS[1]); // G4
+  // Bass: line 4 = F3 (idx 3), line 2 = B2 (idx 1)
+  var bassLine4Y = midiToY(BASS_LINE_MIDIS[3]); // F3
+  var bassLine2Y = midiToY(BASS_LINE_MIDIS[1]); // B2
   var tsX = clefW + 2;
-  ctx.font = 'bold 14px DM Sans, sans-serif';
+  var tsFontSize = Math.round(lineSpacing * 2);
+  ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
   ctx.textAlign = 'center';
-  ctx.fillText(timeSig[0], tsX + 6, trebleMidY + 2);
-  ctx.fillText(timeSig[1], tsX + 6, trebleBottom + 2);
-  ctx.fillText(timeSig[0], tsX + 6, bassMidY - 1);
-  ctx.fillText(timeSig[1], tsX + 6, bassBottom);
+  // Each number vertically centered between its two staff lines
+  ctx.fillText(timeSig[0], tsX + 6, (trebleLine4Y + trebleTop) / 2 + tsFontSize * 0.35);
+  ctx.fillText(timeSig[1], tsX + 6, (trebleLine2Y + trebleBottom) / 2 + tsFontSize * 0.35);
+  ctx.fillText(timeSig[0], tsX + 6, (bassLine4Y + bassTop) / 2 + tsFontSize * 0.35);
+  ctx.fillText(timeSig[1], tsX + 6, (bassLine2Y + bassBottom) / 2 + tsFontSize * 0.35);
   ctx.textAlign = 'left';
 
   // Key signature accidentals
@@ -2093,21 +2105,21 @@ function drawGrandStaff() {
   ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, marginLeft - 2, H);
 
-  // Redraw clefs and key sig on top
+  // Redraw clefs and key sig on top (same placement as above)
   ctx.fillStyle = '#AAAAAA';
-  ctx.font = '22px serif';
-  ctx.fillText('\uD834\uDD1E', 2, trebleMidY + 8);
-  ctx.font = '18px serif';
-  ctx.fillText('\uD834\uDD22', 2, bassMidY + 6);
+  ctx.font = (lineSpacing * 6) + 'px serif';
+  ctx.fillText('\uD834\uDD1E', 2, trebleG4Y + lineSpacing * 1.5);
+  ctx.font = (lineSpacing * 3.5) + 'px serif';
+  ctx.fillText('\uD834\uDD22', 2, bassF3Y + lineSpacing * 0.4);
 
   // Redraw time sig
-  ctx.font = 'bold 14px DM Sans, sans-serif';
+  ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
   ctx.textAlign = 'center';
-  ctx.fillText(timeSig[0], tsX + 6, trebleMidY + 2);
-  ctx.fillText(timeSig[1], tsX + 6, trebleBottom + 2);
-  ctx.fillText(timeSig[0], tsX + 6, bassMidY - 1);
-  ctx.fillText(timeSig[1], tsX + 6, bassBottom);
+  ctx.fillText(timeSig[0], tsX + 6, (trebleLine4Y + trebleTop) / 2 + tsFontSize * 0.35);
+  ctx.fillText(timeSig[1], tsX + 6, (trebleLine2Y + trebleBottom) / 2 + tsFontSize * 0.35);
+  ctx.fillText(timeSig[0], tsX + 6, (bassLine4Y + bassTop) / 2 + tsFontSize * 0.35);
+  ctx.fillText(timeSig[1], tsX + 6, (bassLine2Y + bassBottom) / 2 + tsFontSize * 0.35);
   ctx.textAlign = 'left';
 
   // Redraw key sig

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.4] - 2026-03-15
+
+### Fixed
+- **CRITICAL**: Empty GOOGLE_API_KEY on Cloud Run — cloudbuild.yaml had `_API_KEY: ''`, now uses Secret Manager `google-api-key:latest`
+- Grand staff clef placement: treble clef centered on G4 line, bass clef on F3 line (proper music notation)
+- Grand staff time signature: top/bottom numbers centered in upper/lower halves of each staff
+- Clef and time signature font sizes scale with lineSpacing
+
 ## [1.8.3] - 2026-03-15
 
 ### Fixed
