@@ -21,13 +21,12 @@ steps:
       - '--max-instances=5'
       - '--min-instances=1'
       - '--session-affinity'
-      - '--set-env-vars=GOOGLE_API_KEY=${_API_KEY}'
+      - '--set-secrets=GOOGLE_API_KEY=google-api-key:latest'
 
 substitutions:
   _REGION: us-central1
   _REPO: pianoquest-live
   _SERVICE: pianoquest-live
-  _API_KEY: ''
 
 options:
   logging: CLOUD_LOGGING_ONLY
