@@ -1,144 +1,121 @@
-# PianoQuest Live — Demo Video Script (v0.3.0)
+# PianoQuest Live — Demo Video Script (v1.0.0)
 
-**Duration:** 3-4 minutes (max 4:00)
-**Arc:** Bad playing → Coaching → Visible improvement
+**Duration:** 3 minutes (strict)
+**Arc:** Bad playing → Coaching with EYE/EAR reports → Visible improvement
 **Judging:** Innovation 40% | Technical 30% | Demo 30%
+**Narrative:** "AI that makes you a better musician"
 
 ---
 
-## Opening — The Hook (0:00 - 0:20)
+## Opening — The Hook (0:00 - 0:15)
 
-**Visual:** Dark screen. Piano chord sound. PianoQuest Live logo fades in.
-**Voiceover:** "What if your piano playing could tell a story? What if an AI could see your hands, hear your music, and coach you in real time — all through creative narrative?"
+**Visual:** Browser opens PianoQuest Live. Full UI visible.
+**Voiceover:** "What if an AI could watch your hands, hear your music, and coach you in real time — connecting what it sees to what it hears?"
 
-**Action:** Browser opens. Full UI visible: quest map, scene card ("Your Quest Awaits"), empty achievement shelf, technique score showing "--".
-
----
-
-## The Problem (0:20 - 0:35)
-
-**Voiceover:** "Music practice apps score notes right or wrong. They don't make music meaningful. PianoQuest Live changes that — it turns every practice session into an interactive quest."
-
-**Action:** Click "Start Session." Camera activates showing hands on keyboard. Status dot turns green. Level meter starts responding.
+**Action:** Click "Start Session." Camera activates. Hands visible on keyboard.
 
 ---
 
-## Act 1 — Bad Playing (0:35 - 1:15)
+## Act 1 — Bad Playing + First Report (0:15 - 0:50)
 
-**Player:** Plays C major triad with uneven dynamics (loud C, quiet E, loud G). Rhythm slightly off.
+**Player:** Plays C major triad with uneven dynamics. E too soft, G too hard.
 
-**What the viewer sees:**
-- **MIDI bars** show uneven heights (visual proof of imbalance)
-- **Rhythm grid** shows amber/red dots (off-beat)
-- **Technique score** appears: ~35-45
-- **Quest map** stays at "Opening"
+**Agent:** Greets briefly, observes, then coaches: "I can see your 3rd finger collapsing — and the E is getting buried."
 
-**Agent (voice):** Greets warmly. "Welcome to the Harmony Garden — here, every note in your chord must bloom equally." Observes: "I can see your middle finger is flatter than the others, and I can hear the E getting lost."
+**Tool calls fire:**
+- `set_scene("enchanted_forest")` — scene card changes
+- `advance_quest(0)` then `advance_quest(1)` — quest map progresses
+- `report_technique` — **THE WOW MOMENT:**
+  - EYE: "3rd finger collapsing at first knuckle"
+  - EAR: "E note noticeably softer than C and G"
+  - Suggestion: "Curve fingertip, press from knuckle arch"
+- `set_coaching_focus("Curve your 3rd finger — lead with the fingertip")`
 
-**What changes:**
-- **Scene card** transitions to "Harmony Garden" (green gradient) via `set_scene` tool call
-- **Quest map** advances to "Assessment" (line turns green) via `advance_quest` tool call
-- **Coaching focus card** updates: "Try curving your middle finger more to get weight on the E" via `set_coaching_focus` tool call
-- **"First Note" badge** appears with animated popup via `award_badge` tool call
+**Show:** Technique panel with EYE/EAR labels. Score ~40. Badge: "first_note".
 
 ---
 
-## Act 2 — Coaching (1:15 - 2:15)
+## Act 2 — Iterative Coaching (0:50 - 1:45)
 
-**Player (voice):** "How can I make the E louder without hitting it harder?"
+**Player (voice):** "Like this?" — tries again, slightly better.
 
-**Agent (voice):** "Imagine you're whispering the C, speaking the E, and whispering the G. The E needs more finger weight, not more force. Try leading with your fingertip."
+**Agent:** "Better! The E is waking up. Try it once more."
 
-**What changes:**
-- **Coaching focus** updates with the tip via `set_coaching_focus` tool call
-- **Quest map** advances to "Challenge" via `advance_quest` tool call
-- **Scene** may shift to "Technique Tower" if agent calls `set_scene`
-
-**Player:** Tries again. Second attempt slightly better.
-
-**Agent:** "Better! I can hear the E waking up. Your wrist dropped a bit on that stretch though — try keeping it level."
+**Second `report_technique`:**
+- EYE: "fingertip more curved than before"
+- EAR: "E velocity closer to C and G — gap narrowing"
+- Shows CHANGE from previous attempt
 
 **Player:** Third attempt — more even.
 
-**Agent:** "Yes! Did you feel that difference? That chord is starting to sing as one voice."
+**Agent:** "Yes! Did you feel that? Much more balanced."
 
-**What the viewer sees:**
-- **MIDI bars** becoming more uniform with each attempt
-- **Technique score** climbing: 45 → 55 → 65
-- **Score trend arrow** appears (green up arrow)
-- **Rhythm grid** dots becoming greener
+**Third `report_technique`:**
+- EYE: "good finger arch maintained"
+- EAR: "velocities within 10% — even triad"
 
----
-
-## Act 3 — Breakthrough (2:15 - 2:50)
-
-**Player:** Plays the triad with good evenness. Then plays a short progression (C-F-G-C) with consistent dynamics.
-
-**Agent:** "That chord rang like a bell! You've earned the Resonant Triad. The Harmony Garden is in full bloom."
-
-**What the viewer sees (the money shots):**
-- **Technique score** hits 78-85+ (turns green)
-- **"Resonant Triad" achievement** pops up with animation
-- **Scene** transitions to "Sunrise Peak" (warm orange gradient)
-- **Quest map** advances to "Mastery"
-- **MIDI bars** showing even, consistent response
-- **Rhythm grid** mostly green dots on-beat
+**What viewer sees:**
+- 3 technique reports stacking in panel (EYE/EAR for each attempt)
+- Score climbing: 40 → 55 → 70
+- `advance_quest(2)` — quest at Challenge
+- `set_scene("technique_tower")`
 
 ---
 
-## Wrap-Up (2:50 - 3:20)
+## Act 3 — Breakthrough (1:45 - 2:30)
 
-**Agent:** "Chapter complete! From uneven chords to a resonant voice — what a journey. You've conquered the Harmony Garden."
+**Player:** Plays triad evenly. Then C-F-G-C progression with consistent dynamics.
 
-**What changes:**
-- **"Chapter Complete" badge** popup via `award_badge` tool call
-- **Quest map** reaches "Celebration" — all nodes green via `advance_quest` tool call
-- **Scene** transitions to "Victory Hall" (gold gradient) via `set_scene` tool call
+**Agent:** "That chord rang like a bell."
 
-**Player (voice):** "That was amazing. I could actually feel the improvement."
+**Tool calls:**
+- `award_badge("even_triad")` — animated badge popup
+- `set_scene("sunrise_peak")`
+- `advance_quest(3)` — quest at Mastery
+- `report_technique` showing before/after: "fingers curved, velocities balanced, clean legato transition"
 
----
-
-## Tech Walkthrough (3:20 - 3:50)
-
-**Visual:** Architecture diagram (docs/architecture.svg) or overlay on the app.
-
-**Voiceover / text overlay:**
-- "3 multimodal inputs: Camera + Piano Audio + Voice"
-- "8 interleaved outputs: Voice, Scenes, MIDI Bars, Rhythm Grid, Score, Coaching, Achievements, Quest Map"
-- "Powered by Gemini 2.5 Flash Live API + Google ADK"
-- "Deployed on Google Cloud Run"
-- "Real-time WebSocket streaming — no turn-taking"
+**Score hits 85.** Trend arrow green.
 
 ---
 
-## End Card (3:50 - 4:00)
+## Wrap-Up (2:30 - 2:50)
 
-**Visual:** PianoQuest Live logo, final technique score, all earned badges.
+**Agent:** "Beautiful journey. From uneven chords to a resonant voice."
 
-**Text:**
-- "PianoQuest Live — Creative Musical Storytelling"
-- "Gemini Live Agent Challenge — Creative Storyteller"
+- `award_badge("chapter_complete")`
+- `set_scene("victory_hall")`
+- `advance_quest(4)` — all phases complete
+
+**Player:** "I could actually feel the improvement."
+
+---
+
+## End Card (2:50 - 3:00)
+
+Show: Final score (~85), 4-5 EYE/EAR technique reports in panel, all badges, quest map fully lit.
+
+**Text overlay:**
+- "PianoQuest Live — AI that makes you a better musician"
+- "Vision + MIDI + Voice → Real-time coaching"
+- "Gemini 2.5 Flash Native Audio + Google ADK TypeScript"
+- "Google Cloud Run"
 - GitHub URL
-- "Built by Jay — MIT · STEM Educator"
-- #GeminiLiveAgentChallenge
 
 ---
 
-## Key Moments to Capture
+## Key Moments for Judges
 
-1. **Scene transition** — the gradient change when agent says "Harmony Garden"
-2. **Achievement popup** — the animated badge sliding in
-3. **Score climbing** — technique score going from 35 to 85
-4. **Quest map progression** — nodes lighting up green
-5. **MIDI bars evening out** — visual proof of dynamics improvement
-6. **Agent referencing vision** — "I can see your middle finger is flatter"
+1. **0:30** — First `report_technique` with EYE/EAR structured data (proves real multimodal fusion)
+2. **1:15** — Second report showing CHANGE from previous attempt (proves iterative coaching)
+3. **1:45** — Score improvement visible (quantifiable: 40→85)
+4. **2:10** — Badge awarded for genuine improvement (not scripted)
+5. **Throughout** — Agent voice is natural, 1-2 sentences, not lecturing
 
 ## Demo Tips
 
-- Use a well-lit keyboard for clear camera view
-- Exaggerate the "bad" playing initially (very uneven dynamics)
-- Speak clearly when talking to the agent
-- Show the full UI in frame so all 8 output modalities are visible
-- Keep BPM slider at 90 for the demo
-- Consider split screen: webcam of hands + app UI
+- Well-lit keyboard for clear camera view
+- Exaggerate "bad" playing (very uneven dynamics)
+- Speak clearly to the agent
+- Keep the full UI in frame
+- BPM slider at 90
+- The EYE/EAR technique panel is the centerpiece — make sure it's visible

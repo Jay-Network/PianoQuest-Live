@@ -442,7 +442,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v0.4.6</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.0.1</div>
       </div>
       <div class="score-display" id="scoreDisplay">
         <div>
@@ -870,7 +870,6 @@ function handleToolEvent(msg) {
 }
 
 function showTechniqueReport(msg) {
-  if (!bothHandsDetected) return;
   var panel = document.getElementById('techniquePanel');
   // Clear placeholder text on first report
   if (!panel.querySelector('.technique-entry')) {
@@ -1477,7 +1476,8 @@ async function startSession() {
     updateCameraUi();
     initHandTracking();
 
-    audioCtx = new AudioContext({ sampleRate: 16000 });
+    audioCtx = new AudioContext();
+    var nativeRate = audioCtx.sampleRate;
     var source = audioCtx.createMediaStreamSource(mediaStream);
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 2048;
@@ -1489,13 +1489,16 @@ async function startSession() {
 
     playbackCtx = new AudioContext({ sampleRate: 24000 });
     nextPlayTime = 0;
+    var downsampleRatio = nativeRate / 16000;
     processor.onaudioprocess = function(e) {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
       if (playbackCtx && playbackCtx.currentTime < playbackActiveUntil) return;
-      var input = e.inputBuffer.getChannelData(0);
-      var pcm16 = new Int16Array(input.length);
-      for (var i = 0; i < input.length; i++) {
-        pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(input[i] * 32767)));
+      var f32 = e.inputBuffer.getChannelData(0);
+      var outLen = Math.floor(f32.length / downsampleRatio);
+      var pcm16 = new Int16Array(outLen);
+      for (var i = 0; i < outLen; i++) {
+        var srcIdx = Math.floor(i * downsampleRatio);
+        pcm16[i] = Math.max(-32768, Math.min(32767, Math.round(f32[srcIdx] * 32767)));
       }
       ws.send(pcm16.buffer);
     };

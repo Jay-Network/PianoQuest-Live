@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-03-14
+
+### Fixed
+- Removed bothHandsDetected guard from showTechniqueReport() — trust model judgment, prevent report swallowing during brief tracking drops
+- Mic audio quality: capture at native sample rate and downsample to 16kHz (cross-app fix from JayWalks Live)
+
+### Changed
+- Conversation-first system prompt: shorter responses (1-2 sentences), natural flow, tools used sparingly
+- Updated demo script for v1.0.0 architecture
+
+## [1.0.0] - 2026-03-12
+
+### Changed
+- **BREAKING**: Migrated entire backend from Python (FastAPI + ADK Python) to TypeScript (Express + ws + @google/genai)
+  - Runtime: Python 3.11 → Node.js 20
+  - Server: FastAPI WebSocket → Express + `ws` library
+  - AI: ADK `Runner.run_live()` → `@google/genai` `client.live.connect()` (ADK TS v0.5 lacks `runLive`)
+  - Tools: Python functions with `contextvars` → manual `functionDeclarations` + local execution
+  - Dockerfile: python:3.11-slim → node:20-slim
+- All 5 tools preserved: set_scene, award_badge, set_coaching_focus, advance_quest, report_technique
+- WebSocket protocol unchanged — frontend (static/index.html) requires no changes
+- System instruction preserved verbatim
+
+### Added
+- `src/index.ts` — entry point
+- `src/agent/agent.ts` — tool definitions, system instruction, ADK LlmAgent (structural)
+- `src/agent/server.ts` — Express + WebSocket + Gemini Live API integration
+- `package.json`, `tsconfig.json` — TypeScript project config
+- ADK FunctionTool definitions with Zod schemas (for future `runLive` support)
+
+### Removed
+- `agent/agent.py`, `agent/server.py`, `agent/__init__.py`, `agent/__main__.py`
+- `requirements.txt`
+
+## [0.4.7] - 2026-03-12
+
 ### Added
 - `report_technique` tool for vision-audio correlation reporting
 - Finger Tracking UI panel
