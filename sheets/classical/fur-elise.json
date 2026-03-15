@@ -1,0 +1,68 @@
+{
+  "title": "Fur Elise",
+  "composer": "Ludwig van Beethoven",
+  "key": "A minor",
+  "tempo": 70,
+  "timeSig": "3/8",
+  "measures": [
+    { "notes": [
+      { "midi": 76, "beat": 0, "dur": 0.5 },
+      { "midi": 75, "beat": 0.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 76, "beat": 0, "dur": 0.5 },
+      { "midi": 75, "beat": 0.5, "dur": 0.5 },
+      { "midi": 76, "beat": 1, "dur": 0.5 },
+      { "midi": 71, "beat": 1.5, "dur": 0.5 },
+      { "midi": 74, "beat": 2, "dur": 0.5 },
+      { "midi": 72, "beat": 2.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 69, "beat": 0, "dur": 1.5 },
+      { "midi": 45, "beat": 0, "dur": 1.5 },
+      { "midi": 52, "beat": 1.5, "dur": 0.5 },
+      { "midi": 57, "beat": 2, "dur": 0.5 },
+      { "midi": 60, "beat": 2.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 64, "beat": 0, "dur": 1.5 },
+      { "midi": 40, "beat": 0, "dur": 1.5 },
+      { "midi": 52, "beat": 1.5, "dur": 0.5 },
+      { "midi": 56, "beat": 2, "dur": 0.5 },
+      { "midi": 64, "beat": 2.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 76, "beat": 0, "dur": 1.5 },
+      { "midi": 45, "beat": 0, "dur": 1.5 },
+      { "midi": 52, "beat": 1.5, "dur": 0.5 },
+      { "midi": 64, "beat": 2, "dur": 0.5 },
+      { "midi": 75, "beat": 2.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 76, "beat": 0, "dur": 0.5 },
+      { "midi": 75, "beat": 0.5, "dur": 0.5 },
+      { "midi": 76, "beat": 1, "dur": 0.5 },
+      { "midi": 71, "beat": 1.5, "dur": 0.5 },
+      { "midi": 74, "beat": 2, "dur": 0.5 },
+      { "midi": 72, "beat": 2.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 69, "beat": 0, "dur": 1.5 },
+      { "midi": 45, "beat": 0, "dur": 1.5 },
+      { "midi": 52, "beat": 1.5, "dur": 0.5 },
+      { "midi": 57, "beat": 2, "dur": 0.5 },
+      { "midi": 60, "beat": 2.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 64, "beat": 0, "dur": 1.5 },
+      { "midi": 40, "beat": 0, "dur": 1.5 },
+      { "midi": 52, "beat": 1.5, "dur": 0.5 },
+      { "midi": 56, "beat": 2, "dur": 0.5 },
+      { "midi": 64, "beat": 2.5, "dur": 0.5 }
+    ]},
+    { "notes": [
+      { "midi": 71, "beat": 0, "dur": 1.5 },
+      { "midi": 45, "beat": 0, "dur": 1.5 }
+    ]}
+  ]
+}

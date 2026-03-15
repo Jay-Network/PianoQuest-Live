@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-15
+
+### Added
+- Score panel (right column): browse sheet music files, preview on mini grand staff
+- Sheet music file system: `/sheets/` directory served statically, `/api/sheets` tree listing
+- `sheets/classical/fur-elise.json` — Fur Elise opening measures as digital note data
+- "Load as Target Notes" — sends score notes to waterfall + grand staff target system
+- Color mode toggle: velocity-based coloring on sheet music notation
+- Score canvas: mini grand staff renderer with treble/bass, stems, ledger lines
+
+### Changed
+- Layout: 3-column grid (left sidebar, center midi stack, right score panel)
+- Keyboard panel moved above grand staff (dynamic bars grow upward from keyboard top)
+- Dynamic bars removed from piano roll canvas, integrated into keyboard canvas
+- Piano roll waterfall uses full canvas height
+
 ## [1.6.2] - 2026-03-15
 
 ### Fixed

@@ -79,7 +79,7 @@
   /* Main grid */
   .main {
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 260px 1fr 280px;
     gap: 12px;
     flex: 1;
   }
@@ -265,6 +265,7 @@
 
   @media (max-width: 900px) {
     .main { grid-template-columns: 1fr; }
+    .score-col { display: none; }
     .quest-map { overflow-x: auto; }
     .midi-header-tools {
       width: 100%;
@@ -345,6 +346,46 @@
   .secondary-camera-preview video {
     width: 100%; border-radius: 12px; display: block;
   }
+
+  /* Score panel (right column) */
+  .score-col { display: flex; flex-direction: column; gap: 12px; }
+  .score-browser {
+    display: flex; flex-direction: column; height: 100%;
+  }
+  .score-tree {
+    flex: 1; overflow-y: auto; padding: 6px 8px; font-size: 11px;
+    max-height: 300px;
+  }
+  .score-tree-folder { padding: 2px 0; }
+  .score-tree-folder-name {
+    cursor: pointer; font-weight: 700; color: var(--text2);
+    padding: 3px 4px; border-radius: 4px; display: flex; align-items: center; gap: 4px;
+  }
+  .score-tree-folder-name:hover { background: rgba(255,255,255,0.05); }
+  .score-tree-children { padding-left: 14px; }
+  .score-tree-file {
+    cursor: pointer; padding: 3px 8px; border-radius: 4px;
+    color: var(--text2); display: flex; align-items: center; gap: 4px;
+  }
+  .score-tree-file:hover { background: rgba(255,255,255,0.05); color: var(--text1); }
+  .score-tree-file.active { background: rgba(251,191,36,0.12); color: var(--amber); }
+  .score-preview {
+    padding: 8px; border-top: 1px solid var(--border);
+  }
+  .score-info { font-size: 11px; color: var(--text2); padding: 4px 0; }
+  .score-info .title { font-size: 14px; font-weight: 700; color: var(--text1); margin-bottom: 2px; }
+  .score-info .composer { font-size: 11px; color: var(--text3); }
+  .score-info .meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
+  .score-canvas-wrap { background: #111118; border-radius: 6px; margin-top: 6px; }
+  .score-canvas-wrap canvas { width: 100%; display: block; }
+  .score-actions { display: flex; gap: 6px; padding: 6px 0; }
+  .score-actions button {
+    flex: 1; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg2); color: var(--text2); font-size: 10px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .score-actions button:hover { border-color: var(--amber); color: var(--amber); }
+  .score-actions button.active { border-color: var(--green); color: var(--green); background: rgba(134,239,172,0.08); }
 </style>
 </head>
 <body>
@@ -355,7 +396,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.6.2</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.7.0</div>
       </div>
     </div>
     <div class="controls">
@@ -434,7 +475,7 @@
 
     </div>
 
-    <!-- Right column: Scene + MIDI UI -->
+    <!-- Center column: Scene + MIDI UI -->
     <div class="right-col">
 
       <div class="midi-stack">
@@ -513,6 +554,32 @@
         </div>
       </div>
     </div>
+
+    <!-- Right column: Score Browser -->
+    <div class="score-col">
+      <div class="panel" style="flex:1;display:flex;flex-direction:column;">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--amber)"></div>SCORE
+        </div>
+        <div class="score-browser">
+          <div class="score-tree" id="scoreTree">
+            <div style="color:var(--text3);font-size:10px;">Loading sheets...</div>
+          </div>
+          <div class="score-preview" id="scorePreview" style="display:none;">
+            <div class="score-info" id="scoreInfo"></div>
+            <div class="score-canvas-wrap">
+              <canvas id="scoreCanvas"></canvas>
+            </div>
+            <div class="score-actions">
+              <button id="scoreLoadBtn" onclick="loadScoreToTargets()">Load as Target Notes</button>
+              <button id="scoreColorBtn" onclick="toggleScoreColorMode()">Color Mode</button>
+              <button id="scorePlayBtn" onclick="toggleScorePlayback()">Play</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -2180,6 +2247,273 @@ function updateLevelMeter() {
   document.getElementById('levelBar').style.width = pct + '%';
   document.getElementById('levelLabel').textContent = Math.round(pct);
 }
+
+// ============================================================================
+// Score Browser & Sheet Music Renderer
+// ============================================================================
+
+var currentScore = null;
+var scoreColorMode = false;
+var scorePlaybackTimer = null;
+
+function loadScoreTree() {
+  fetch('/api/sheets').then(function(r) { return r.json(); }).then(function(tree) {
+    var el = document.getElementById('scoreTree');
+    el.innerHTML = '';
+    renderTree(el, tree);
+  }).catch(function() {
+    document.getElementById('scoreTree').innerHTML = '<div style="color:var(--text3);font-size:10px;">No sheets found</div>';
+  });
+}
+
+function renderTree(parent, items) {
+  items.forEach(function(item) {
+    if (item.type === 'folder') {
+      var folder = document.createElement('div');
+      folder.className = 'score-tree-folder';
+      var name = document.createElement('div');
+      name.className = 'score-tree-folder-name';
+      name.innerHTML = '<span style="font-size:10px;">&#128193;</span> ' + item.name;
+      var children = document.createElement('div');
+      children.className = 'score-tree-children';
+      name.onclick = function() { children.style.display = children.style.display === 'none' ? '' : 'none'; };
+      folder.appendChild(name);
+      folder.appendChild(children);
+      renderTree(children, item.children);
+      parent.appendChild(folder);
+    } else {
+      var file = document.createElement('div');
+      file.className = 'score-tree-file';
+      file.innerHTML = '<span style="font-size:10px;">&#9835;</span> ' + item.name;
+      file.onclick = function() {
+        document.querySelectorAll('.score-tree-file.active').forEach(function(f) { f.classList.remove('active'); });
+        file.classList.add('active');
+        loadScore(item.path);
+      };
+      parent.appendChild(file);
+    }
+  });
+}
+
+function loadScore(filePath) {
+  fetch('/sheets/' + filePath).then(function(r) { return r.json(); }).then(function(score) {
+    currentScore = score;
+    var preview = document.getElementById('scorePreview');
+    preview.style.display = '';
+    var info = document.getElementById('scoreInfo');
+    info.innerHTML = '<div class="title">' + score.title + '</div>' +
+      '<div class="composer">' + score.composer + '</div>' +
+      '<div class="meta">' + score.key + ' &middot; ' + score.timeSig + ' &middot; &#9833; = ' + score.tempo + '</div>';
+    drawScorePreview(score);
+  });
+}
+
+function drawScorePreview(score) {
+  var canvas = document.getElementById('scoreCanvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
+  if (!rect.width) return;
+  var measuresPerLine = 2;
+  var lineH = 90;
+  var lines = Math.ceil(score.measures.length / measuresPerLine);
+  var totalH = lines * lineH + 20;
+  canvas.width = rect.width * dpr;
+  canvas.height = totalH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  var W = rect.width;
+
+  ctx.clearRect(0, 0, W, totalH);
+  ctx.fillStyle = '#111118';
+  ctx.fillRect(0, 0, W, totalH);
+
+  var staffSpacing = 6;
+  var measureW = (W - 20) / measuresPerLine;
+
+  for (var line = 0; line < lines; line++) {
+    var baseY = line * lineH + 20;
+
+    // Draw treble staff lines
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 0.5;
+    for (var s = 0; s < 5; s++) {
+      var y = baseY + s * staffSpacing;
+      ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W - 10, y); ctx.stroke();
+    }
+    // Bass staff
+    var bassBaseY = baseY + 5 * staffSpacing + 10;
+    for (var s = 0; s < 5; s++) {
+      var y = bassBaseY + s * staffSpacing;
+      ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W - 10, y); ctx.stroke();
+    }
+
+    // Draw notes for each measure in this line
+    for (var m = 0; m < measuresPerLine; m++) {
+      var mIdx = line * measuresPerLine + m;
+      if (mIdx >= score.measures.length) break;
+      var measure = score.measures[mIdx];
+      var mX = 10 + m * measureW;
+
+      // Measure bar line
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(mX + measureW, baseY);
+      ctx.lineTo(mX + measureW, bassBaseY + 4 * staffSpacing);
+      ctx.stroke();
+
+      // Draw notes
+      var timeSigParts = score.timeSig.split('/');
+      var beatsInMeasure = parseInt(timeSigParts[0]);
+      measure.notes.forEach(function(note) {
+        var noteX = mX + 12 + (note.beat / beatsInMeasure) * (measureW - 20);
+        var noteY = scoreNoteY(note.midi, baseY, bassBaseY, staffSpacing);
+
+        // Color mode: velocity-based coloring
+        if (scoreColorMode) {
+          var vel = note.vel || 80;
+          ctx.fillStyle = dynamicsColor(vel);
+        } else {
+          ctx.fillStyle = note.midi >= 60 ? '#DDDDDD' : '#BBBBBB';
+        }
+
+        // Note head
+        ctx.beginPath();
+        ctx.ellipse(noteX, noteY, 4, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stem
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (noteY > baseY + 2 * staffSpacing) {
+          ctx.moveTo(noteX + 3.5, noteY);
+          ctx.lineTo(noteX + 3.5, noteY - 20);
+        } else {
+          ctx.moveTo(noteX - 3.5, noteY);
+          ctx.lineTo(noteX - 3.5, noteY + 20);
+        }
+        ctx.stroke();
+
+        // Ledger lines if needed
+        drawScoreLedgerLines(ctx, noteX, noteY, baseY, bassBaseY, staffSpacing);
+      });
+    }
+  }
+}
+
+function scoreNoteY(midi, trebleBaseY, bassBaseY, sp) {
+  // Map MIDI to staff position using diatonic system
+  // Treble: F5(77)=top line, E4(64)=bottom line
+  // Bass: A3(57)=top line, G2(43)=bottom line
+  var NOTE_OFFSETS = { 0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6 }; // C,D,E,F,G,A,B
+  var pc = midi % 12;
+  var octave = Math.floor(midi / 12) - 1;
+  var diatonic = NOTE_OFFSETS[pc] !== undefined ? NOTE_OFFSETS[pc] : NOTE_OFFSETS[pc - 1] + 0.5;
+  var stepsFromC4 = (octave - 4) * 7 + diatonic; // diatonic steps from C4(midi 60)
+
+  if (midi >= 60) {
+    // Treble: B4 = middle line (step 6 from C4)
+    // E4(step 2) = bottom line = trebleBaseY + 4*sp
+    var y = trebleBaseY + 4 * sp - (stepsFromC4 - 2) * (sp / 2);
+    return y;
+  } else {
+    // Bass: D3(step -5) = middle line = bassBaseY + 2*sp
+    var y = bassBaseY + 2 * sp - (stepsFromC4 + 5) * (sp / 2);
+    return y;
+  }
+}
+
+function drawScoreLedgerLines(ctx, x, y, trebleBase, bassBase, sp) {
+  var trebleBottom = trebleBase + 4 * sp;
+  var bassTop = bassBase;
+  var bassBottom = bassBase + 4 * sp;
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 0.8;
+
+  // Above treble
+  for (var ly = trebleBase - sp; ly >= y - 1; ly -= sp) {
+    ctx.beginPath(); ctx.moveTo(x - 6, ly); ctx.lineTo(x + 6, ly); ctx.stroke();
+  }
+  // Below treble / above bass (middle C area)
+  for (var ly = trebleBottom + sp; ly <= y + 1; ly += sp) {
+    if (ly < bassTop) {
+      ctx.beginPath(); ctx.moveTo(x - 6, ly); ctx.lineTo(x + 6, ly); ctx.stroke();
+    }
+  }
+  // Below bass
+  for (var ly = bassBottom + sp; ly <= y + 1; ly += sp) {
+    ctx.beginPath(); ctx.moveTo(x - 6, ly); ctx.lineTo(x + 6, ly); ctx.stroke();
+  }
+}
+
+function loadScoreToTargets() {
+  if (!currentScore) return;
+  // Clear existing targets
+  targetNotes.length = 0;
+
+  var tempo = currentScore.tempo;
+  var msPerBeat = 60000 / tempo;
+  var timeSigParts = currentScore.timeSig.split('/');
+  var beatsPerMeasure = parseInt(timeSigParts[0]);
+  var startMs = Date.now() + 2000; // 2 second lead-in
+
+  // Set staff tempo/time sig/scale to match score
+  document.getElementById('staffTempo').value = tempo;
+  var timeSigSelect = document.getElementById('staffTimeSig');
+  for (var i = 0; i < timeSigSelect.options.length; i++) {
+    if (timeSigSelect.options[i].value === currentScore.timeSig) {
+      timeSigSelect.selectedIndex = i; break;
+    }
+  }
+  var scaleSelect = document.getElementById('staffScale');
+  for (var i = 0; i < scaleSelect.options.length; i++) {
+    if (scaleSelect.options[i].value === currentScore.key) {
+      scaleSelect.selectedIndex = i; break;
+    }
+  }
+
+  currentScore.measures.forEach(function(measure, mIdx) {
+    var measureStartMs = startMs + mIdx * beatsPerMeasure * msPerBeat;
+    measure.notes.forEach(function(note) {
+      targetNotes.push({
+        midi: note.midi,
+        arriveMs: measureStartMs + note.beat * msPerBeat,
+        durationBeats: note.dur,
+        hit: false
+      });
+    });
+  });
+
+  // Update button
+  document.getElementById('scoreLoadBtn').classList.add('active');
+  document.getElementById('scoreLoadBtn').textContent = 'Loaded (' + targetNotes.length + ' notes)';
+  setTimeout(function() {
+    document.getElementById('scoreLoadBtn').classList.remove('active');
+    document.getElementById('scoreLoadBtn').textContent = 'Load as Target Notes';
+  }, 3000);
+}
+
+function toggleScorePlayback() {
+  // TODO: MIDI playback of score
+  alert('Score playback coming soon');
+}
+
+function toggleScoreColorMode() {
+  scoreColorMode = !scoreColorMode;
+  var btn = document.getElementById('scoreColorBtn');
+  if (scoreColorMode) {
+    btn.classList.add('active');
+    btn.textContent = 'Color ON';
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = 'Color Mode';
+  }
+  if (currentScore) drawScorePreview(currentScore);
+}
+
+// Load score tree on init
+setTimeout(loadScoreTree, 500);
 
 // ============================================================================
 // UI Helpers

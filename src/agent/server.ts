@@ -9,6 +9,7 @@
 import express from "express";
 import { createServer } from "http";
 import path from "path";
+import fs from "fs";
 import { WebSocketServer, WebSocket } from "ws";
 // GoogleGenAI SDK live.connect() has a bug (instant close after setup).
 // Using raw WebSocket to Gemini Live API instead.
@@ -23,6 +24,7 @@ import {
 
 const APP_NAME = "pianoquest";
 const STATIC_DIR = path.join(__dirname, "..", "..", "static");
+const SHEETS_DIR = path.join(__dirname, "..", "..", "sheets");
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -308,6 +310,27 @@ export function createApp() {
   });
 
   app.use("/static", express.static(STATIC_DIR));
+  app.use("/sheets", express.static(SHEETS_DIR));
+
+  // List sheet music files as a tree
+  app.get("/api/sheets", (_req, res) => {
+    function walkDir(dir: string, prefix: string): any[] {
+      const entries: any[] = [];
+      if (!fs.existsSync(dir)) return entries;
+      for (const name of fs.readdirSync(dir).sort()) {
+        const full = path.join(dir, name);
+        const rel = prefix ? `${prefix}/${name}` : name;
+        const stat = fs.statSync(full);
+        if (stat.isDirectory()) {
+          entries.push({ name, path: rel, type: "folder", children: walkDir(full, rel) });
+        } else if (name.endsWith(".json")) {
+          entries.push({ name: name.replace(".json", ""), path: rel, type: "file" });
+        }
+      }
+      return entries;
+    }
+    res.json(walkDir(SHEETS_DIR, ""));
+  });
 
   server.on("upgrade", (request: IncomingMessage, socket, head) => {
     const url = new URL(request.url ?? "/", `http://${request.headers.host}`);
