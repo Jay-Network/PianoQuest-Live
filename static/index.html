@@ -227,6 +227,7 @@
     padding: 0;
     background: #0a0a0a;
   }
+  .staff-wrap canvas,
   .roll-wrap canvas,
   .keyboard-wrap canvas {
     width: 100%;
@@ -453,6 +454,15 @@
           </div>
         </div>
 
+        <div class="panel staff-panel" style="border-radius:0;border-top:none;">
+          <div class="panel-header">
+            <div class="dot" style="background:var(--green)"></div>GRAND STAFF
+          </div>
+          <div class="staff-wrap" style="padding:0;background:#111118;">
+            <canvas id="grandStaffCanvas"></canvas>
+          </div>
+        </div>
+
         <div class="panel keyboard-panel">
           <div class="panel-header">
             <div class="dot" style="background:var(--blue)"></div>KEYBOARD
@@ -567,7 +577,7 @@ document.getElementById('midiInputSelect').addEventListener('change', function(e
 });
 
 // ============================================================================
-// Scene and Achievement Definitions (all hardcoded — no user input)
+// MIDI helpers
 // ============================================================================
 function buildKeyboard() {
   var keys = [];
@@ -1356,6 +1366,7 @@ function drawLoop() {
   if (!sessionActive) return;
   processHandTracking();
   drawPianoRoll();
+  drawGrandStaff();
   drawKeyboard();
   drawHandOverlay();
   updateLevelMeter();
@@ -1544,6 +1555,231 @@ function drawPianoRoll() {
 
   drawBars(false);
   drawBars(true);
+}
+
+// ============================================================================
+// Grand Staff — diatonic coordinate system (from PianoQuest app)
+// ============================================================================
+
+// Staff line MIDI values
+var TREBLE_LINE_MIDIS = [64, 67, 71, 74, 77]; // E4, G4, B4, D5, F5
+var BASS_LINE_MIDIS   = [43, 47, 50, 53, 57]; // G2, B2, D3, F3, A3
+
+function diatonicIndex(midi) {
+  var octave = Math.floor(midi / 12) - 1;
+  var n = midi % 12;
+  var diatonic;
+  switch (n) {
+    case 0: case 1: diatonic = 0; break;   // C, C#
+    case 2: case 3: diatonic = 1; break;   // D, D#
+    case 4: diatonic = 2; break;           // E
+    case 5: case 6: diatonic = 3; break;   // F, F#
+    case 7: case 8: diatonic = 4; break;   // G, G#
+    case 9: case 10: diatonic = 5; break;  // A, A#
+    case 11: diatonic = 6; break;          // B
+    default: diatonic = 0;
+  }
+  return octave * 7 + diatonic;
+}
+
+function isBlackKey(midi) {
+  return BLACK_KEY_PATTERN[midi % 12];
+}
+
+function drawGrandStaff() {
+  var canvas = document.getElementById('grandStaffCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.getBoundingClientRect();
+  if (!rect.width) return;
+  var desiredH = 160;
+  canvas.width = rect.width * dpr;
+  canvas.height = desiredH * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  var W = rect.width;
+  var H = desiredH;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#111118';
+  ctx.fillRect(0, 0, W, H);
+
+  // Diatonic layout: center on B3 (MIDI 59) — middle of grand staff gap
+  var centerMidi = 59;
+  var centerDiatonic = diatonicIndex(centerMidi);
+  var centerY = H / 2;
+
+  // Line spacing derived from treble staff spanning 4 gaps
+  var trebleTopDi = diatonicIndex(TREBLE_LINE_MIDIS[4]);
+  var trebleBottomDi = diatonicIndex(TREBLE_LINE_MIDIS[0]);
+  var staffSpanDi = trebleTopDi - trebleBottomDi; // 4 diatonic steps
+  var lineSpacing = Math.min(12, (H * 0.28) / staffSpanDi);
+  var halfStep = lineSpacing / 2;
+
+  function midiToY(midi) {
+    var di = diatonicIndex(midi);
+    return centerY - (di - centerDiatonic) * halfStep;
+  }
+
+  var clefW = 28;
+  var noteAreaLeft = clefW + 8;
+
+  // Draw staff lines
+  ctx.strokeStyle = '#555555';
+  ctx.lineWidth = 1;
+  for (var t = 0; t < TREBLE_LINE_MIDIS.length; t++) {
+    var y = midiToY(TREBLE_LINE_MIDIS[t]);
+    ctx.beginPath();
+    ctx.moveTo(clefW, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+  for (var b = 0; b < BASS_LINE_MIDIS.length; b++) {
+    var y = midiToY(BASS_LINE_MIDIS[b]);
+    ctx.beginPath();
+    ctx.moveTo(clefW, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+
+  // Middle C ledger line reference (faint)
+  var middleCY = midiToY(60);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 0.5;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(clefW, middleCY);
+  ctx.lineTo(W, middleCY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Clef symbols
+  ctx.font = '22px serif';
+  ctx.fillStyle = '#AAAAAA';
+  var trebleMidY = (midiToY(TREBLE_LINE_MIDIS[0]) + midiToY(TREBLE_LINE_MIDIS[4])) / 2;
+  var bassMidY = (midiToY(BASS_LINE_MIDIS[0]) + midiToY(BASS_LINE_MIDIS[4])) / 2;
+  ctx.fillText('\uD834\uDD1E', 4, trebleMidY + 8); // treble clef
+  ctx.font = '18px serif';
+  ctx.fillText('\uD834\uDD22', 4, bassMidY + 6);   // bass clef
+
+  // Staff boundaries for ledger lines
+  var trebleTop = midiToY(TREBLE_LINE_MIDIS[4]);
+  var trebleBottom = midiToY(TREBLE_LINE_MIDIS[0]);
+  var bassTop = midiToY(BASS_LINE_MIDIS[4]);
+  var bassBottom = midiToY(BASS_LINE_MIDIS[0]);
+
+  function drawLedgerLines(noteX, noteY) {
+    ctx.strokeStyle = '#555555';
+    ctx.lineWidth = 1;
+    var ledgerHalf = 10;
+    // Middle C line
+    if (Math.abs(noteY - middleCY) < halfStep) {
+      ctx.beginPath();
+      ctx.moveTo(noteX - ledgerHalf, middleCY);
+      ctx.lineTo(noteX + ledgerHalf, middleCY);
+      ctx.stroke();
+    }
+    // Above treble
+    if (noteY < trebleTop - halfStep * 0.5) {
+      var ly = trebleTop - lineSpacing;
+      while (ly >= noteY - halfStep * 0.5) {
+        ctx.beginPath();
+        ctx.moveTo(noteX - ledgerHalf, ly);
+        ctx.lineTo(noteX + ledgerHalf, ly);
+        ctx.stroke();
+        ly -= lineSpacing;
+      }
+    }
+    // Below bass
+    if (noteY > bassBottom + halfStep * 0.5) {
+      var ly = bassBottom + lineSpacing;
+      while (ly <= noteY + halfStep * 0.5) {
+        ctx.beginPath();
+        ctx.moveTo(noteX - ledgerHalf, ly);
+        ctx.lineTo(noteX + ledgerHalf, ly);
+        ctx.stroke();
+        ly += lineSpacing;
+      }
+    }
+  }
+
+  // Draw active notes on staff
+  var noteRadius = Math.max(3, lineSpacing * 0.4);
+  var nowMs = Date.now();
+
+  // Active notes — filled circles
+  activeNotes.forEach(function(noteData, midi) {
+    if (midi < FIRST_MIDI || midi > FIRST_MIDI + TOTAL_KEYS - 1) return;
+    var noteY = midiToY(midi);
+    // Position note horizontally at a fixed x
+    var noteX = noteAreaLeft + (W - noteAreaLeft) * 0.15;
+    var color = fingerDownNotes.has(midi) ? dynamicsColor(noteData.velocity) : darkenedColor(noteData.velocity, 0.5);
+
+    drawLedgerLines(noteX, noteY);
+
+    // Accidental for black keys
+    if (isBlackKey(midi)) {
+      ctx.font = '11px serif';
+      ctx.fillStyle = color;
+      ctx.fillText('\u266F', noteX - noteRadius - 11, noteY + 4);
+    }
+
+    // Note head
+    ctx.beginPath();
+    ctx.arc(noteX, noteY, noteRadius, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    // Stem
+    var stemUp = noteY > middleCY;
+    var stemLen = lineSpacing * 3.5;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    if (stemUp) {
+      ctx.moveTo(noteX + noteRadius - 1, noteY);
+      ctx.lineTo(noteX + noteRadius - 1, noteY - stemLen);
+    } else {
+      ctx.moveTo(noteX - noteRadius + 1, noteY);
+      ctx.lineTo(noteX - noteRadius + 1, noteY + stemLen);
+    }
+    ctx.stroke();
+  });
+
+  // Recent note history — fading circles scrolling right
+  var historyWindow = 4000; // 4 seconds
+  for (var i = noteHistory.length - 1; i >= 0; i--) {
+    var entry = noteHistory[i];
+    var age = nowMs - entry.startMs;
+    if (age > historyWindow) break;
+    if (activeNotes.has(entry.note)) continue;
+
+    var noteY = midiToY(entry.note);
+    var t = age / historyWindow;
+    var noteX = noteAreaLeft + (W - noteAreaLeft) * (0.15 + t * 0.8);
+    var alpha = Math.max(0.1, 1 - t);
+    var color = dynamicsColor(entry.velocity, alpha);
+
+    // Ledger lines for recent notes too
+    if (alpha > 0.3) drawLedgerLines(noteX, noteY);
+
+    // Accidental
+    if (isBlackKey(entry.note) && alpha > 0.3) {
+      ctx.font = '11px serif';
+      ctx.fillStyle = dynamicsColor(entry.velocity, alpha * 0.8);
+      ctx.fillText('\u266F', noteX - noteRadius - 11, noteY + 4);
+    }
+
+    ctx.beginPath();
+    ctx.arc(noteX, noteY, noteRadius * (0.6 + 0.4 * (1 - t)), 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  // Labels
+  ctx.font = '8px DM Sans, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillText('C4', clefW + 2, middleCY - 3);
 }
 
 function drawKeyboard() {
