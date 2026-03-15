@@ -442,7 +442,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.3.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.3.1</div>
       </div>
       <div class="score-display" id="scoreDisplay">
         <div>
@@ -1494,6 +1494,11 @@ async function startSession() {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
       if (playbackCtx && playbackCtx.currentTime < playbackActiveUntil) return;
       var f32 = e.inputBuffer.getChannelData(0);
+      // Energy gate: skip silent chunks so Gemini detects end-of-speech
+      var sum = 0;
+      for (var j = 0; j < f32.length; j++) sum += f32[j] * f32[j];
+      var rms = Math.sqrt(sum / f32.length);
+      if (rms < 0.01) return;
       var outLen = Math.floor(f32.length / downsampleRatio);
       var pcm16 = new Int16Array(outLen);
       for (var i = 0; i < outLen; i++) {

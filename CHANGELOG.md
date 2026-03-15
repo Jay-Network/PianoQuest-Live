@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-03-15
+
+### Fixed
+- Mic audio energy gate: skip silent chunks (RMS < 0.01) so Gemini's automatic activity detection triggers end-of-speech correctly (cross-app fix from BookSage)
+
 ## [1.3.0] - 2026-03-15
 
 ### Added
