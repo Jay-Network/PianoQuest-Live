@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-03-15
+
+### Added
+- QR code button in room bar for easy secondary device onboarding
+- Better Gemini Live session close/error logging for diagnostics
+
+### Fixed
+- Grand staff visualization between piano roll and keyboard
+
 ## [1.5.0] - 2026-03-15
 
 ### Removed

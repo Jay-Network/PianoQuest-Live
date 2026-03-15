@@ -927,11 +927,11 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         },
         onerror: (e: any) => {
           if (!closed) {
-            console.log(`[${APP_NAME}] Gemini Live error:`, e?.message ?? e);
+            console.log(`[${APP_NAME}] Gemini Live error:`, JSON.stringify(e, Object.getOwnPropertyNames(e ?? {})));
           }
         },
-        onclose: () => {
-          console.log(`[${APP_NAME}] Gemini Live session closed: ${sessionId}`);
+        onclose: (e: any) => {
+          console.log(`[${APP_NAME}] Gemini Live session closed: ${sessionId}`, JSON.stringify(e ?? "no reason"));
           closed = true;
           try { ws.close(); } catch {}
         },

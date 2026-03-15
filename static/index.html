@@ -354,7 +354,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.5.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.5.1</div>
       </div>
     </div>
     <div class="controls">
@@ -382,6 +382,11 @@
         <div class="room-bar">
           Room: <span class="room-code" id="roomCodeDisplay">----</span>
           <button class="mini-btn" type="button" onclick="copyRoomLink()">Copy Link</button>
+          <button class="mini-btn" type="button" onclick="toggleQr()">QR</button>
+        </div>
+        <div id="qrPanel" style="display:none;text-align:center;padding:8px;background:#111118;border-radius:0 0 8px 8px;">
+          <img id="qrImg" style="width:180px;height:180px;border-radius:4px;" alt="QR code">
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;">Scan to join this session</div>
         </div>
       </div>
 
@@ -1250,6 +1255,7 @@ async function startSession() {
             myRoomCode = msg.room;
             document.getElementById('deviceManagerPanel').style.display = '';
             document.getElementById('roomCodeDisplay').textContent = msg.room;
+            updateQr(msg.room);
           } else if (msg.type === 'room_code') {
             myRoomCode = msg.room;
             var label = document.getElementById('statusLabel');
@@ -1919,6 +1925,17 @@ function copyRoomLink() {
       if (btn) { btn.textContent = 'Copied!'; setTimeout(function() { btn.textContent = 'Copy Link'; }, 1500); }
     });
   }
+}
+
+function toggleQr() {
+  var panel = document.getElementById('qrPanel');
+  panel.style.display = panel.style.display === 'none' ? '' : 'none';
+}
+
+function updateQr(roomCode) {
+  var joinUrl = location.origin + '/?room=' + roomCode;
+  var apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(joinUrl);
+  document.getElementById('qrImg').src = apiUrl;
 }
 
 // ============================================================================
