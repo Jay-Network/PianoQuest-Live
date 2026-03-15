@@ -605,8 +605,6 @@ const noteHistory = [];
 const recentMidiNotes = [];
 let pedalDown = false;
 
-let currentScore = 0;
-
 const TOTAL_KEYS = 88;
 const FIRST_MIDI = 21;
 const WHITE_KEYS_COUNT = 52;
@@ -1228,7 +1226,6 @@ function sendMidiSnapshot(force) {
 // ============================================================================
 // Session management
 // ============================================================================
-var sessionActive = false;
 function toggleSession() {
   if (sessionActive) { stopSession(); return; }
   startSession();
