@@ -1766,7 +1766,7 @@ function drawGrandStaff() {
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
-  var desiredH = 180;
+  var desiredH = 260;
   canvas.width = rect.width * dpr;
   canvas.height = desiredH * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2136,7 +2136,7 @@ function drawKeyboard() {
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
-  var dynamicsH = 48; // dynamic bars zone above keyboard
+  var dynamicsH = 72; // dynamic bars zone above keyboard
   var keyboardH = Math.max(100, rect.width * 0.13);
   var totalH = dynamicsH + keyboardH;
   canvas.width = rect.width * dpr;
