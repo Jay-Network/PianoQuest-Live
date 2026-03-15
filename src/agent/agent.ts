@@ -13,7 +13,7 @@ import { Type } from "@google/genai";
 // Model
 // =========================================================================
 
-export const LIVE_MODEL = "gemini-2.5-flash-preview-native-audio-dialog";
+export const LIVE_MODEL = "gemini-2.5-flash-native-audio-latest";
 
 // =========================================================================
 // Tool implementations — execute locally, push results to client via WS

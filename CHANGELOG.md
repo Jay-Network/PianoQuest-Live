@@ -6,14 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [1.5.1] - 2026-03-15
+## [1.5.2] - 2026-03-15
+
+### Fixed
+- Gemini model name: `gemini-2.5-flash-preview-native-audio-dialog` → `gemini-2.5-flash-native-audio-latest` (old name removed by Google, caused instant session close loop)
+- Camera off by default — only activates on device with camera role assigned
 
 ### Added
 - QR code button in room bar for easy secondary device onboarding
-- Better Gemini Live session close/error logging for diagnostics
+- `activateCamera()` function for role-based camera activation
 
-### Fixed
+## [1.5.1] - 2026-03-15
+
+### Added
 - Grand staff visualization between piano roll and keyboard
+- Better Gemini Live session close/error logging for diagnostics
 
 ## [1.5.0] - 2026-03-15
 

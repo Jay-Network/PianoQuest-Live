@@ -354,14 +354,14 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.5.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.5.2</div>
       </div>
     </div>
     <div class="controls">
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="startSession()">Start Session</button>
-      <button class="secondary" id="btnCamera" onclick="toggleCamera()" disabled>Camera On</button>
+      <button class="secondary" id="btnCamera" onclick="toggleCamera()" disabled style="display:none">Camera On</button>
       <button class="danger" id="btnStop" onclick="stopSession()" disabled>Stop</button>
     </div>
   </div>
@@ -498,7 +498,7 @@ let animFrame = null;
 let nextPlayTime = 0;
 let sessionActive = false;
 let playbackActiveUntil = 0;
-let cameraEnabled = true;
+let cameraEnabled = false;
 let handsTracker = null;
 let handTrackerReady = false;
 let handTrackerBusy = false;
@@ -827,6 +827,29 @@ function toggleCamera() {
   sendHandState(true);
 }
 
+async function activateCamera() {
+  try {
+    var camStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: 'user' }
+    });
+    var videoTrack = camStream.getVideoTracks()[0];
+    if (mediaStream) {
+      mediaStream.addTrack(videoTrack);
+    }
+    var video = document.getElementById('cameraVideo');
+    video.srcObject = mediaStream;
+    cameraEnabled = true;
+    updateCameraUi();
+    document.getElementById('btnCamera').style.display = '';
+    document.getElementById('btnCamera').disabled = false;
+    lastSentCameraState = '';
+    sendCameraState();
+    initHandTracking();
+  } catch (err) {
+    console.error('Failed to activate camera:', err);
+  }
+}
+
 async function initHandTracking() {
   if (handTrackerReady || handsTracker || !window.Hands) return;
   try {
@@ -1137,20 +1160,18 @@ async function startSession() {
 
   try {
     mediaStream = await navigator.mediaDevices.getUserMedia({
-      // With MIDI as the source of musical truth, the mic is now for speech only.
-      // Optimize for conversation so Gemini does not hear its own playback or room bleed.
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
         autoGainControl: true,
         channelCount: 1
       },
-      video: { width: 640, height: 480, facingMode: 'user' }
+      video: false
     });
 
     var video = document.getElementById('cameraVideo');
     video.srcObject = mediaStream;
-    cameraEnabled = true;
+    cameraEnabled = false;
     handLandmarks = [];
     detectedHandCount = 0;
     bothHandsDetected = false;
@@ -1265,13 +1286,14 @@ async function startSession() {
             renderDeviceList();
           } else if (msg.type === 'role_assigned') {
             myRoles = msg.roles;
-            // If primary lost mic/camera, stop sending
-            if (isPrimaryDevice) {
-              if (!myRoles.camera && cameraEnabled) {
-                cameraEnabled = false;
-                if (mediaStream) mediaStream.getVideoTracks().forEach(function(t) { t.enabled = false; });
-                updateCameraUi();
-              }
+            // Activate/deactivate camera based on role
+            if (myRoles.camera && !cameraEnabled) {
+              activateCamera();
+            } else if (!myRoles.camera && cameraEnabled) {
+              cameraEnabled = false;
+              if (mediaStream) mediaStream.getVideoTracks().forEach(function(t) { t.enabled = false; });
+              updateCameraUi();
+              document.getElementById('btnCamera').style.display = 'none';
             }
           } else if (msg.type === 'midi') {
             // Remote MIDI from Ubuntu bridge — feed into existing visualization
