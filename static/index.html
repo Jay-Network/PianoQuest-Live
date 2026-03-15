@@ -403,7 +403,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.2</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.3</div>
       </div>
     </div>
     <div class="controls">
@@ -1125,6 +1125,14 @@ function handleMidiMessage(event) {
 }
 
 function handleNoteOn(note, velocity, nowMs) {
+  // Close any open history entries for this note (e.g. pedal-sustained re-trigger)
+  for (var hi = noteHistory.length - 1; hi >= 0; hi--) {
+    if (noteHistory[hi].note === note && noteHistory[hi].endMs === 0) {
+      noteHistory[hi].endMs = nowMs;
+      if (!noteHistory[hi].fingerDurationMs) noteHistory[hi].fingerDurationMs = nowMs - noteHistory[hi].startMs;
+      break;
+    }
+  }
   activeNotes.set(note, { note: note, velocity: velocity, timestamp: nowMs });
   fingerDownNotes.add(note);
   pedalSustainedNotes.delete(note);
@@ -1579,7 +1587,7 @@ function drawPianoRoll() {
       var headColor = dynamicsColor(entry.velocity);
       var pedalColor = darkenedColor(entry.velocity, 0.5);
 
-      var fingerEndMs = entry.fingerDurationMs ? entry.startMs + entry.fingerDurationMs : null;
+      var fingerEndMs = (entry.fingerDurationMs > 0) ? entry.startMs + entry.fingerDurationMs : null;
       var finalEndMs = entry.endMs || nowMs;
 
       function drawSegment(segStartMs, segEndMs, color) {
@@ -2014,29 +2022,32 @@ function drawGrandStaff() {
     drawStem(tnX, tnY, tnColor, noteRadius);
   }
 
-  // --- PLAYED NOTES (active) at play line, elongating left ---
+  // --- PLAYED NOTES (active) — head scrolls left from play line, tail extends to play line ---
   activeNotes.forEach(function(noteData, midi) {
     if (midi < FIRST_MIDI || midi > FIRST_MIDI + TOTAL_KEYS - 1) return;
     var noteY = midiToY(midi);
-    var color = fingerDownNotes.has(midi) ? dynamicsColor(noteData.velocity) : darkenedColor(noteData.velocity, 0.5);
+    // Always bright while sounding (active), regardless of finger/pedal
+    var color = dynamicsColor(noteData.velocity);
+    var isPedalOnly = !fingerDownNotes.has(midi) && pedalSustainedNotes.has(midi);
     var holdMs = nowMs - noteData.timestamp;
-    var tailPx = holdMs * pxPerMs; // elongate left at tempo-matched speed
-    var tailX = Math.max(marginLeft, playLineX - tailPx);
+    var headPx = holdMs * pxPerMs; // head moves left at tempo speed
+    var headX = Math.max(marginLeft, playLineX - headPx);
 
-    // Draw elongation tail (rounded rect from tailX to playLineX)
-    if (tailPx > 2) {
-      ctx.fillStyle = color;
+    // Draw tail from head to play line
+    var tailLen = playLineX - headX;
+    if (tailLen > 2) {
+      ctx.fillStyle = isPedalOnly ? darkenedColor(noteData.velocity, 0.5) : color;
       ctx.globalAlpha = 0.6;
       ctx.beginPath();
-      ctx.roundRect(tailX, noteY - noteRadius * 0.7, playLineX - tailX, noteRadius * 1.4, noteRadius * 0.7);
+      ctx.roundRect(headX, noteY - noteRadius * 0.7, tailLen, noteRadius * 1.4, noteRadius * 0.7);
       ctx.fill();
       ctx.globalAlpha = 1.0;
     }
 
-    drawLedgerLines(playLineX, noteY);
-    drawAccidental(playLineX, noteY, midi, color);
-    drawNoteHead(playLineX, noteY, color, noteRadius);
-    drawStem(playLineX, noteY, color, noteRadius);
+    drawLedgerLines(headX, noteY);
+    drawAccidental(headX, noteY, midi, color);
+    drawNoteHead(headX, noteY, color, noteRadius);
+    drawStem(headX, noteY, color, noteRadius);
   });
 
   // --- NOTE HISTORY scrolling left from play line at tempo speed ---

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.3] - 2026-03-15
+
+### Fixed
+- Waterfall: pedal-sustained notes no longer revert to bright on pedal release (close open history on re-trigger)
+- Grand staff: note heads scroll left from play line at tempo speed (were stuck on play line)
+- Grand staff: active notes always bright while sounding (were turning dark on finger release)
+- Grand staff: pedal-sustained tail drawn dimmer, head stays bright
+
 ## [1.8.2] - 2026-03-15
 
 ### Fixed
