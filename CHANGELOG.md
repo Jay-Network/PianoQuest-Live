@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-03-15
+
+### Fixed
+- **CRITICAL**: Strip Gemini config to absolute minimum (responseModalities only) — no tools, no system instruction, no speech config, no transcription, no realtime input config
+- Grand staff positioning: highest piano key (C8/MIDI 108) now at y=0, touching keyboard panel bottom
+
 ## [1.8.1] - 2026-03-15
 
 ### Fixed

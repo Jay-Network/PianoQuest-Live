@@ -403,7 +403,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.2</div>
       </div>
     </div>
     <div class="controls">
@@ -1782,18 +1782,19 @@ function drawGrandStaff() {
   ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, W, H);
 
-  // Diatonic layout: center on B3 (MIDI 59), position so top treble line is near canvas top
+  // Diatonic layout: center on B3 (MIDI 59)
+  // Position so highest piano key (C8=MIDI 108) is at y=0 (touching keyboard bottom)
   var centerMidi = 59;
   var centerDiatonic = diatonicIndex(centerMidi);
-  // We'll set centerY after computing halfStep so top treble line lands at ~15px from top
 
   var trebleTopDi = diatonicIndex(TREBLE_LINE_MIDIS[4]);
   var trebleBottomDi = diatonicIndex(TREBLE_LINE_MIDIS[0]);
   var staffSpanDi = trebleTopDi - trebleBottomDi;
   var lineSpacing = Math.min(12, (H * 0.28) / staffSpanDi);
   var halfStep = lineSpacing / 2;
-  // Position centerY so top treble line (F5) is ~15px from canvas top
-  var centerY = 15 + (trebleTopDi - centerDiatonic) * halfStep;
+  // C8 (MIDI 108) at y=0 → touching keyboard panel bottom
+  var highestDi = diatonicIndex(108);
+  var centerY = (highestDi - centerDiatonic) * halfStep;
 
   function midiToY(midi) {
     var di = diatonicIndex(midi);
