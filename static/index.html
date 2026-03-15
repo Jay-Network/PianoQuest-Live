@@ -442,7 +442,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.2.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.3.0</div>
       </div>
       <div class="score-display" id="scoreDisplay">
         <div>
@@ -1569,6 +1569,17 @@ async function startSession() {
             var cameraUrl = location.origin + '/?camera=1&room=' + msg.room;
             var label = document.getElementById('statusLabel');
             if (label) label.textContent = 'Connected · Camera: ' + msg.room;
+          } else if (msg.type === 'midi') {
+            // Remote MIDI from Ubuntu bridge — feed into existing visualization
+            var nowMs = msg.timestampMs || Date.now();
+            if (msg.event === 'noteOn' && msg.velocity > 0) {
+              handleNoteOn(msg.note, msg.velocity, nowMs);
+            } else if (msg.event === 'noteOff' || (msg.event === 'noteOn' && msg.velocity === 0)) {
+              handleNoteOff(msg.note, nowMs);
+            } else if (msg.event === 'controlChange') {
+              handleControlChange(msg.controller || msg.note, msg.value || msg.velocity, nowMs);
+            }
+            updateMidiStatus('MIDI (remote bridge)');
           }
         }
       };

@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-15
+
+### Added
+- 3-device demo architecture: Ubuntu (MIDI) + iPad (primary UI) + iPhone (camera)
+  - `/ws/midi?room=CODE` WebSocket path for MIDI bridge connections
+  - Server buffers MIDI events and flushes to Gemini as snapshots every 2 seconds
+  - Server forwards raw MIDI events to iPad for waterfall/dynamics visualization
+  - iPad handles incoming `midi` messages from WebSocket for remote MIDI rendering
+- `scripts/midi-relay.js` — relay script connecting pianoquest-bridge (:3491) to Cloud Run
+- Room session now includes `sendClientContent` and `primaryWs` for cross-device data routing
+
 ## [1.2.0] - 2026-03-15
 
 ### Added

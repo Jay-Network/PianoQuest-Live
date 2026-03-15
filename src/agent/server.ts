@@ -121,6 +121,14 @@ function broadcast(data: Buffer | string, binary = false) {
 
 interface RoomSession {
   sendRealtimeInput: (input: any) => void;
+  sendClientContent: (content: any) => void;
+  primaryWs: WebSocket;
+  /** Accumulated MIDI notes for periodic Gemini snapshots */
+  midiBuffer: Array<{ note: number; velocity: number; event: string; timestampMs: number }>;
+  midiFlushTimer: ReturnType<typeof setTimeout> | null;
+  cameraEnabled: boolean;
+  bothHandsDetected: boolean;
+  detectedHandCount: number;
 }
 
 const rooms = new Map<string, RoomSession>();
@@ -146,6 +154,7 @@ export function createApp() {
   const wssDialog = new WebSocketServer({ noServer: true });
   const wssSpectator = new WebSocketServer({ noServer: true });
   const wssCamera = new WebSocketServer({ noServer: true });
+  const wssMidi = new WebSocketServer({ noServer: true });
 
   app.get("/health", (_req, res) => {
     res.json({
@@ -178,6 +187,12 @@ export function createApp() {
       wssCamera.handleUpgrade(request, socket, head, (ws) => {
         (ws as any)._room = room;
         wssCamera.emit("connection", ws, request);
+      });
+    } else if (url.pathname === "/ws/midi") {
+      const room = url.searchParams.get("room") ?? "";
+      wssMidi.handleUpgrade(request, socket, head, (ws) => {
+        (ws as any)._room = room;
+        wssMidi.emit("connection", ws, request);
       });
     } else {
       socket.destroy();
@@ -232,6 +247,103 @@ export function createApp() {
 
     ws.on("close", () => {
       console.log(`[${APP_NAME}] Remote camera disconnected from room "${room}"`);
+    });
+  });
+
+  // -----------------------------------------------------------------
+  // /ws/midi — Ubuntu bridge forwards MIDI events to Gemini + iPad
+  // -----------------------------------------------------------------
+
+  function flushMidiToGemini(roomSession: RoomSession) {
+    if (roomSession.midiBuffer.length === 0) return;
+
+    const recentNotes = roomSession.midiBuffer
+      .filter((m) => m.event === "noteOn")
+      .slice(-8)
+      .map((m) => ({ note: m.note, velocity: m.velocity }));
+
+    const activeNotes: Array<{ note: number; velocity: number }> = [];
+    const noteOnMap = new Map<number, number>();
+    for (const m of roomSession.midiBuffer) {
+      if (m.event === "noteOn") {
+        noteOnMap.set(m.note, m.velocity);
+      } else if (m.event === "noteOff") {
+        noteOnMap.delete(m.note);
+      }
+    }
+    for (const [note, velocity] of noteOnMap) {
+      activeNotes.push({ note, velocity });
+    }
+
+    const summary = describeMidiSnapshot(
+      { recent_notes: recentNotes, active_notes: activeNotes, pedal_down: false },
+      roomSession.cameraEnabled,
+      roomSession.bothHandsDetected,
+      roomSession.detectedHandCount
+    );
+
+    if (summary) {
+      roomSession.sendClientContent({
+        turns: { role: "user", parts: [{ text: summary }] },
+        turnComplete: true,
+      });
+    }
+
+    roomSession.midiBuffer = [];
+  }
+
+  wssMidi.on("connection", (ws: WebSocket) => {
+    const room = (ws as any)._room as string;
+    const roomSession = rooms.get(room);
+    if (!roomSession) {
+      console.log(`[${APP_NAME}] MIDI rejected — room "${room}" not found`);
+      ws.send(JSON.stringify({ type: "error", message: `Room "${room}" not found` }));
+      ws.close();
+      return;
+    }
+
+    console.log(`[${APP_NAME}] MIDI bridge connected to room "${room}"`);
+    ws.send(JSON.stringify({ type: "midi_connected", room }));
+
+    ws.on("message", (data: Buffer | string) => {
+      if (typeof data !== "string") return;
+      try {
+        const msg = JSON.parse(data);
+        if (msg.type !== "midi") return;
+
+        // Forward raw MIDI event to iPad for waterfall rendering
+        if (roomSession.primaryWs.readyState === WebSocket.OPEN) {
+          roomSession.primaryWs.send(JSON.stringify(msg));
+        }
+        // Also broadcast to spectators
+        broadcast(JSON.stringify(msg));
+
+        // Buffer for Gemini (flush every 2 seconds)
+        if (msg.event === "noteOn" || msg.event === "noteOff") {
+          roomSession.midiBuffer.push({
+            note: msg.note ?? 0,
+            velocity: msg.velocity ?? 0,
+            event: msg.event,
+            timestampMs: msg.timestampMs ?? Date.now(),
+          });
+
+          if (!roomSession.midiFlushTimer) {
+            roomSession.midiFlushTimer = setTimeout(() => {
+              roomSession.midiFlushTimer = null;
+              flushMidiToGemini(roomSession);
+            }, 2000);
+          }
+        }
+      } catch {}
+    });
+
+    ws.on("close", () => {
+      console.log(`[${APP_NAME}] MIDI bridge disconnected from room "${room}"`);
+      if (roomSession.midiFlushTimer) {
+        clearTimeout(roomSession.midiFlushTimer);
+        roomSession.midiFlushTimer = null;
+        flushMidiToGemini(roomSession);
+      }
     });
   });
 
@@ -346,8 +458,17 @@ async function handleWebSocket(ws: WebSocket) {
       callbacks: {
         onopen: () => {
           console.log(`[${APP_NAME}] Gemini Live session opened: ${sessionId}, room: ${roomCode}`);
-          // Register room so remote cameras can join
-          rooms.set(roomCode, session);
+          // Register room so remote cameras and MIDI bridges can join
+          rooms.set(roomCode, {
+            sendRealtimeInput: (input: any) => session.sendRealtimeInput(input),
+            sendClientContent: (content: any) => session.sendClientContent(content),
+            primaryWs: ws,
+            midiBuffer: [],
+            midiFlushTimer: null,
+            cameraEnabled,
+            bothHandsDetected,
+            detectedHandCount,
+          });
           // Send room code to primary client
           ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
         },
@@ -574,9 +695,13 @@ async function handleWebSocket(ws: WebSocket) {
               bothHandsDetected = false;
               detectedHandCount = 0;
             }
+            const rs = rooms.get(roomCode);
+            if (rs) { rs.cameraEnabled = cameraEnabled; rs.bothHandsDetected = bothHandsDetected; rs.detectedHandCount = detectedHandCount; }
           } else if (msgType === "hand_state") {
             detectedHandCount = parseInt(msg.detected_count ?? "0", 10);
             bothHandsDetected = Boolean(msg.both_hands_detected);
+            const rs = rooms.get(roomCode);
+            if (rs) { rs.bothHandsDetected = bothHandsDetected; rs.detectedHandCount = detectedHandCount; }
           } else if (msgType === "midi_event") {
             // Frontend uses raw MIDI events for UI rendering; snapshots go to agent
           } else if (msgType === "close") {
@@ -595,6 +720,8 @@ async function handleWebSocket(ws: WebSocket) {
       ws.send(JSON.stringify({ type: "error", message: String(e) }));
     } catch {}
   } finally {
+    const rs = rooms.get(roomCode);
+    if (rs?.midiFlushTimer) clearTimeout(rs.midiFlushTimer);
     rooms.delete(roomCode);
     console.log(`[${APP_NAME}] Client disconnected: ${sessionId}, room ${roomCode} removed`);
     try {
