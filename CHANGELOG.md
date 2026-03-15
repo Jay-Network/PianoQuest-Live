@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-03-15
+
+### Fixed
+- **CRITICAL**: Replace @google/genai SDK `live.connect()` with raw WebSocket to Gemini BidiGenerateContent endpoint. SDK has a bug causing instant session close after setup. Raw WS works perfectly.
+- Partition bar visibility on grand staff improved
+
 ## [1.6.0] - 2026-03-15
 
 ### Added

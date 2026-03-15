@@ -354,7 +354,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.6.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.6.1</div>
       </div>
     </div>
     <div class="controls">
@@ -1869,8 +1869,8 @@ function drawGrandStaff() {
     if (barX < marginLeft || barX > W) continue;
 
     // Measure bar line across both staves
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(barX, trebleTop);
     ctx.lineTo(barX, trebleBottom);
@@ -1884,7 +1884,7 @@ function drawGrandStaff() {
     for (var beat = 1; beat < beatsPerMeasure; beat++) {
       var beatX = barX - beat * (measureDurationMs / beatsPerMeasure) * pxPerMs;
       if (beatX < marginLeft || beatX > W) continue;
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(beatX, trebleTop);
