@@ -175,10 +175,7 @@
   .right-col { display: flex; flex-direction: column; gap: 12px; }
 
   /* Piano MIDI stack */
-  .midi-stack { display: flex; flex-direction: column; gap: 0; }
-  .midi-panel { border-radius: 12px 12px 0 0; }
-  .keyboard-panel { border-radius: 0; border-top: none; }
-  .staff-panel { border-radius: 0 0 12px 12px; border-top: none; }
+  .midi-stack { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .midi-header-tools {
     margin-left: auto;
     display: flex;
@@ -400,6 +397,13 @@
       </div>
     </div>
     <div class="controls">
+      <select class="midi-select" id="midiInputSelect" aria-label="MIDI input" style="font-size:10px;padding:4px 6px;">
+        <option value="">No MIDI input</option>
+      </select>
+      <span class="pedal-pill" id="pedalStatus">Pedal Up</span>
+      <span id="midiStatus" style="display:none;"></span>
+      <input type="range" id="bpmSlider" min="40" max="200" value="90" style="width:60px;height:14px;">
+      <span class="bpm-val" id="bpmVal" style="font-size:10px;color:var(--text3);min-width:20px;">90</span>
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="startSession()">Start Session</button>
@@ -479,76 +483,44 @@
     <div class="right-col">
 
       <div class="midi-stack">
-        <div class="panel midi-panel">
-          <div class="panel-header">
-            <div class="dot" style="background:var(--purple)"></div>PIANO ROLL
-            <div class="midi-header-tools">
-              <span class="midi-status" id="midiStatus">MIDI not connected</span>
-              <span class="pedal-pill" id="pedalStatus">Pedal Up</span>
-              <div class="bpm-control">
-                <label>BPM</label>
-                <input type="range" id="bpmSlider" min="40" max="200" value="90">
-                <span class="bpm-val" id="bpmVal">90</span>
-              </div>
-              <select class="midi-select" id="midiInputSelect" aria-label="MIDI input">
-                <option value="">No MIDI input</option>
-              </select>
-              <button class="mini-btn" type="button" onclick="refreshMidiInputs()">Refresh MIDI</button>
-            </div>
-          </div>
-          <div class="roll-wrap">
-            <canvas id="pianoRollCanvas"></canvas>
-          </div>
+        <div class="roll-wrap" style="background:#1A1A2E;border-radius:12px 12px 0 0;overflow:hidden;">
+          <canvas id="pianoRollCanvas"></canvas>
         </div>
-
-        <div class="panel keyboard-panel" style="border-radius:0;border-top:none;">
-          <div class="panel-header">
-            <div class="dot" style="background:var(--blue)"></div>KEYBOARD
-          </div>
-          <div class="keyboard-wrap">
-            <canvas id="keyboardCanvas"></canvas>
-          </div>
-          <div class="keyboard-hint">Digital piano MIDI drives the keyboard, waterfall, dynamics, and technique score. Microphone input is reserved for speech.</div>
+        <div class="keyboard-wrap" style="background:#0a0a0a;">
+          <canvas id="keyboardCanvas"></canvas>
         </div>
-
-        <div class="panel staff-panel" style="border-radius:0;border-top:none;">
-          <div class="panel-header">
-            <div class="dot" style="background:var(--green)"></div>GRAND STAFF
-            <div class="midi-header-tools">
-              <div class="bpm-control">
-                <label>Tempo</label>
-                <input type="number" id="staffTempo" min="20" max="300" value="100" style="width:48px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:4px;padding:2px 4px;font-size:11px;">
-              </div>
-              <select id="staffTimeSig" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:4px;padding:2px 4px;font-size:11px;">
-                <option value="4/4">4/4</option>
-                <option value="3/4">3/4</option>
-                <option value="2/4">2/4</option>
-                <option value="6/8">6/8</option>
-              </select>
-              <select id="staffScale" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:4px;padding:2px 4px;font-size:11px;">
-                <option value="C major">C major</option>
-                <option value="G major">G major</option>
-                <option value="D major">D major</option>
-                <option value="A major">A major</option>
-                <option value="E major">E major</option>
-                <option value="B major">B major</option>
-                <option value="F major">F major</option>
-                <option value="Bb major">B&#9837; major</option>
-                <option value="Eb major">E&#9837; major</option>
-                <option value="Ab major">A&#9837; major</option>
-                <option value="A minor">A minor</option>
-                <option value="E minor">E minor</option>
-                <option value="B minor">B minor</option>
-                <option value="D minor">D minor</option>
-                <option value="G minor">G minor</option>
-                <option value="C minor">C minor</option>
-                <option value="F minor">F minor</option>
-                <option value="F# minor">F&#9839; minor</option>
-                <option value="C# minor">C&#9839; minor</option>
-              </select>
-            </div>
+        <div style="display:flex;background:#111118;border-radius:0 0 12px 12px;overflow:hidden;">
+          <div class="staff-controls" style="display:flex;flex-direction:column;gap:4px;padding:6px 4px;background:#0d0d16;min-width:42px;align-items:center;justify-content:center;">
+            <input type="number" id="staffTempo" min="20" max="300" value="100" title="Tempo" style="width:36px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:2px;font-size:9px;text-align:center;">
+            <select id="staffTimeSig" title="Time signature" style="width:36px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:9px;">
+              <option value="4/4">4/4</option>
+              <option value="3/4">3/4</option>
+              <option value="2/4">2/4</option>
+              <option value="6/8">6/8</option>
+            </select>
+            <select id="staffScale" title="Scale" style="width:36px;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);color:var(--text1);border-radius:3px;padding:1px;font-size:8px;">
+              <option value="C major">C</option>
+              <option value="G major">G</option>
+              <option value="D major">D</option>
+              <option value="A major">A</option>
+              <option value="E major">E</option>
+              <option value="B major">B</option>
+              <option value="F major">F</option>
+              <option value="Bb major">Bb</option>
+              <option value="Eb major">Eb</option>
+              <option value="Ab major">Ab</option>
+              <option value="A minor">Am</option>
+              <option value="E minor">Em</option>
+              <option value="B minor">Bm</option>
+              <option value="D minor">Dm</option>
+              <option value="G minor">Gm</option>
+              <option value="C minor">Cm</option>
+              <option value="F minor">Fm</option>
+              <option value="F# minor">F#m</option>
+              <option value="C# minor">C#m</option>
+            </select>
           </div>
-          <div class="staff-wrap" style="padding:0;background:#111118;">
+          <div class="staff-wrap" style="flex:1;padding:0;background:#111118;">
             <canvas id="grandStaffCanvas"></canvas>
           </div>
         </div>
