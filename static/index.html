@@ -31,7 +31,7 @@
     min-height: 100vh;
   }
   .app {
-    max-width: 1280px;
+    max-width: 1920px;
     margin: 0 auto;
     padding: 16px 20px;
     display: flex;
@@ -82,7 +82,7 @@
   /* Main grid */
   .main {
     display: grid;
-    grid-template-columns: 260px 1fr 280px;
+    grid-template-columns: 260px 1fr 560px;
     gap: 12px;
     flex: 1;
   }
@@ -348,7 +348,14 @@
   }
 
   /* Score panel (right column) */
-  .score-col { display: flex; flex-direction: column; gap: 12px; }
+  .score-col { display: flex; flex-direction: column; gap: 12px; position: relative; }
+  .score-resize-handle {
+    position: absolute; left: -4px; top: 0; bottom: 0; width: 8px;
+    cursor: col-resize; z-index: 10;
+  }
+  .score-resize-handle:hover, .score-resize-handle.dragging {
+    background: rgba(255,255,255,0.08);
+  }
   .score-browser {
     display: flex; flex-direction: column; height: 100%;
   }
@@ -530,7 +537,8 @@
     </div>
 
     <!-- Right column: Score Browser -->
-    <div class="score-col">
+    <div class="score-col" id="scoreCol">
+      <div class="score-resize-handle" id="scoreResizeHandle"></div>
       <div class="panel" style="flex:1;display:flex;flex-direction:column;">
         <div class="panel-header">
           <div class="dot" style="background:var(--accent)"></div>SCORE
@@ -1494,7 +1502,7 @@ function drawPianoRoll() {
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
   canvas.width = rect.width * dpr;
-  canvas.height = Math.max(280, rect.width * 0.42) * dpr;
+  canvas.height = Math.max(560, rect.width * 0.55) * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   var W = rect.width;
   var H = canvas.height / dpr;
@@ -1751,7 +1759,7 @@ function drawGrandStaff() {
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
-  var desiredH = 260;
+  var desiredH = 520;
   canvas.width = rect.width * dpr;
   canvas.height = desiredH * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2121,8 +2129,8 @@ function drawKeyboard() {
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
-  var dynamicsH = 72; // dynamic bars zone above keyboard
-  var keyboardH = Math.max(100, rect.width * 0.13);
+  var dynamicsH = 144; // dynamic bars zone above keyboard
+  var keyboardH = Math.max(200, rect.width * 0.2);
   var totalH = dynamicsH + keyboardH;
   canvas.width = rect.width * dpr;
   canvas.height = totalH * dpr;
@@ -2499,6 +2507,36 @@ function toggleScoreColorMode() {
 
 // Load score tree on init
 setTimeout(loadScoreTree, 500);
+
+// Score panel resize handle
+(function() {
+  var handle = document.getElementById('scoreResizeHandle');
+  var col = document.getElementById('scoreCol');
+  var main = document.querySelector('.main');
+  if (!handle || !col || !main) return;
+  var dragging = false;
+  handle.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    dragging = true;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    var mainRect = main.getBoundingClientRect();
+    var newW = mainRect.right - e.clientX;
+    newW = Math.max(200, Math.min(newW, mainRect.width * 0.6));
+    main.style.gridTemplateColumns = '260px 1fr ' + Math.round(newW) + 'px';
+  });
+  document.addEventListener('mouseup', function() {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+})();
 
 // ============================================================================
 // UI Helpers
