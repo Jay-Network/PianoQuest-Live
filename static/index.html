@@ -442,7 +442,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.0.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.1.0</div>
       </div>
       <div class="score-display" id="scoreDisplay">
         <div>
@@ -1940,6 +1940,74 @@ function addTranscript(role, text) {
 
 refreshMidiInputs();
 updateCameraUi();
+
+// ============================================================================
+// Spectator Mode — ?spectator=1
+// ============================================================================
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('spectator') !== '1') return;
+
+  // Hide controls that spectators don't need
+  var controls = document.querySelector('.controls');
+  if (controls) controls.style.display = 'none';
+  var cameraPanel = document.querySelector('.left-col .panel');
+  if (cameraPanel) {
+    var ph = cameraPanel.querySelector('.video-container');
+    if (ph) ph.style.display = 'none';
+    var lm = cameraPanel.querySelector('.level-meter');
+    if (lm) lm.style.display = 'none';
+  }
+
+  // Update header to show spectator mode
+  var headerSub = document.querySelector('.header-sub');
+  if (headerSub) headerSub.textContent = 'SPECTATOR MODE';
+
+  // Auto-connect to /ws/spectator
+  setStatus('connecting');
+  var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  var wsUrl = proto + '://' + location.host + '/ws/spectator';
+  var specWs = new WebSocket(wsUrl);
+
+  // Audio playback context for spectator
+  var specPlaybackCtx = new AudioContext({ sampleRate: 24000 });
+  var specNextPlayTime = 0;
+
+  specWs.binaryType = 'arraybuffer';
+
+  specWs.onopen = function() {
+    setStatus('connected');
+  };
+
+  specWs.onmessage = function(event) {
+    if (event.data instanceof ArrayBuffer) {
+      // Audio playback
+      var i16 = new Int16Array(event.data);
+      var f32 = new Float32Array(i16.length);
+      for (var i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
+      var buf = specPlaybackCtx.createBuffer(1, f32.length, 24000);
+      buf.getChannelData(0).set(f32);
+      var src = specPlaybackCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(specPlaybackCtx.destination);
+      var now = specPlaybackCtx.currentTime;
+      var startAt = Math.max(now + 0.05, specNextPlayTime);
+      src.start(startAt);
+      specNextPlayTime = startAt + buf.duration;
+    } else {
+      var msg = JSON.parse(event.data);
+      if (msg.type === 'story_scene' || msg.type === 'achievement' ||
+          msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
+          msg.type === 'technique_report') {
+        handleToolEvent(msg);
+      }
+    }
+  };
+
+  specWs.onclose = function() {
+    setStatus('disconnected');
+  };
+})();
 </script>
 </body>
 </html>

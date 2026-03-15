@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-14
+
+### Added
+- Spectator mode: connect to `?spectator=1` to watch a live session from another device
+  - New `/ws/spectator` WebSocket path receives all output (audio, tool events, transcripts)
+  - Spectator UI hides camera/mic controls, auto-connects, plays audio and shows all visual panels
+  - Primary session broadcasts all Gemini output to connected spectators
+- Health endpoint now shows spectator count
+
 ## [1.0.1] - 2026-03-14
 
 ### Fixed

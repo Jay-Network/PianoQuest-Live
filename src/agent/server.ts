@@ -102,16 +102,36 @@ function describeMidiSnapshot(
 }
 
 // =========================================================================
+// Spectator broadcasting — spectators receive all output but send nothing
+// =========================================================================
+
+const spectators = new Set<WebSocket>();
+
+function broadcast(data: Buffer | string, binary = false) {
+  for (const s of spectators) {
+    if (s.readyState === WebSocket.OPEN) {
+      try { s.send(data, { binary }); } catch {}
+    }
+  }
+}
+
+// =========================================================================
 // Express + WebSocket server
 // =========================================================================
 
 export function createApp() {
   const app = express();
   const server = createServer(app);
-  const wss = new WebSocketServer({ noServer: true });
+  const wssDialog = new WebSocketServer({ noServer: true });
+  const wssSpectator = new WebSocketServer({ noServer: true });
 
   app.get("/health", (_req, res) => {
-    res.json({ status: "ok", service: APP_NAME, modes: ["storyteller"] });
+    res.json({
+      status: "ok",
+      service: APP_NAME,
+      modes: ["storyteller"],
+      spectators: spectators.size,
+    });
   });
 
   app.get("/", (_req, res) => {
@@ -123,16 +143,32 @@ export function createApp() {
   server.on("upgrade", (request: IncomingMessage, socket, head) => {
     const url = new URL(request.url ?? "/", `http://${request.headers.host}`);
     if (url.pathname === "/ws/dialog") {
-      wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit("connection", ws, request);
+      wssDialog.handleUpgrade(request, socket, head, (ws) => {
+        wssDialog.emit("connection", ws, request);
+      });
+    } else if (url.pathname === "/ws/spectator") {
+      wssSpectator.handleUpgrade(request, socket, head, (ws) => {
+        wssSpectator.emit("connection", ws, request);
       });
     } else {
       socket.destroy();
     }
   });
 
-  wss.on("connection", (ws: WebSocket) => {
+  wssDialog.on("connection", (ws: WebSocket) => {
     handleWebSocket(ws);
+  });
+
+  wssSpectator.on("connection", (ws: WebSocket) => {
+    console.log(`[${APP_NAME}] Spectator connected (total: ${spectators.size + 1})`);
+    spectators.add(ws);
+    ws.on("close", () => {
+      spectators.delete(ws);
+      console.log(`[${APP_NAME}] Spectator disconnected (total: ${spectators.size})`);
+    });
+    ws.on("error", () => {
+      spectators.delete(ws);
+    });
   });
 
   return server;
@@ -250,13 +286,23 @@ async function handleWebSocket(ws: WebSocket) {
           if (closed) return;
 
           try {
+            // Helper: send to primary + all spectators
+            const sendAll = (data: Buffer | string, binary = false) => {
+              if (binary) {
+                ws.send(data, { binary: true });
+              } else {
+                ws.send(data);
+              }
+              broadcast(data, binary);
+            };
+
             // Audio data from model turn
             if (msg.serverContent?.modelTurn?.parts) {
               for (const part of msg.serverContent.modelTurn.parts) {
                 if (part.inlineData?.data) {
                   const audioBuffer = Buffer.from(part.inlineData.data, "base64");
                   if (turnHasUserSpeech) {
-                    ws.send(audioBuffer, { binary: true });
+                    sendAll(audioBuffer, true);
                   } else {
                     pendingAudioChunks.push(audioBuffer);
                   }
@@ -278,7 +324,7 @@ async function handleWebSocket(ws: WebSocket) {
                 turnHasUserSpeech = true;
                 // Flush pending audio now that we know user spoke
                 while (pendingAudioChunks.length > 0) {
-                  ws.send(pendingAudioChunks.shift()!, { binary: true });
+                  sendAll(pendingAudioChunks.shift()!, true);
                 }
               }
             }
@@ -299,11 +345,11 @@ async function handleWebSocket(ws: WebSocket) {
                 // Send visual event to frontend
                 const visualEvent = toolCallToVisualEvent(fc.name!, args);
                 if (visualEvent) {
-                  ws.send(JSON.stringify(visualEvent));
+                  sendAll(JSON.stringify(visualEvent));
                 }
 
                 // Send tool_call notification to frontend
-                ws.send(
+                sendAll(
                   JSON.stringify({
                     type: "tool_call",
                     name: fc.name,
@@ -315,7 +361,7 @@ async function handleWebSocket(ws: WebSocket) {
                 const result = executeToolLocally(fc.name!, args);
 
                 // Send tool_result to frontend
-                ws.send(
+                sendAll(
                   JSON.stringify({
                     type: "tool_result",
                     name: fc.name,
@@ -339,20 +385,20 @@ async function handleWebSocket(ws: WebSocket) {
             // Turn complete
             if (msg.serverContent?.turnComplete) {
               if (turnHasUserSpeech && bufInput) {
-                ws.send(
+                sendAll(
                   JSON.stringify({ type: "input_transcript", text: bufInput })
                 );
                 bufInput = "";
               }
               if (turnHasUserSpeech && bufOutput) {
-                ws.send(
+                sendAll(
                   JSON.stringify({ type: "output_transcript", text: bufOutput })
                 );
                 bufOutput = "";
               }
               pendingAudioChunks.length = 0;
               if (turnHasUserSpeech) {
-                ws.send(JSON.stringify({ type: "turn_complete" }));
+                sendAll(JSON.stringify({ type: "turn_complete" }));
               }
               turnHasUserSpeech = false;
             }
@@ -360,20 +406,20 @@ async function handleWebSocket(ws: WebSocket) {
             // Interrupted
             if (msg.serverContent?.interrupted) {
               if (turnHasUserSpeech && bufInput) {
-                ws.send(
+                sendAll(
                   JSON.stringify({ type: "input_transcript", text: bufInput })
                 );
                 bufInput = "";
               }
               if (turnHasUserSpeech && bufOutput) {
-                ws.send(
+                sendAll(
                   JSON.stringify({ type: "output_transcript", text: bufOutput })
                 );
                 bufOutput = "";
               }
               pendingAudioChunks.length = 0;
               if (turnHasUserSpeech) {
-                ws.send(JSON.stringify({ type: "interrupted" }));
+                sendAll(JSON.stringify({ type: "interrupted" }));
               }
               turnHasUserSpeech = false;
             }
