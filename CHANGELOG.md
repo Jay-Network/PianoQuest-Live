@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-03-15
+
+### Added
+- Grand staff: tempo input, scale selector (19 keys), time signature selector (4/4, 3/4, 2/4, 6/8)
+- Grand staff: key signature accidentals (sharps/flats) drawn on staff lines per selected scale
+- Grand staff: time signature numbers displayed left of staff
+- Grand staff: flowing measure bar lines scrolling right-to-left at tempo speed
+- Grand staff: beat subdivision lines within measures
+- Grand staff: play line (green) marking where notes should be played
+- Grand staff: target notes system — hollow note heads flowing from right to play line
+- Waterfall: target notes flowing down from top as outlined rectangles
+- Practice curriculum framework in IDEAS.md (Stage 1: single finger)
+
+### Changed
+- Grand staff: played notes now appear at play line, history scrolls left (was: fixed position, history scrolled right)
+- Grand staff: accidentals respect key signature (only shown for notes outside the key)
+- Camera off by default — only activates when device receives camera role
+
 ## [1.5.2] - 2026-03-15
 
 ### Fixed

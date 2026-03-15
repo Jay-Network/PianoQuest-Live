@@ -5,6 +5,18 @@ Each idea: ID, version proposed, severity (major/minor), status, description.
 
 ---
 
+## Practice Stages (Curriculum)
+
+### Stage 1: Single Finger
+- **1-1. Single Finger Tempo** — Play a single note (e.g. C) at a regular interval (e.g. 100 BPM). Target notes flow down the waterfall and across the grand staff.
+- **1-2. Single Finger Strength** — Play a note at a specific dynamic level (e.g. mp). Gemini evaluates velocity accuracy.
+- *(More variations TBD — articulation, different fingers, different registers)*
+
+### Stage 2: TBD
+### Stage 3: TBD
+
+---
+
 **IDEA: Cross-session memory (from BookSage cross-pollination)**
 - **Version:** 0.4.6
 - **Status:** proposed
