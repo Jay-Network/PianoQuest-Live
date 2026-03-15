@@ -2022,7 +2022,7 @@ function drawGrandStaff() {
     var age = nowMs - entry.startMs;
     var offsetPx = age * pxPerMs; // same speed as measure bar flow
     if (offsetPx > maxLeftPx) break;
-    if (activeNotes.has(entry.note)) continue;
+    if (entry.endMs === 0) continue; // skip currently-active note (drawn at play line)
 
     var noteY = midiToY(entry.note);
     var noteX = playLineX - offsetPx;
