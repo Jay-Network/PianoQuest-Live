@@ -143,3 +143,11 @@ let me know when 1.5.0 is ready
 
 why does the room code keep rotating every second
 
+### Prompt 27
+
+did you bump
+
+### Prompt 28
+
+of course, idiot
+
