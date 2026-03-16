@@ -355,8 +355,8 @@
   .right-tab-content.active { display: flex; flex-direction: column; }
   /* Drills panel */
   .drill-stage-header {
-    padding: 8px 10px; font-size: 15px; font-weight: 700; color: var(--text3);
-    letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px; font-size: 10px; font-weight: 700; color: var(--text3);
+    letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 4px;
     user-select: none; border-bottom: 1px solid var(--border);
   }
   .drill-stage-header:hover { color: var(--text2); }
@@ -370,22 +370,22 @@
   }
   .drill-card:hover { border-color: var(--accent); }
   .drill-card.active { border-color: var(--green); background: rgba(134,239,172,0.06); }
-  .drill-card .drill-id { font-size: 15px; font-weight: 700; color: var(--text3); letter-spacing: 0.05em; }
-  .drill-card .drill-name { font-size: 20px; font-weight: 700; color: var(--text1); margin: 2px 0; }
-  .drill-card .drill-desc { font-size: 15px; color: var(--text3); line-height: 1.4; }
-  .drill-result-bar { display: flex; gap: 8px; align-items: center; padding: 8px 0; }
-  .drill-medal { font-size: 24px; }
-  .drill-score { font-size: 18px; font-weight: 700; color: var(--text1); }
-  .drill-metrics { font-size: 15px; color: var(--text3); line-height: 1.5; }
-  .drill-settings { padding: 10px 14px; font-size: 16px; }
-  .drill-settings label { display: block; color: var(--text2); margin: 8px 0 3px; font-weight: 600; }
+  .drill-card .drill-id { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.05em; }
+  .drill-card .drill-name { font-size: 13px; font-weight: 700; color: var(--text1); margin: 2px 0; }
+  .drill-card .drill-desc { font-size: 10px; color: var(--text3); line-height: 1.4; }
+  .drill-result-bar { display: flex; gap: 6px; align-items: center; padding: 6px 0; }
+  .drill-medal { font-size: 16px; }
+  .drill-score { font-size: 12px; font-weight: 700; color: var(--text1); }
+  .drill-metrics { font-size: 10px; color: var(--text3); line-height: 1.5; }
+  .drill-settings { padding: 8px 12px; font-size: 11px; }
+  .drill-settings label { display: block; color: var(--text2); margin: 6px 0 2px; font-weight: 600; }
   .drill-settings select, .drill-settings input {
-    width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border);
-    background: var(--bg1); color: var(--text1); font-size: 16px;
+    width: 100%; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border);
+    background: var(--bg1); color: var(--text1); font-size: 11px;
   }
   .drill-start-btn {
-    margin: 10px; padding: 10px; border-radius: 6px; border: 1px solid var(--green);
-    background: rgba(134,239,172,0.08); color: var(--green); font-size: 18px; font-weight: 700;
+    margin: 8px; padding: 8px; border-radius: 6px; border: 1px solid var(--green);
+    background: rgba(134,239,172,0.08); color: var(--green); font-size: 12px; font-weight: 700;
     cursor: pointer; text-align: center; transition: all 0.2s;
   }
   .drill-start-btn:hover { background: rgba(134,239,172,0.15); }
@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.27</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.28</div>
       </div>
     </div>
     <div class="controls">
@@ -590,6 +590,13 @@
       </select>
       <span class="pedal-pill" id="pedalStatus">Pedal Up</span>
       <span id="midiStatus" style="display:none;"></span>
+      <div style="display:flex;align-items:center;gap:4px;margin:0 8px;">
+        <span style="font-size:10px;color:var(--text3);">A</span>
+        <input type="range" id="fontScaleSlider" min="80" max="200" value="150" step="10"
+          style="width:60px;accent-color:var(--accent);"
+          oninput="setFontScale(this.value)">
+        <span style="font-size:14px;color:var(--text3);">A</span>
+      </div>
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
@@ -848,6 +855,21 @@ let sessionActive = false;
 let playbackActiveUntil = 0;
 let isBotSpeaking = false;
 let reconnectDelay = 1000;
+
+// Font scale — persisted in localStorage
+function setFontScale(val) {
+  var scale = parseInt(val) / 100;
+  // Scale the main content area (not the header)
+  var main = document.querySelector('.main');
+  if (main) main.style.zoom = scale;
+  localStorage.setItem('pq_fontScale', val);
+  var slider = document.getElementById('fontScaleSlider');
+  if (slider && slider.value !== String(val)) slider.value = val;
+}
+(function() {
+  var saved = localStorage.getItem('pq_fontScale') || '150';
+  setFontScale(saved);
+})();
 
 // Device management state
 let isPrimaryDevice = false;

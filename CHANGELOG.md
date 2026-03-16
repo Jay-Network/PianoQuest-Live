@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.28] - 2026-03-16
+
+### Added
+- **Font size slider** in header — A to A slider (80%-200%), scales entire UI via CSS zoom, persisted in localStorage, defaults to 150%
+- **Camera Refresh button** — appears when camera freezes, sends restart command to phone
+
 ## [3.2.27] - 2026-03-16
 
 ### Added
