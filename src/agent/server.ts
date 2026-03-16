@@ -750,6 +750,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         responseModalities: [Modality.AUDIO],
         systemInstruction: STORYTELLER_INSTRUCTION,
         speechConfig: {
+          languageCode: "en-US",
           voiceConfig: {
             prebuiltVoiceConfig: { voiceName: "Puck" },
           },

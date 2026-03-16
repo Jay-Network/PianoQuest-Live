@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.38] - 2026-03-16
+
+### Fixed
+- **Force English only** — added languageCode: "en-US" to Gemini speechConfig and explicit "ALWAYS speak in English" to system instruction. Prevents Gemini from switching to other languages.
+
 ## [3.2.37] - 2026-03-16
 
 ### Fixed
