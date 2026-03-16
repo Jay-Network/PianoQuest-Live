@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.0.3] - 2026-03-16
+
+### Fixed
+- **Stop sending midi_snapshot to Gemini** — text summaries triggered "MIDI update received, staying silent" responses. Gemini hears piano audio directly; text MIDI data is redundant.
+
 ## [3.0.2] - 2026-03-16
 
 ### Added
