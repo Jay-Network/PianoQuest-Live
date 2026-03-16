@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.20</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.49</div>
       </div>
     </div>
     <div class="controls">
@@ -400,10 +400,6 @@
       <span id="midiStatus" style="display:none;"></span>
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
-      <div class="gemini-speaking" id="geminiSpeaking">
-        <span id="geminiSpeakLabel">Silent</span>
-        <div class="vol-bar"><div class="vol-fill" id="geminiVolFill"></div></div>
-      </div>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
     </div>
   </div>
@@ -437,9 +433,14 @@
           <div class="dot" style="background:var(--accent)"></div>AUDIO LEVEL
         </div>
         <div class="level-meter">
-          <div class="dot" style="background:var(--accent);width:5px;height:5px;border-radius:50%"></div>
+          <span style="font-size:9px;color:var(--text3);min-width:38px;">User</span>
           <div class="level-bar-bg"><div class="level-bar" id="levelBar"></div></div>
           <div class="level-label" id="levelLabel">0</div>
+        </div>
+        <div class="level-meter" id="geminiSpeaking">
+          <span style="font-size:9px;color:var(--text3);min-width:38px;">Gemini</span>
+          <div class="level-bar-bg"><div class="level-bar" id="geminiVolFill" style="background:var(--gemini);"></div></div>
+          <span id="geminiSpeakLabel" style="font-size:9px;color:var(--text3);min-width:38px;text-align:right;">Silent</span>
         </div>
       </div>
 
@@ -460,6 +461,55 @@
     <!-- Center column: Scene + MIDI UI -->
     <div class="right-col">
 
+      <div style="display:flex;align-items:center;gap:16px;padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;flex-shrink:0;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);white-space:nowrap;">
+          Scale:
+          <select id="staffScale" title="Scale" style="font-size:12px;padding:3px 6px;background:var(--bg3);border:1px solid var(--border);color:var(--text1);border-radius:4px;cursor:pointer;">
+            <option value="C major">C</option>
+            <option value="G major">G</option>
+            <option value="D major">D</option>
+            <option value="A major">A</option>
+            <option value="E major">E</option>
+            <option value="B major">B</option>
+            <option value="F# major">F#</option>
+            <option value="F major">F</option>
+            <option value="Bb major">Bb</option>
+            <option value="Eb major">Eb</option>
+            <option value="Ab major">Ab</option>
+            <option value="Db major">Db</option>
+            <option value="Gb major">Gb</option>
+            <option value="A minor">Am</option>
+            <option value="E minor">Em</option>
+            <option value="B minor">Bm</option>
+            <option value="D minor">Dm</option>
+            <option value="G minor">Gm</option>
+            <option value="C minor">Cm</option>
+            <option value="F minor">Fm</option>
+            <option value="F# minor">F#m</option>
+            <option value="C# minor">C#m</option>
+            <option value="G# minor">G#m</option>
+            <option value="D# minor">D#m</option>
+            <option value="Bb minor">Bbm</option>
+            <option value="Eb minor">Ebm</option>
+          </select>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);white-space:nowrap;">
+          Tempo:
+          <input type="range" id="bpmSlider" min="40" max="300" value="90" style="width:100px;height:14px;cursor:pointer;">
+          <span id="bpmVal" style="font-size:12px;color:var(--text1);min-width:28px;">90</span>
+          <span style="font-size:11px;color:var(--text3);">bpm</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);white-space:nowrap;">
+          Time signature:
+          <select id="staffTimeSig" title="Time signature" style="font-size:12px;padding:3px 6px;background:var(--bg3);border:1px solid var(--border);color:var(--text1);border-radius:4px;cursor:pointer;">
+            <option value="4/4">4/4</option>
+            <option value="3/4">3/4</option>
+            <option value="2/4">2/4</option>
+            <option value="6/8">6/8</option>
+          </select>
+        </label>
+      </div>
+
       <div class="midi-stack" id="midiStack">
         <div class="roll-wrap" id="rollWrap" style="background:#0a0a0a;border-radius:12px 12px 0 0;overflow:hidden;">
           <canvas id="pianoRollCanvas"></canvas>
@@ -470,40 +520,6 @@
         <div class="staff-wrap" id="staffWrap" style="padding:0;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
           <canvas id="grandStaffCanvas"></canvas>
         </div>
-      </div>
-      <div class="midi-footer" style="display:flex;align-items:center;gap:12px;padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-        <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);">
-          BPM
-          <input type="range" id="bpmSlider" min="40" max="300" value="90" style="width:80px;height:14px;">
-          <span id="bpmVal" style="font-size:11px;color:var(--text1);min-width:24px;">90</span>
-        </label>
-        <select id="staffTimeSig" title="Time signature" style="font-size:11px;padding:2px 4px;background:var(--bg3);border:1px solid var(--border);color:var(--text1);border-radius:4px;">
-          <option value="4/4">4/4</option>
-          <option value="3/4">3/4</option>
-          <option value="2/4">2/4</option>
-          <option value="6/8">6/8</option>
-        </select>
-        <select id="staffScale" title="Scale" style="font-size:11px;padding:2px 4px;background:var(--bg3);border:1px solid var(--border);color:var(--text1);border-radius:4px;">
-          <option value="C major">C</option>
-          <option value="G major">G</option>
-          <option value="D major">D</option>
-          <option value="A major">A</option>
-          <option value="E major">E</option>
-          <option value="B major">B</option>
-          <option value="F major">F</option>
-          <option value="Bb major">Bb</option>
-          <option value="Eb major">Eb</option>
-          <option value="Ab major">Ab</option>
-          <option value="A minor">Am</option>
-          <option value="E minor">Em</option>
-          <option value="B minor">Bm</option>
-          <option value="D minor">Dm</option>
-          <option value="G minor">Gm</option>
-          <option value="C minor">Cm</option>
-          <option value="F minor">Fm</option>
-          <option value="F# minor">F#m</option>
-          <option value="C# minor">C#m</option>
-        </select>
       </div>
     </div>
 
@@ -520,12 +536,19 @@
           <div class="score-tree" id="scoreTree">
             <div style="color:var(--text3);font-size:10px;">Loading sheets...</div>
           </div>
+          <div class="sheet-music-view" id="sheetMusicView" style="display:none;flex:1;overflow:auto;padding:4px;">
+            <img src="/static/sheets/fur-elise-reference.png" alt="Fur Elise Sheet Music" style="width:100%;display:block;border-radius:4px;">
+            <div style="text-align:center;padding:4px;">
+              <a href="/static/sheets/fur-elise-full.pdf" target="_blank" style="color:#6af;font-size:11px;">Open full PDF</a>
+            </div>
+          </div>
           <div class="score-preview" id="scorePreview" style="display:none;">
             <div class="score-info" id="scoreInfo"></div>
             <div class="score-canvas-wrap">
               <canvas id="scoreCanvas"></canvas>
             </div>
             <div class="score-actions">
+              <button id="sheetMusicBtn" onclick="toggleSheetMusicView()">Sheet Music</button>
               <button id="scoreLoadBtn" onclick="loadScoreToTargets()">Load as Target Notes</button>
               <button id="scoreColorBtn" onclick="toggleScoreColorMode()">Color Mode</button>
               <button id="scorePlayBtn" onclick="toggleScorePlayback()">Play</button>
@@ -1327,9 +1350,8 @@ function queueAudio(arrayBuf) {
   var speakEl = document.getElementById('geminiSpeaking');
   var labelEl = document.getElementById('geminiSpeakLabel');
   var fillEl = document.getElementById('geminiVolFill');
-  if (speakEl && fillEl) {
-    speakEl.className = 'gemini-speaking active';
-    labelEl.textContent = 'Speaking';
+  if (fillEl) {
+    if (labelEl) labelEl.textContent = 'Speaking';
     fillEl.style.width = Math.min(100, rms * 500) + '%';
   }
   var buffer = playbackCtx.createBuffer(1, float32.length, 24000);
@@ -1345,7 +1367,6 @@ function queueAudio(arrayBuf) {
   // Reset indicator when playback ends
   src.onended = function() {
     if (playbackCtx && playbackCtx.currentTime >= playbackActiveUntil - 0.25) {
-      if (speakEl) speakEl.className = 'gemini-speaking';
       if (labelEl) labelEl.textContent = 'Silent';
       if (fillEl) fillEl.style.width = '0%';
     }
@@ -1360,9 +1381,9 @@ function sizeMidiStack() {
   if (!stack) return;
   var totalH = stack.clientHeight;
   if (totalH < 100) return;
-  // Proportions: waterfall 5, keyboard 2.5, grand staff 4 = 11.5 total
-  var rollH = Math.round(totalH * 5 / 11.5);
-  var kbH = Math.round(totalH * 2.5 / 11.5);
+  // Proportions: waterfall 4, keyboard 3.5, grand staff 4 = 11.5 total
+  var rollH = Math.round(totalH * 4 / 11.5);
+  var kbH = Math.round(totalH * 3.5 / 11.5);
   var staffH = totalH - rollH - kbH;
   document.getElementById('rollWrap').style.height = rollH + 'px';
   document.getElementById('keyboardWrap').style.height = kbH + 'px';
@@ -1612,11 +1633,14 @@ var KEY_SIG_MAP = {
   'D major': 2, 'B minor': 2,
   'A major': 3, 'F# minor': 3,
   'E major': 4, 'C# minor': 4,
-  'B major': 5,
+  'B major': 5, 'G# minor': 5,
+  'F# major': 6, 'D# minor': 6,
   'F major': -1, 'D minor': -1,
   'Bb major': -2, 'G minor': -2,
   'Eb major': -3, 'C minor': -3,
-  'Ab major': -4, 'F minor': -4
+  'Ab major': -4, 'F minor': -4,
+  'Db major': -5, 'Bb minor': -5,
+  'Gb major': -6, 'Eb minor': -6
 };
 
 // Sharp positions on staff (MIDI values for treble and bass)
@@ -1638,6 +1662,24 @@ function getKeySigSemitones(keyName) {
 
 function isUseFlats(keyName) {
   return (KEY_SIG_MAP[keyName] || 0) < 0;
+}
+
+// Get the 7 diatonic semitones (0-11) for a given key
+function getScaleSemitones(keyName) {
+  // Major scale intervals: W W H W W W H
+  var majorIntervals = [0, 2, 4, 5, 7, 9, 11];
+  // Minor scale intervals: W H W W H W W
+  var minorIntervals = [0, 2, 3, 5, 7, 8, 10];
+  var rootMap = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11,
+                  'Db': 1, 'D#': 3, 'Eb': 3, 'F#': 6, 'Gb': 6, 'G#': 8, 'Ab': 8, 'Bb': 10, 'C#': 1 };
+  var parts = keyName.split(' ');
+  var root = rootMap[parts[0]] || 0;
+  var intervals = (parts[1] === 'minor') ? minorIntervals : majorIntervals;
+  var set = new Set();
+  for (var i = 0; i < intervals.length; i++) {
+    set.add((root + intervals[i]) % 12);
+  }
+  return set;
 }
 
 // Target notes for practice — flowing from right on grand staff, from top on waterfall
@@ -1706,6 +1748,7 @@ function drawGrandStaff() {
   var keySigNum = KEY_SIG_MAP[scaleName] || 0;
   var useFlats = keySigNum < 0;
   var keySigSemitones = getKeySigSemitones(scaleName);
+  var scaleSemitones = getScaleSemitones(scaleName);
   var msPerBeat = 60000 / tempo;
   var msPerMeasure = msPerBeat * beatsPerMeasure;
 
@@ -1743,13 +1786,13 @@ function drawGrandStaff() {
     var y = midiToY(TREBLE_LINE_MIDIS[t]);
     if (t === 0) trebleBottom = y;
     if (t === 4) trebleTop = y;
-    ctx.beginPath(); ctx.moveTo(clefW, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
   for (var b = 0; b < BASS_LINE_MIDIS.length; b++) {
     var y = midiToY(BASS_LINE_MIDIS[b]);
     if (b === 0) bassBottom = y;
     if (b === 4) bassTop = y;
-    ctx.beginPath(); ctx.moveTo(clefW, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
 
   var middleCY = midiToY(60);
@@ -1763,19 +1806,20 @@ function drawGrandStaff() {
 
   // Treble clef — Unicode 𝄞, centered on G4 line
   ctx.fillStyle = '#AAAAAA';
-  var trebleClefSize = Math.round(staffH * 0.924 * 1.2);
+  var trebleClefSize = Math.round(staffH * 0.924 * 1.44);
   ctx.font = trebleClefSize + 'px serif';
   ctx.textBaseline = 'middle';
-  var trebleClefX = 4;
-  ctx.fillText('\uD834\uDD1E', trebleClefX, trebleG4Y);
+  var trebleClefX = -4;
+  var trebleLineSpacing = (trebleBottom - trebleTop) / 4;
+  ctx.fillText('\uD834\uDD1E', trebleClefX, trebleG4Y - trebleLineSpacing * 0.85);
   var trebleClefW = ctx.measureText('\uD834\uDD1E').width;
   // Bass clef — Unicode 𝄢, dots straddle F3 line
-  var bassClefSize = Math.round(staffH * 1.008);
+  var bassClefSize = Math.round(staffH * 1.008 * 1.2);
   ctx.font = bassClefSize + 'px serif';
   var bassLineSpacing = (bassBottom - bassTop) / 4;
   var bassF3LineY = midiToY(53); // F3 = 4th line from bottom
-  var bassClefY = bassF3LineY + bassLineSpacing * 2; // shift down one more note
-  var bassClefX = 6;
+  var bassClefY = bassF3LineY + bassLineSpacing * 1.5;
+  var bassClefX = Math.max(4, trebleClefX + trebleClefW - ctx.measureText('\uD834\uDD22').width);
   ctx.fillText('\uD834\uDD22', bassClefX, bassClefY);
   var bassClefW = ctx.measureText('\uD834\uDD22').width;
   ctx.textBaseline = 'alphabetic';
@@ -1787,36 +1831,40 @@ function drawGrandStaff() {
   var playLineX = marginLeft + (W - marginLeft) * 0.5;
   // Time signature — to the RIGHT of clefs, using measured width
   var tsX = actualClefW;
-  var tsFontSize = Math.round(staffH * 0.48);
+  var tsFontSize = Math.round(staffH * 0.576);
   ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   // Treble staff: top number centered between lines 3(B4) and 5(F5), bottom between 1(E4) and 3(B4)
   var trebleLine3Y = midiToY(TREBLE_LINE_MIDIS[2]); // B4
-  ctx.fillText(timeSig[0], tsX + 6, (trebleTop + trebleLine3Y) / 2);
-  ctx.fillText(timeSig[1], tsX + 6, (trebleLine3Y + trebleBottom) / 2);
+  ctx.fillText(timeSig[0], tsX + 10, (trebleTop + trebleLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 10, (trebleLine3Y + trebleBottom) / 2);
   // Bass staff: top between lines 3(D3) and 5(A3), bottom between 1(G2) and 3(D3)
   var bassLine3Y = midiToY(BASS_LINE_MIDIS[2]); // D3
-  ctx.fillText(timeSig[0], tsX + 6, (bassTop + bassLine3Y) / 2);
-  ctx.fillText(timeSig[1], tsX + 6, (bassLine3Y + bassBottom) / 2);
+  ctx.fillText(timeSig[0], tsX + 10, (bassTop + bassLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 10, (bassLine3Y + bassBottom) / 2);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
-  // Key signature accidentals
-  var ksX = actualClefW + timeSigW;
+  // Key signature accidentals — to the right of time signature
+  var ksX = actualClefW + timeSigW + 20;
   var absKeySig = Math.abs(keySigNum);
   if (absKeySig > 0) {
     var symbol = useFlats ? '\u266D' : '\u266F';
     var treblePos = useFlats ? TREBLE_FLAT_POS : TREBLE_SHARP_POS;
     var bassPos = useFlats ? BASS_FLAT_POS : BASS_SHARP_POS;
-    ctx.font = '11px serif';
-    ctx.fillStyle = '#999999';
+    ctx.font = 'bold 33px serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     for (var i = 0; i < absKeySig; i++) {
-      var x = ksX + i * 10;
-      ctx.fillText(symbol, x, midiToY(treblePos[i]) + 4);
-      ctx.fillText(symbol, x, midiToY(bassPos[i]) + 4);
+      var x = ksX + i * 22;
+      ctx.fillText(symbol, x, midiToY(treblePos[i]));
+      ctx.fillText(symbol, x, midiToY(bassPos[i]));
     }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
   }
 
   // Play line (where notes arrive)
@@ -1830,7 +1878,7 @@ function drawGrandStaff() {
   // Flowing measure bar lines — scroll from right to left
   // Fixed measure width: always show ~4 measures; BPM controls scroll speed
   var scrollableW = W - playLineX;
-  var measuresVisible = 4;
+  var measuresVisible = 2;
   var measureDurationMs = msPerMeasure;
   var measureWidthPx = scrollableW / measuresVisible;
   var pxPerMs = measureWidthPx / measureDurationMs;
@@ -1939,13 +1987,25 @@ function drawGrandStaff() {
 
   function drawAccidental(noteX, noteY, midi, color) {
     var semitone = midi % 12;
-    if (!isBlackKey(midi)) return;
-    // Skip if already in key signature
-    if (keySigSemitones.has(semitone)) return;
-    var symbol = useFlats ? '\u266D' : '\u266F';
-    ctx.font = '11px serif';
-    ctx.fillStyle = color;
-    ctx.fillText(symbol, noteX - noteRadius - 11, noteY + 4);
+    // Diatonic notes in the scale need no accidental
+    if (scaleSemitones.has(semitone)) return;
+    // Black keys not in key signature get sharp/flat
+    // White keys not in scale get natural sign (e.g. F natural in G major)
+    var symbol;
+    if (isBlackKey(midi)) {
+      if (keySigSemitones.has(semitone)) return; // already in key sig
+      symbol = useFlats ? '\u266D' : '\u266F';
+    } else {
+      // White key that's non-diatonic — needs natural sign
+      symbol = '\u266E';
+    }
+    ctx.font = 'bold 22px serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(symbol, noteX - 14, noteY);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
   }
 
   // --- TARGET NOTES flowing from right ---
@@ -1998,18 +2058,20 @@ function drawGrandStaff() {
         // Finger released, pedal sustaining — draw two segments
         var fingerMs = histEntry.fingerDurationMs;
         var fingerEndX = Math.max(headX, playLineX - (holdMs - fingerMs) * pxPerMs);
-        // Finger-held segment: inner gradient with synchronized breathing
+        // Finger-held segment: inner gradient matching waterfall style
         if (fingerEndX > headX) {
           var fW = fingerEndX - headX;
-          var bA = 0.5 * breathe; // synced breathing alpha for center
-          var bE = 0.8 * breathe; // synced breathing alpha for edges
           var fGrad = ctx.createLinearGradient(0, barY, 0, barY + barH);
-          fGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + bE + ')');
-          fGrad.addColorStop(0.3, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',' + bA + ')');
-          fGrad.addColorStop(0.7, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',' + bA + ')');
-          fGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + bE + ')');
+          fGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.9)');
+          fGrad.addColorStop(0.3, 'rgba(' + Math.round(c.r * 0.7) + ',' + Math.round(c.g * 0.7) + ',' + Math.round(c.b * 0.7) + ',0.7)');
+          fGrad.addColorStop(0.7, 'rgba(' + Math.round(c.r * 0.7) + ',' + Math.round(c.g * 0.7) + ',' + Math.round(c.b * 0.7) + ',0.7)');
+          fGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.9)');
           ctx.fillStyle = fGrad;
           ctx.fillRect(headX, barY, fW, barH);
+          // Bright edge highlights (top/bottom)
+          ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.6)';
+          ctx.fillRect(headX, barY, fW, 1);
+          ctx.fillRect(headX, barY + barH - 1, fW, 1);
           // Thin start bar
           ctx.fillStyle = color;
           ctx.globalAlpha = 0.95;
@@ -2034,16 +2096,18 @@ function drawGrandStaff() {
         }
         ctx.globalAlpha = 1.0;
       } else {
-        // Finger still held — inner gradient fill with synchronized breathing
-        var bA = 0.5 * breathe;
-        var bE = 0.8 * breathe;
+        // Finger still held — inner gradient fill matching waterfall style
         var fGrad = ctx.createLinearGradient(0, barY, 0, barY + barH);
-        fGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + bE + ')');
-        fGrad.addColorStop(0.3, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',' + bA + ')');
-        fGrad.addColorStop(0.7, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',' + bA + ')');
-        fGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + bE + ')');
+        fGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.9)');
+        fGrad.addColorStop(0.3, 'rgba(' + Math.round(c.r * 0.7) + ',' + Math.round(c.g * 0.7) + ',' + Math.round(c.b * 0.7) + ',0.7)');
+        fGrad.addColorStop(0.7, 'rgba(' + Math.round(c.r * 0.7) + ',' + Math.round(c.g * 0.7) + ',' + Math.round(c.b * 0.7) + ',0.7)');
+        fGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.9)');
         ctx.fillStyle = fGrad;
         ctx.fillRect(headX, barY, tailLen, barH);
+        // Bright edge highlights (top/bottom of bar)
+        ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.6)';
+        ctx.fillRect(headX, barY, tailLen, 1);
+        ctx.fillRect(headX, barY + barH - 1, tailLen, 1);
         // Thin start bar
         ctx.fillStyle = color;
         ctx.globalAlpha = 0.95;
@@ -2086,17 +2150,22 @@ function drawGrandStaff() {
     if (durationPx > 2) {
       var fingerEndMs = (entry.fingerDurationMs > 0) ? entry.startMs + entry.fingerDurationMs : null;
       if (fingerEndMs && fingerEndMs < entry.endMs) {
-        // Finger-held segment: inner gradient, square edges, thin start bar
+        // Finger-held segment: inner gradient matching waterfall style
         var fingerEndAge = nowMs - fingerEndMs;
         var fingerEndX = Math.min(playLineX, playLineX - fingerEndAge * pxPerMs);
         if (fingerEndX > noteX) {
+          var fSegW = fingerEndX - noteX;
           var fGrad = ctx.createLinearGradient(0, histBarY, 0, histBarY + histBarH);
-          fGrad.addColorStop(0, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
-          fGrad.addColorStop(0.3, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
-          fGrad.addColorStop(0.7, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
-          fGrad.addColorStop(1, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
+          fGrad.addColorStop(0, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.9)');
+          fGrad.addColorStop(0.3, 'rgba(' + Math.round(hc.r * 0.7) + ',' + Math.round(hc.g * 0.7) + ',' + Math.round(hc.b * 0.7) + ',0.7)');
+          fGrad.addColorStop(0.7, 'rgba(' + Math.round(hc.r * 0.7) + ',' + Math.round(hc.g * 0.7) + ',' + Math.round(hc.b * 0.7) + ',0.7)');
+          fGrad.addColorStop(1, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.9)');
           ctx.fillStyle = fGrad;
-          ctx.fillRect(noteX, histBarY, fingerEndX - noteX, histBarH);
+          ctx.fillRect(noteX, histBarY, fSegW, histBarH);
+          // Bright edge highlights (top/bottom)
+          ctx.fillStyle = 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.6)';
+          ctx.fillRect(noteX, histBarY, fSegW, 1);
+          ctx.fillRect(noteX, histBarY + histBarH - 1, fSegW, 1);
           // Thin start bar
           ctx.fillStyle = dynamicsColor(entry.velocity);
           ctx.globalAlpha = 0.9;
@@ -2123,14 +2192,19 @@ function drawGrandStaff() {
         }
         ctx.globalAlpha = 1.0;
       } else {
-        // No pedal sustain — inner gradient fill, square edges, thin start bar
+        // No pedal sustain — inner gradient fill matching waterfall style
+        var nopedalW = tailEndX - noteX;
         var fGrad = ctx.createLinearGradient(0, histBarY, 0, histBarY + histBarH);
-        fGrad.addColorStop(0, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
-        fGrad.addColorStop(0.3, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
-        fGrad.addColorStop(0.7, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
-        fGrad.addColorStop(1, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
+        fGrad.addColorStop(0, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.9)');
+        fGrad.addColorStop(0.3, 'rgba(' + Math.round(hc.r * 0.7) + ',' + Math.round(hc.g * 0.7) + ',' + Math.round(hc.b * 0.7) + ',0.7)');
+        fGrad.addColorStop(0.7, 'rgba(' + Math.round(hc.r * 0.7) + ',' + Math.round(hc.g * 0.7) + ',' + Math.round(hc.b * 0.7) + ',0.7)');
+        fGrad.addColorStop(1, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.9)');
         ctx.fillStyle = fGrad;
-        ctx.fillRect(noteX, histBarY, tailEndX - noteX, histBarH);
+        ctx.fillRect(noteX, histBarY, nopedalW, histBarH);
+        // Bright edge highlights (top/bottom)
+        ctx.fillStyle = 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.6)';
+        ctx.fillRect(noteX, histBarY, nopedalW, 1);
+        ctx.fillRect(noteX, histBarY + histBarH - 1, nopedalW, 1);
         // Thin start bar
         ctx.fillStyle = dynamicsColor(entry.velocity);
         ctx.globalAlpha = 0.9;
@@ -2152,9 +2226,9 @@ function drawGrandStaff() {
   ctx.fillStyle = '#AAAAAA';
   ctx.textBaseline = 'middle';
   ctx.font = trebleClefSize + 'px serif';
-  ctx.fillText('\uD834\uDD1E', 4, trebleG4Y);
+  ctx.fillText('\uD834\uDD1E', trebleClefX, trebleG4Y - trebleLineSpacing * 0.85);
   ctx.font = bassClefSize + 'px serif';
-  ctx.fillText('\uD834\uDD22', 6, bassClefY);
+  ctx.fillText('\uD834\uDD22', bassClefX, bassClefY);
   ctx.textBaseline = 'alphabetic';
 
   // Redraw time sig
@@ -2162,10 +2236,10 @@ function drawGrandStaff() {
   ctx.fillStyle = '#999999';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(timeSig[0], tsX + 6, (trebleTop + trebleLine3Y) / 2);
-  ctx.fillText(timeSig[1], tsX + 6, (trebleLine3Y + trebleBottom) / 2);
-  ctx.fillText(timeSig[0], tsX + 6, (bassTop + bassLine3Y) / 2);
-  ctx.fillText(timeSig[1], tsX + 6, (bassLine3Y + bassBottom) / 2);
+  ctx.fillText(timeSig[0], tsX + 10, (trebleTop + trebleLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 10, (trebleLine3Y + trebleBottom) / 2);
+  ctx.fillText(timeSig[0], tsX + 10, (bassTop + bassLine3Y) / 2);
+  ctx.fillText(timeSig[1], tsX + 10, (bassLine3Y + bassBottom) / 2);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
@@ -2174,25 +2248,29 @@ function drawGrandStaff() {
     var symbol = useFlats ? '\u266D' : '\u266F';
     var treblePos = useFlats ? TREBLE_FLAT_POS : TREBLE_SHARP_POS;
     var bassPos = useFlats ? BASS_FLAT_POS : BASS_SHARP_POS;
-    ctx.font = '11px serif';
-    ctx.fillStyle = '#999999';
+    ctx.font = 'bold 33px serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     for (var i = 0; i < absKeySig; i++) {
-      var x = ksX + i * 10;
-      ctx.fillText(symbol, x, midiToY(treblePos[i]) + 4);
-      ctx.fillText(symbol, x, midiToY(bassPos[i]) + 4);
+      var x = ksX + i * 22;
+      ctx.fillText(symbol, x, midiToY(treblePos[i]));
+      ctx.fillText(symbol, x, midiToY(bassPos[i]));
     }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
   }
 
-  // Redraw staff lines in clef area
+  // Redraw staff lines in clef area (full width from left edge)
   ctx.strokeStyle = '#555555';
   ctx.lineWidth = 1;
   for (var t = 0; t < TREBLE_LINE_MIDIS.length; t++) {
     var y = midiToY(TREBLE_LINE_MIDIS[t]);
-    ctx.beginPath(); ctx.moveTo(clefW, y); ctx.lineTo(marginLeft - 2, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(marginLeft - 2, y); ctx.stroke();
   }
   for (var b = 0; b < BASS_LINE_MIDIS.length; b++) {
     var y = midiToY(BASS_LINE_MIDIS[b]);
-    ctx.beginPath(); ctx.moveTo(clefW, y); ctx.lineTo(marginLeft - 2, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(marginLeft - 2, y); ctx.stroke();
   }
 }
 
@@ -2208,8 +2286,8 @@ function drawKeyboard() {
   var W = rect.width;
   var totalH = rect.height;
   if (totalH < 50) return;
-  var dynamicsH = Math.round(totalH * 0.4); // top 40% for dynamic bars
-  var keyboardH = totalH - dynamicsH; // bottom 60% for keys
+  var dynamicsH = Math.round(totalH * 0.5); // top 50% for dynamic bars (same height as keyboard)
+  var keyboardH = totalH - dynamicsH; // bottom 50% for keys
   var keyTop = dynamicsH; // keys start below dynamics zone
   var whiteKeyW = W / WHITE_KEYS_COUNT;
   var blackKeyW = whiteKeyW * 0.6;
@@ -2222,7 +2300,7 @@ function drawKeyboard() {
   ctx.fillRect(0, 0, W, dynamicsH);
 
   // Dynamics guide lines
-  ctx.font = 'bold 12px DM Sans, sans-serif';
+  ctx.font = 'bold 18px DM Sans, sans-serif';
   DYNAMICS_LABELS.forEach(function(dl) {
     var y = keyTop - (dl.vel / 127) * dynamicsH;
     ctx.strokeStyle = dynamicsColor(dl.vel, 0.5);
@@ -2322,18 +2400,22 @@ function drawKeyboard() {
   ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, keyTop, W, keyboardH);
 
+  var scaleName = document.getElementById('staffScale').value || 'C major';
+  var scaleSemitones = getScaleSemitones(scaleName);
+
   KEYBOARD.forEach(function(key) {
     if (key.isBlack) return;
     var x = key.whiteIndex * whiteKeyW;
     var active = activeNotes.get(key.midi);
     var isPedalOnly = active && !fingerDownNotes.has(key.midi) && pedalSustainedNotes.has(key.midi);
+    var inScale = scaleSemitones.has(key.midi % 12);
 
     if (active) {
       ctx.fillStyle = isPedalOnly ? darkenedColor(active.velocity, 0.75) : dynamicsColor(active.velocity);
       ctx.shadowColor = isPedalOnly ? darkenedColor(active.velocity, 0.75) : dynamicsColor(active.velocity);
       ctx.shadowBlur = 10;
     } else {
-      ctx.fillStyle = '#e8e8e8';
+      ctx.fillStyle = inScale ? '#f4f4f4' : '#b8b8b8';
       ctx.shadowBlur = 0;
     }
 
@@ -2341,6 +2423,15 @@ function drawKeyboard() {
     ctx.strokeStyle = 'rgba(0,0,0,0.22)';
     ctx.lineWidth = 0.5;
     ctx.strokeRect(x + 0.5, keyTop, whiteKeyW - 1, keyboardH - 1);
+    // Scale indicator: colored bottom strip + dot
+    if (inScale && !active) {
+      ctx.fillStyle = 'rgba(80,160,255,0.25)';
+      ctx.fillRect(x + 0.5, keyTop + keyboardH - 5, whiteKeyW - 1, 4);
+      ctx.beginPath();
+      ctx.arc(x + whiteKeyW / 2, keyTop + keyboardH - 8, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(100,180,255,0.6)';
+      ctx.fill();
+    }
   });
 
   ctx.shadowBlur = 0;
@@ -2349,16 +2440,26 @@ function drawKeyboard() {
     var x = (key.whiteIndex + 1) * whiteKeyW - blackKeyW / 2;
     var active = activeNotes.get(key.midi);
     var isPedalOnly = active && !fingerDownNotes.has(key.midi) && pedalSustainedNotes.has(key.midi);
+    var inScale = scaleSemitones.has(key.midi % 12);
 
     if (active) {
       ctx.fillStyle = isPedalOnly ? darkenedColor(active.velocity, 0.75) : dynamicsColor(active.velocity);
       ctx.shadowColor = isPedalOnly ? darkenedColor(active.velocity, 0.75) : dynamicsColor(active.velocity);
       ctx.shadowBlur = 10;
     } else {
-      ctx.fillStyle = '#111111';
+      ctx.fillStyle = inScale ? '#111111' : '#444444';
+      ctx.shadowBlur = 0;
     }
 
     ctx.fillRect(x, keyTop, blackKeyW, blackKeyH);
+    ctx.shadowBlur = 0;
+    // Scale indicator: small dot on diatonic black keys
+    if (inScale && !active) {
+      ctx.beginPath();
+      ctx.arc(x + blackKeyW / 2, keyTop + blackKeyH - 6, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(100,180,255,0.7)';
+      ctx.fill();
+    }
     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 0.5;
     ctx.strokeRect(x, keyTop, blackKeyW, blackKeyH);
@@ -2648,6 +2749,23 @@ function loadScoreToTargets() {
     document.getElementById('scoreLoadBtn').classList.remove('active');
     document.getElementById('scoreLoadBtn').textContent = 'Load as Target Notes';
   }, 3000);
+}
+
+function toggleSheetMusicView() {
+  var sheetView = document.getElementById('sheetMusicView');
+  var scorePreview = document.getElementById('scorePreview');
+  var scoreTree = document.getElementById('scoreTree');
+  var btn = document.getElementById('sheetMusicBtn');
+  if (sheetView.style.display === 'none') {
+    sheetView.style.display = '';
+    scorePreview.style.display = 'none';
+    scoreTree.style.display = 'none';
+    btn.textContent = 'Score Browser';
+  } else {
+    sheetView.style.display = 'none';
+    scoreTree.style.display = '';
+    btn.textContent = 'Sheet Music';
+  }
 }
 
 function toggleScorePlayback() {

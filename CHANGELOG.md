@@ -6,6 +6,174 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.49] - 2026-03-16
+
+### Fixed
+- **Spectator WebSocket keepalive** — added 25s ping interval to prevent Cloud Run from killing idle spectator connections. Bridge was connecting/disconnecting repeatedly due to timeout.
+- **MIDI event logging** — added console.log for midi_event broadcasts to diagnose pipeline issues.
+
+## [2.1.48] - 2026-03-16
+
+### Changed
+- **Speaking indicator moved** from header to Audio Level panel. Now shows two rows: "User" (mic level bar) and "Gemini" (speaking/silent with volume bar). Removed clutter from header.
+
+## [2.1.47] - 2026-03-16
+
+### Changed
+- **Center panel header bar** with controls: `Scale: [dropdown] Tempo: [slider] bpm Time signature: [dropdown]`. Horizontal layout, labeled, above the midi-stack.
+- Removed overlay controls from grand staff panel — controls no longer overlap the notation.
+
+## [2.1.46] - 2026-03-16
+
+### Fixed
+- **CRITICAL: MIDI events now broadcast to spectators** — Primary device had `midi: false` role and primary handler silently dropped `midi_event` messages. Fixed both: primary now has `midi: true` and broadcasts events to room + spectators. This fixes the livestream pipeline (PianoQuest Live → bridge → jayismocking.com/live).
+
+## [2.1.45] - 2026-03-16
+
+### Changed
+- **Staff control dropdowns 3x wider** (36px→54px) and taller (font 9px→12px, more padding).
+- **BPM slider** fixed height (80px) instead of stretching to bottom of panel. Starts just below dropdowns.
+
+## [2.1.44] - 2026-03-16
+
+### Changed
+- **Sheet Music button** added to score-actions in score panel (left of "Load as Target Notes"). Toggles between sheet music image view and score browser within the right panel — no more popup modal.
+- Removed redundant `loadTargetBtn` and footer buttons from score panel.
+
+## [2.1.43] - 2026-03-16
+
+### Changed
+- **Grand staff notes twice as wide** — `measuresVisible` reduced from 4 to 2, doubling horizontal note/clause width.
+- **Removed midi-footer** — time signature and scale dropdowns + vertical BPM slider moved into grand staff panel overlay at left edge.
+
+## [2.1.42] - 2026-03-16
+
+### Fixed
+- **Sheet Music & Load buttons moved** to bottom-left of score panel (right column), not the midi-footer.
+
+## [2.1.41] - 2026-03-16
+
+### Added
+- **Sheet Music button** in midi-footer (left side) — opens modal overlay showing Fur Elise reference PNG with link to full PDF.
+- **Load as Target Notes button** — fetches `fur-elise.json`, sets tempo/key/time sig, and spawns all notes as target notes flowing on the grand staff.
+- Sheet music assets served from `/static/sheets/`.
+
+## [2.1.40] - 2026-03-16
+
+### Added
+- **Missing scales**: F# major (6#), Db major (5b), Gb major (6b), and corresponding minor scales (D#m, G#m, Bbm, Ebm) in dropdown and KEY_SIG_MAP.
+
+## [2.1.39] - 2026-03-16
+
+### Fixed
+- **Grand staff accidentals for non-diatonic white keys** — white keys outside the selected scale now show a natural sign (♮). Previously `drawAccidental` only handled black keys, so non-diatonic white keys (e.g. F natural in G major) had no accidental indicator.
+
+## [2.1.38] - 2026-03-16
+
+### Changed
+- **Dynamic bars panel taller** — keyboard panel proportion increased (2.5→3.5), internal split 50/50 (was 40/60), so dynamic bars are same height as keys.
+- **Waterfall shrunk** proportionally (5→4) to accommodate taller keyboard+dynamics panel.
+- **Dynamics labels larger** — pp, p, mp, etc. text increased from 12px to 18px bold.
+
+## [2.1.37] - 2026-03-16
+
+### Changed
+- **Treble clef nudged down** (0.85 line spacing offset, was 1.0) and **left** (X -4, was -2).
+- **Non-scale black keys more grey** (#444 instead of #333) for clearer distinction from in-scale keys.
+
+## [2.1.36] - 2026-03-16
+
+### Fixed
+- **Black key scale indication inverted**: In-scale black keys now normal black (#111), non-scale grayed out (#333). Removed blue border glow that made in-scale keys look washed out. Only small blue dot remains as indicator.
+
+## [2.1.35] - 2026-03-16
+
+### Changed
+- **Treble clef moved left** (X 2→-2) and **lowered** (offset 1.5→1.0 line spacings).
+
+## [2.1.34] - 2026-03-16
+
+### Fixed
+- **Black key scale indication**: In-scale black keys now #181818 (normal), non-diatonic #060606 (much darker). No more gray-washed look.
+- **Staff lines extended to left edge in redraw section** — second draw was still using `clefW` as start, now uses 0.
+
+## [2.1.33] - 2026-03-16
+
+### Fixed
+- **Clef redraw used hardcoded old positions** — the second draw (after note history) was overwriting the first with wrong coordinates `(4, trebleG4Y)` and `(6, bassClefY)`. Now uses same computed positions as initial draw.
+
+## [2.1.32] - 2026-03-16
+
+### Changed
+- **Scale keyboard indicators improved**: Diatonic keys now have a blue bottom strip + dot indicator. Non-diatonic white keys darkened more (#b8b8b8 vs #f4f4f4). Diatonic black keys brighter (#2a2a2a vs #0c0c0c) with blue bottom strip, dot, and subtle blue border glow.
+- **Time signature shifted left** (tsX+16→tsX+10) to match treble clef repositioning.
+
+## [2.1.31] - 2026-03-16
+
+### Changed
+- **Treble clef moved up** (1.0→1.5 line spacings above G4) and slightly left (X 4→2).
+- **Staff lines extend to left edge** of grand staff panel (from X=0 instead of clefW), matching dynamic bar guide lines.
+
+## [2.1.30] - 2026-03-16
+
+### Fixed
+- **CRITICAL: Page hang on render** — `drawKeyboard()` referenced non-existent `staffKeySig` element (correct ID: `staffScale`). Null reference killed the entire animation loop. Gemini audio still worked because it runs on a separate WebSocket/AudioWorklet thread.
+
+## [2.1.29] - 2026-03-16
+
+### Fixed
+- **Treble clef moved higher** (offset 0.5→1.0 line spacing up from G4).
+- **Bass clef lowered slightly** (offset 1.0→1.5 line spacing from F3).
+- **Bass clef right-aligned with treble** — dots of both clefs now vertically align (bass X computed from treble clef right edge).
+
+## [2.1.28] - 2026-03-16
+
+### Added
+- **Scale-aware keyboard highlighting**: Diatonic keys for the selected scale appear brighter (white keys #f4f4f4 vs #c8c8c8, black keys #222 vs #111) with a subtle blue top-edge indicator. Does not interfere with dynamic coloring when keys are active.
+
+## [2.1.27] - 2026-03-16
+
+### Fixed
+- **Bass clef moved up** — dot now aligns with 2nd line from top (F3 line) instead of 3rd line. Offset reduced from 2.5→1.0 line spacings.
+- **Treble clef moved up** by half a line spacing for better vertical positioning.
+
+## [2.1.26] - 2026-03-16
+
+### Changed
+- **Key signature accidentals 3x larger** (11px→33px bold white), positioned to the right of time signature numbers with proper spacing (22px per accidental).
+
+## [2.1.25] - 2026-03-16
+
+### Fixed
+- **Treble clef moved further up** (-3→-6px offset from G4 line).
+- **Bass clef moved down and right** (1.0→2.5 line spacing offset, 10→14px X position).
+
+## [2.1.24] - 2026-03-16
+
+### Changed
+- **Time signature numbers 20% larger** on grand staff (0.48→0.576 scale factor).
+
+## [2.1.23] - 2026-03-16
+
+### Changed
+- **Accidentals positioned left of start bar** on grand staff (offset -14px from noteX).
+
+## [2.1.22] - 2026-03-16
+
+### Changed
+- **Treble clef shifted up 3px** for better vertical centering on staff.
+- **Bass clef 20% larger** (1.008→1.21 scale), moved up (1.5→1.0 line spacing offset), shifted right (6→10px).
+- **Time signature shifted further right** (tsX+10→tsX+16) for more clef breathing room.
+
+## [2.1.21] - 2026-03-16
+
+### Changed
+- **Grand staff finger-held matches waterfall**: Finger-held segments now use same filled gradient as waterfall (0.9 alpha bright edges, 0.7 darker center, 1px edge highlights). No longer looks hollow or dim.
+- **Treble clef 20% larger**: Scale factor 1.2→1.44 (cumulative).
+- **Bass clef moved higher**: Shifted up half a note spacing.
+- **Time signature shifted right**: 4px rightward for better spacing from clefs.
+- **Accidentals restyled**: Bold white 22px, centered on the note bar (was 11px colored, offset left).
+
 ## [2.1.20] - 2026-03-16
 
 ### Fixed

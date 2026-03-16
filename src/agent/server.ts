@@ -372,11 +372,21 @@ export function createApp() {
   wssSpectator.on("connection", (ws: WebSocket) => {
     console.log(`[${APP_NAME}] Spectator connected (total: ${spectators.size + 1})`);
     spectators.add(ws);
+    // Keepalive ping every 25s to prevent Cloud Run timeout
+    const pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.ping();
+      } else {
+        clearInterval(pingInterval);
+      }
+    }, 25000);
     ws.on("close", () => {
+      clearInterval(pingInterval);
       spectators.delete(ws);
       console.log(`[${APP_NAME}] Spectator disconnected (total: ${spectators.size})`);
     });
     ws.on("error", () => {
+      clearInterval(pingInterval);
       spectators.delete(ws);
     });
   });
@@ -647,7 +657,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
     name: deviceTypeName(devType) + " (Primary)",
     deviceType: devType,
     isPrimary: true,
-    roles: { mic: true, midi: false },
+    roles: { mic: true, midi: true },
     connectedAt: Date.now(),
   };
 
@@ -855,7 +865,14 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         } else if (msgType === "set_mode") {
           // Single agent — mode is always storyteller
         } else if (msgType === "midi_event") {
-          // Frontend uses raw MIDI events for UI rendering; snapshots go to agent
+          // Broadcast MIDI events to all room devices + spectators for visualization
+          if (roomSession) {
+            console.log(`[${APP_NAME}] midi_event broadcast to room + ${spectators.size} spectators`);
+            broadcastToRoom(roomSession, JSON.stringify(msg));
+          } else {
+            console.log(`[${APP_NAME}] midi_event broadcast to ${spectators.size} spectators (no room)`);
+            broadcastSpectators(JSON.stringify(msg));
+          }
         } else if (msgType === "set_device_role") {
           const { deviceId, role, enabled } = msg;
           if (roomSession && (role === "mic" || role === "midi")) {

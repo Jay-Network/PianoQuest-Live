@@ -192,3 +192,99 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: Option B dynamics colors too desaturated — at normal playing velocities (60-100), colors looked near-white/monochrome, indistinguishable from Option A.
 - Fix: Increased blue channel saturation across the gradient. Low velocities now clearly deep blue, mid-range sky blue, high velocities near-white.
 - Prevention: Test color palettes at typical velocity ranges, not just extremes.
+
+## BUG-025
+- Version found: `2.1.21`
+- Severity: Medium
+- Status: Fixed (v2.1.21)
+- Root cause: Grand staff finger-held segments rendered hollow (same as pedal-sustained), not matching waterfall's filled inner gradient style.
+- Fix: Applied waterfall's gradient pattern (0.9 alpha edges, 0.7 center, 1px edge highlights) to grand staff finger-held segments in both initial draw and redraw sections.
+- Prevention: Keep visual rendering rules identical between waterfall and grand staff.
+
+## BUG-026
+- Version found: `2.1.21`
+- Severity: Medium
+- Status: Fixed (v2.1.22)
+- Root cause: Individual note accidentals (#/b) too small and hard to read on the glass bars.
+- Fix: Changed to bold white 22px serif font, centered on the note bar at noteX-14.
+- Prevention: Music notation symbols need to be large enough to read at performance speed.
+
+## BUG-027
+- Version found: `2.1.22`
+- Severity: Medium
+- Status: Fixed (v2.1.23)
+- Root cause: Key signature accidentals (shown when scale selected) too small — same size as individual note accidentals.
+- Fix: Made key signature accidentals 3x larger (33px bold white), positioned right of time signature numbers with 22px spacing.
+- Prevention: Key signature is a persistent display element — needs to be clearly visible at all times.
+
+## BUG-028
+- Version found: `2.1.28`
+- Severity: Critical
+- Status: Fixed (v2.1.28)
+- Root cause: `document.getElementById('staffKeySig')` returned null — correct ID is `staffScale`. Null `.value` threw TypeError that killed the entire render loop, causing page to hang with no animation.
+- Fix: Changed to `document.getElementById('staffScale')`.
+- Prevention: Never reference DOM IDs without verifying they exist. Clef/notation code must never crash the render loop.
+
+## BUG-029
+- Version found: `2.1.29`
+- Severity: Low
+- Status: Fixed (v2.1.29)
+- Root cause: Grand staff clef redraw section (~line 2196) used hardcoded positions `(4, trebleG4Y)` and `(6, bassClefY)`, overriding the computed `trebleClefX` and offset values from the initial draw. Clef position changes appeared to have no effect.
+- Fix: Redraw section now uses `trebleClefX` and `trebleG4Y - trebleLineSpacing * 0.85` matching the initial draw.
+- Prevention: When grand staff has dual-draw (initial + redraw after history), both must use the same computed coordinates.
+
+## BUG-030
+- Version found: `2.1.30`
+- Severity: Medium
+- Status: Fixed (v2.1.31)
+- Root cause: Pressing a single black key caused bright glowing rims around every black key. `ctx.shadowBlur = 10` set for the active key was never reset, bleeding to all subsequent black key fillRect calls.
+- Fix: Added `ctx.shadowBlur = 0` after each black key fillRect.
+- Prevention: Always reset ctx.shadowBlur to 0 after any element that uses it.
+
+## BUG-031
+- Version found: `2.1.30`
+- Severity: Low
+- Status: Fixed (v2.1.32)
+- Root cause: Grand staff horizontal lines only extended from clefW, not from the left edge of the panel. Both initial and redraw sections used `clefW` as the starting X.
+- Fix: Changed `ctx.moveTo(0, y)` in both initial draw and redraw sections.
+- Prevention: Staff lines should always span full panel width.
+
+## BUG-032
+- Version found: `2.1.33`
+- Severity: Medium
+- Status: Fixed (v2.1.34)
+- Root cause: Scale-aware keyboard initially made in-scale black keys #181818 (lighter than normal #111), which looked "grayed out" — the opposite of intended. Non-diatonic keys appeared normal while diatonic keys looked dimmed.
+- Fix: In-scale black keys use #111 (normal black), non-scale black keys use #444 (visibly grey/dimmed). Small blue dot indicator on in-scale keys.
+- Prevention: Brighter = more prominent. Diatonic keys should look normal/default; non-diatonic should be visibly muted.
+
+## BUG-033
+- Version found: `2.1.30`
+- Severity: High
+- Status: Fixed (v2.1.30)
+- Root cause: Deploy v2.1.30 failed silently due to gzip race condition from overlapping background deploys. Jay saw v2.1.29 still live.
+- Fix: Resubmitted deploy after previous build completed.
+- Prevention: Never run overlapping Cloud Build deploys. Wait for one to finish before starting another.
+
+## BUG-034
+- Version found: `2.1.21–2.1.37`
+- Severity: High
+- Status: Fixed (v2.1.37)
+- Root cause: Multiple code changes made without bumping VERSION, package.json, CHANGELOG.md, and index.html header. Jay couldn't tell if deploys succeeded.
+- Fix: Established strict rule — bump all 4 version locations after EVERY code change, immediately.
+- Prevention: Version bump is part of every change, not a separate step. Never skip it.
+
+## BUG-035
+- Version found: `2.1.39`
+- Severity: Medium
+- Status: Fixed (v2.1.39)
+- Root cause: `drawAccidental` returned immediately for all white keys (`if (!isBlackKey(midi)) return`). Non-diatonic white keys (e.g. F natural in G major) never got an accidental symbol on the grand staff.
+- Fix: Rewrote `drawAccidental` to check `scaleSemitones` first. Diatonic notes skip. Non-diatonic black keys get ♯/♭. Non-diatonic white keys get ♮ (natural sign).
+- Prevention: Accidental logic must consider all 12 semitones against the scale, not just black keys.
+
+## BUG-036
+- Version found: `2.1.44`
+- Severity: Critical
+- Status: Fixed (v2.1.46)
+- Root cause: Two bugs preventing MIDI events from reaching spectators (and thus the livestream bridge): (1) Primary device had `roles.midi = false`, so `midi_event` messages from secondary handler were gated. (2) Primary handler's `midi_event` case was a no-op — it received events but never broadcast them.
+- Fix: Set primary device `roles.midi = true`. Added `broadcastToRoom` (or `broadcastSpectators` fallback) in primary handler's `midi_event` case.
+- Prevention: Any message type that needs to reach spectators must have an explicit broadcast call. Don't silently drop messages.
