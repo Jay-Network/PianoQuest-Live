@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-03-16
+
+### Fixed
+- **Color palette**: Replace rainbow dynamics with cool blue→white temperature ramp (Option B by jworks:81) — quiet=steel blue, loud=white
+- **Clef area widened**: 24→32px so clefs don't overlap time signature
+- **Grand staff tail brightness**: Match waterfall rules — finger-held bright, pedal-sustained dims
+- **Gemini speech/piano confusion**: System instruction clarifies two audio signal types, requires MIDI before coaching
+- **Panel resize handles**: Restructured from clipped absolute-positioned to grid-level columns (left ↔ center ↔ score all draggable)
+- **Treble clef**: 10% larger (0.84→0.924), moved right
+- **Bass clef**: Moved one note lower so dots straddle F3 line
+
 ## [2.1.0] - 2026-03-16
 
 ### Added
