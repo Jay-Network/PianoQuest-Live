@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.51] - 2026-03-16
+
+### Fixed
+- **Debug: log ALL text message types** from primary WS handler to diagnose why midi_event never appears in server logs
+
 ## [2.1.50] - 2026-03-16
 
 ### Fixed
