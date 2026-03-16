@@ -298,6 +298,7 @@
   .camera-bottom-bar .cam-room b { color: var(--accent); font-family: monospace; letter-spacing: 0.06em; }
   .camera-bottom-bar .cam-status { margin-left: auto; }
   .camera-bottom-bar .cam-exit { margin-left: 8px; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: var(--text2); font-size: 10px; cursor: pointer; }
+  .camera-bottom-bar .cam-flip { padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: var(--text2); font-size: 13px; cursor: pointer; }
   .secondary-header { text-align: center; }
   .secondary-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
   .secondary-header h2 span { color: var(--accent); }
@@ -476,7 +477,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.4</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.5</div>
       </div>
     </div>
     <div class="controls">
@@ -3388,6 +3389,11 @@ function updateQr(roomCode) {
   camStatusSpan.id = 'camStatusText';
   camStatusSpan.textContent = 'Camera active';
   camBottomBar.appendChild(camStatusSpan);
+  var camFlipBtn = document.createElement('button');
+  camFlipBtn.className = 'cam-flip';
+  camFlipBtn.textContent = '\uD83D\uDD04';
+  camFlipBtn.onclick = function() { switchCamera(); };
+  camBottomBar.appendChild(camFlipBtn);
   var camExitBtn = document.createElement('button');
   camExitBtn.className = 'cam-exit';
   camExitBtn.textContent = 'Exit';
@@ -3589,6 +3595,7 @@ function updateQr(roomCode) {
   var secHandAnimFrame = null;
   var secLastHandCount = -1;
   var secLastHandProcessTime = 0;
+  var secCameraFacing = 'environment';
 
   function startSecondaryCamera() {
     var wrap = document.getElementById('cameraPreviewWrap');
@@ -3596,7 +3603,7 @@ function updateQr(roomCode) {
     wrap.style.display = '';
 
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+      video: { facingMode: secCameraFacing, width: { ideal: 640 }, height: { ideal: 480 } }
     }).then(function(stream) {
       secCameraStream = stream;
       var video = document.createElement('video');
@@ -3651,6 +3658,23 @@ function updateQr(roomCode) {
       secWs.send(JSON.stringify({ type: 'camera_state', enabled: false }));
     }
     secLastHandCount = -1;
+  }
+
+  function switchCamera() {
+    secCameraFacing = secCameraFacing === 'environment' ? 'user' : 'environment';
+    // Stop current stream but keep camera role active
+    if (secCameraInterval) { clearInterval(secCameraInterval); secCameraInterval = null; }
+    if (secHandAnimFrame) { cancelAnimationFrame(secHandAnimFrame); secHandAnimFrame = null; }
+    if (secCameraStream) {
+      secCameraStream.getTracks().forEach(function(t) { t.stop(); });
+      secCameraStream = null;
+    }
+    secHandLandmarker = null;
+    secLastHandCount = -1;
+    var wrap = document.getElementById('cameraPreviewWrap');
+    if (wrap) wrap.textContent = '';
+    // Restart with new facing mode
+    startSecondaryCamera();
   }
 
   function initHandLandmarker(video, overlayCanvas) {

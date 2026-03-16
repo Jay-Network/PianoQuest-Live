@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.5] - 2026-03-16
+
+### Added
+- **Camera flip button** — 🔄 button in camera bottom bar switches between front and back camera on phone. Defaults to rear camera, tap to toggle.
+
 ## [3.1.4] - 2026-03-16
 
 ### Fixed
