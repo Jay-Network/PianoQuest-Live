@@ -271,8 +271,8 @@
   /* Secondary device mode */
   .secondary-app {
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-    min-height: 100vh; gap: 20px; padding: 24px;
-    background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif;
+    height: 100vh; gap: 0; padding: 0;
+    background: #000; color: var(--text); font-family: 'DM Sans', sans-serif;
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   .secondary-app.camera-fullscreen {
@@ -295,6 +295,7 @@
     align-items: center; gap: 12px;
     position: fixed; bottom: 0; left: 0; z-index: 100;
   }
+  .secondary-app .camera-bottom-bar { display: flex; }
   .secondary-app.camera-fullscreen .camera-bottom-bar { display: flex; }
   .camera-bottom-bar .cam-status { font-size: 12px; color: rgba(255,255,255,0.5); }
   .camera-bottom-bar .cam-status.tracking { color: #86efac; }
@@ -398,8 +399,11 @@
   .camera-badge.ready { color: var(--green); border-color: rgba(134,239,172,0.2); background: rgba(134,239,172,0.06); }
   /* Camera preview on secondary device */
   .camera-preview-wrap {
-    margin: 12px auto; position: relative; border-radius: 12px; overflow: hidden;
-    border: 1px solid var(--border); max-width: 480px; width: 100%;
+    margin: 0 auto; position: relative; border-radius: 0; overflow: hidden;
+    border: none; max-width: 100%; width: 100%;
+  }
+  .secondary-app .camera-preview-wrap {
+    flex: 0 0 auto; width: 100%; max-width: 100%;
   }
   .camera-preview-wrap video { width: 100%; display: block; }
   .camera-preview-wrap .hand-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -563,7 +567,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.11</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.12</div>
       </div>
     </div>
     <div class="controls">
@@ -4052,31 +4056,10 @@ function buildSecondaryUI(room, params) {
   var app = document.createElement('div');
   app.className = 'secondary-app';
 
-  var header = document.createElement('div');
-  header.className = 'secondary-header';
-  var h2 = document.createElement('h2');
-  var pianoText = document.createTextNode('Piano');
-  var questSpan = document.createElement('span');
-  questSpan.style.color = 'var(--accent)';
-  questSpan.textContent = 'Quest';
-  h2.appendChild(pianoText);
-  h2.appendChild(questSpan);
-  header.appendChild(h2);
-  var roomLabel = document.createElement('div');
-  roomLabel.className = 'secondary-room-code';
-  var roomPrefix = document.createTextNode('Room: ');
-  var roomBold = document.createElement('b');
-  roomBold.textContent = room;
-  roomLabel.appendChild(roomPrefix);
-  roomLabel.appendChild(roomBold);
-  header.appendChild(roomLabel);
-  app.appendChild(header);
-
+  // No header or status text above camera — phone goes straight to camera view
   var statusEl = document.createElement('div');
-  statusEl.className = 'secondary-status';
   statusEl.id = 'secondaryStatus';
-  statusEl.textContent = 'Connecting...';
-  app.appendChild(statusEl);
+  statusEl.style.display = 'none';
 
   var rolesContainer = document.createElement('div');
   rolesContainer.className = 'secondary-roles';
@@ -4139,13 +4122,7 @@ function buildSecondaryUI(room, params) {
   var camBottomBar = document.createElement('div');
   camBottomBar.className = 'camera-bottom-bar';
   camBottomBar.id = 'cameraBottomBar';
-  // Status text (left)
-  var camStatusSpan = document.createElement('span');
-  camStatusSpan.className = 'cam-status';
-  camStatusSpan.id = 'camStatusText';
-  camStatusSpan.textContent = 'Camera active';
-  camBottomBar.appendChild(camStatusSpan);
-  // Spacer
+  // Spacer (pushes buttons to the right)
   var camSpacer = document.createElement('span');
   camSpacer.className = 'cam-spacer';
   camBottomBar.appendChild(camSpacer);
@@ -4464,12 +4441,16 @@ function buildSecondaryUI(room, params) {
       });
     }).then(function(landmarker) {
       secHandLandmarker = landmarker;
-      if (camStatus) { camStatus.textContent = 'Hand tracking active'; camStatus.classList.add('tracking'); }
+      console.log('HandLandmarker ready (GPU)');
+      // Notify desktop that MediaPipe is active
+      if (secWs && secWs.readyState === WebSocket.OPEN) {
+        secWs.send(JSON.stringify({ type: 'hand_state', hands: 0, bothHands: false, mediapipeReady: true, fingerHeights: [] }));
+      }
       processHands(video, overlayCanvas);
     }).catch(function(err) {
       console.log('HandLandmarker GPU failed, trying CPU:', err);
       if (!savedFileset) {
-        if (camStatus) camStatus.textContent = 'Hand tracking failed';
+        console.log('No fileset — hand tracking failed completely');
         return;
       }
       HandLandmarker.createFromOptions(savedFileset, {
@@ -4481,11 +4462,13 @@ function buildSecondaryUI(room, params) {
         numHands: 2
       }).then(function(landmarker) {
         secHandLandmarker = landmarker;
-        if (camStatus) { camStatus.textContent = 'Hand tracking active'; camStatus.classList.add('tracking'); }
+        console.log('HandLandmarker ready (CPU fallback)');
+        if (secWs && secWs.readyState === WebSocket.OPEN) {
+          secWs.send(JSON.stringify({ type: 'hand_state', hands: 0, bothHands: false, mediapipeReady: true, fingerHeights: [] }));
+        }
         processHands(video, overlayCanvas);
       }).catch(function(err2) {
         console.log('HandLandmarker CPU also failed:', err2);
-        if (camStatus) camStatus.textContent = 'Hand tracking failed';
       });
     });
   }

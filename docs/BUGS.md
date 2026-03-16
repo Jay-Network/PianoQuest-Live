@@ -296,3 +296,59 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: The `ws` npm library delivers ALL WebSocket messages as `Buffer` by default, regardless of whether they were sent as text or binary. The `wsMessages()` generator pushed raw `data` into the queue, and the consumer checked `typeof rawMsg === "string"` — which was ALWAYS false. All JSON text messages (`midi_event`, `midi_snapshot`, `text`, `set_mode`) were silently routed into the binary (PCM audio) branch and sent to Gemini as garbage audio. This is why zero `midi_event` messages ever reached the broadcast code despite the browser sending them correctly.
 - Fix: Use the `isBinary` parameter from the ws `message` event. When `isBinary` is false, call `data.toString()` before pushing to the queue.
 - Prevention: Never assume `typeof data === "string"` with the ws library. Always use the `isBinary` flag.
+
+## BUG-038
+- Version found: `3.2.0`
+- Severity: High
+- Status: Fixed (v3.2.1)
+- Root cause: iPhone Pro Max in landscape has `window.innerWidth > 768` with touch, falsely triggering tablet mode detection. The tablet detection used `window.innerWidth >= 768 && 'ontouchstart' in window` which matches large phones in landscape.
+- Fix: Changed detection to `Math.min(window.innerWidth, window.innerHeight) >= 768` — uses the smaller dimension so phones (narrow in portrait) never qualify.
+- Prevention: Use min dimension for tablet vs phone detection. Phones are always narrow in one axis.
+
+## BUG-039
+- Version found: `3.2.3`
+- Severity: High
+- Status: Fixed (v3.2.4)
+- Root cause: Phone secondary device auto-activated mic role on WebSocket connect, alongside camera. Jay only wants the phone as a camera — mic should stay on desktop.
+- Fix: Removed `request_role mic` from secondary device onopen handler. Only camera auto-activates.
+- Prevention: Never auto-activate mic on secondary devices. The primary desktop device owns the mic.
+
+## BUG-040
+- Version found: `3.2.0`
+- Severity: Critical
+- Status: Fixed (v3.2.8)
+- Root cause: Camera fullscreen mode (`.camera-fullscreen` class) hid header, roles container, and status bar, then expanded video to fill the viewport. The bottom bar with Flip/Exit buttons was covered by the video element. No way to exit fullscreen — user was trapped in a full-screen camera view with no visible controls.
+- Fix: (1) Removed auto-fullscreen on camera activation. (2) Made camera bottom bar `position: fixed; bottom: 0; z-index: 100`. (3) Added a manual fullscreen toggle button (`.cam-fs-btn`) at bottom-right of camera preview. Default state is non-fullscreen.
+- Prevention: Never auto-fullscreen. Always provide a visible, accessible exit control. Fixed-position controls can't be hidden by sibling elements.
+
+## BUG-041
+- Version found: `3.2.0`
+- Severity: Medium
+- Status: Fixed (v3.2.8)
+- Root cause: Phone secondary UI had `justify-content: center` and no `overflow-y`, so when content exceeded viewport height, elements were clipped with no way to scroll.
+- Fix: Changed to `justify-content: flex-start` and added `overflow-y: auto; -webkit-overflow-scrolling: touch`.
+- Prevention: Mobile UIs must always have scroll capability. Never use `justify-content: center` on containers that may overflow.
+
+## BUG-042
+- Version found: `3.2.0`
+- Severity: Medium
+- Status: Fixed (v3.2.9)
+- Root cause: JPEG frames sent from phone to desktop only captured raw video — the MediaPipe hand skeleton overlay (drawn on a separate canvas) was not composited into the JPEG. Desktop finger tracking panel showed hands but no skeleton.
+- Fix: Before JPEG encoding, composite the hand overlay canvas onto the offscreen canvas using `offCtx.drawImage(overlayCanvas, 0, 0, w, h)`.
+- Prevention: When sending camera frames, always composite all visual layers (video + overlays) before encoding.
+
+## BUG-043
+- Version found: `3.2.0`
+- Severity: Low
+- Status: Fixed (v3.2.10)
+- Root cause: Desktop finger tracking panel showed "Camera Off" even when phone camera was connected and streaming. The `cameraEnabled` flag wasn't being set from incoming `camera_state` messages, and there was no `mediapipeActive` state tracking.
+- Fix: Added `mediapipeActive` state variable, set to true on `hand_state` message receipt. Camera badge now shows "MediaPipe: ON/OFF" based on this state.
+- Prevention: Desktop state indicators must react to messages from connected secondary devices.
+
+## BUG-044
+- Version found: `3.2.0`
+- Severity: Low
+- Status: Fixed (v3.2.10)
+- Root cause: MediaPipe HandLandmarker GPU delegate fails silently on some iPhones, leaving hand tracking non-functional with no error shown to user.
+- Fix: Added GPU→CPU fallback chain. If GPU delegate creation fails, retry with `delegate: 'CPU'` using the saved fileset reference.
+- Prevention: Always provide CPU fallback for WebGL/GPU-dependent features on mobile.

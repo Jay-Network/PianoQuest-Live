@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.12] - 2026-03-16
+
+### Fixed
+- **Removed header/status text above phone camera** — phone shows only camera view, nothing above it
+- **Removed "Camera active" text** from bottom bar
+- **Phone camera fills viewport** — no padding, margins, or borders on secondary device
+- **Bottom bar (Flip/Exit) always visible** — not just in fullscreen mode
+- **MediaPipe hand_state sent immediately** on init — desktop sees "MediaPipe: ON" as soon as tracker loads
+
+## [3.2.11] - 2026-03-16
+
+### Changed
+- Simplified camera badge to "MediaPipe: ON/OFF" — removed hand count display
+
 ## [3.2.10] - 2026-03-16
 
 ### Added
