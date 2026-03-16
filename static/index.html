@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.36</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.37</div>
       </div>
     </div>
     <div class="controls">
@@ -854,6 +854,7 @@ let nextPlayTime = 0;
 let sessionActive = false;
 let playbackActiveUntil = 0;
 let isBotSpeaking = false;
+var lastBotSpeakEnd = 0;
 let reconnectDelay = 1000;
 
 // Font scale — persisted in localStorage
@@ -1634,6 +1635,7 @@ async function startSession() {
           } else if (msg.type === 'turn_complete' || msg.type === 'interrupted') {
             // Gemini finished speaking — re-enable mic
             isBotSpeaking = false;
+            lastBotSpeakEnd = Date.now();
             var labelEl = document.getElementById('geminiSpeakLabel');
             var fillEl = document.getElementById('geminiVolFill');
             if (labelEl) labelEl.textContent = 'Silent';
@@ -1701,6 +1703,8 @@ function startSpeechRecognition() {
   speechRecognition.interimResults = false;
   speechRecognition.onresult = function(e) {
     if (isBotSpeaking) return; // Don't transcribe Gemini's own voice
+    // Also ignore results that arrived shortly after bot stopped speaking (echo tail)
+    if (typeof lastBotSpeakEnd === 'number' && Date.now() - lastBotSpeakEnd < 1500) return;
     for (var i = e.resultIndex; i < e.results.length; i++) {
       if (e.results[i].isFinal) {
         var text = e.results[i][0].transcript.trim();

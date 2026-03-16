@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.37] - 2026-03-16
+
+### Fixed
+- **Speech recognition echo suppression** — added 1.5s grace period after Gemini finishes speaking where speech recognition results are ignored. Prevents Gemini's speaker output from being transcribed as user input in the conversation panel.
+
 ## [3.2.36] - 2026-03-16
 
 ### Changed
