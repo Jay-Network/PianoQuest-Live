@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.10] - 2026-03-16
+
+### Fixed
+- **Camera controls actually visible on iPhone** — moved bottom bar to document.body with position:fixed, z-index:100. Added safe-area-inset for iPhone notch. Controls now float above everything.
+
 ## [3.1.9] - 2026-03-16
 
 ### Fixed
