@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.16] - 2026-03-16
+
+### Fixed
+- **Target notes fall from top in waterfall**: Target notes now correctly fall from top of screen toward keyboard edge (were previously appearing from wrong direction)
+
+### Added
+- **Target note dynamics on keyboard**: Ghost/dashed dynamic bars show expected velocity for approaching target notes, with pulsing outline that fades in as note approaches
+- **Velocity data in target notes**: Score dynamics markings (pp, mf, etc.) now propagate to target note velocity
+- **Visual effects** (from jworks:81): Note-hit flash/halo at keyboard edge, particle burst on note attack (6-16 velocity-scaled particles), gradient tail on falling notes
+
 ## [2.1.15] - 2026-03-16
 
 ### Changed

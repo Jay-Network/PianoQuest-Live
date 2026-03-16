@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.15</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.16</div>
       </div>
     </div>
     <div class="controls">
@@ -461,7 +461,7 @@
     <div class="right-col">
 
       <div class="midi-stack" id="midiStack">
-        <div class="roll-wrap" id="rollWrap" style="background:#0a0a0f;border-radius:12px 12px 0 0;overflow:hidden;">
+        <div class="roll-wrap" id="rollWrap" style="background:#0a0a0a;border-radius:12px 12px 0 0;overflow:hidden;">
           <canvas id="pianoRollCanvas"></canvas>
         </div>
         <div class="keyboard-wrap" id="keyboardWrap" style="background:#0a0a0a;">
@@ -714,6 +714,116 @@ function darkenedColor(velocity, factor, alpha) {
 }
 
 // ============================================================================
+// Visual Effects — particles, flashes, gradient tails
+// ============================================================================
+var VFX_PARTICLES = [];
+var VFX_MAX_PARTICLES = 200;
+var VFX_FLASHES = [];
+
+function vfxSpawnParticles(note, velocity) {
+  var keyInfo = KEY_BY_MIDI.get(note);
+  if (!keyInfo) return;
+  var canvas = document.getElementById('pianoRollCanvas');
+  if (!canvas) return;
+  var rect = canvas.getBoundingClientRect();
+  var W = rect.width;
+  var H = rect.height;
+  var whiteKeyW = W / WHITE_KEYS_COUNT;
+  var blackKeyW = whiteKeyW * 0.65;
+  var noteX = keyInfo.isBlack
+    ? (keyInfo.whiteIndex + 1) * whiteKeyW - blackKeyW / 2
+    : keyInfo.whiteIndex * whiteKeyW;
+  var noteW = keyInfo.isBlack ? blackKeyW : whiteKeyW;
+  var spawnX = noteX + noteW / 2;
+  var spawnY = H; // bottom of waterfall
+  var count = Math.round(6 + (velocity / 127) * 10); // 6-16 particles
+  var c = dynamicsRgb(velocity);
+  for (var i = 0; i < count; i++) {
+    if (VFX_PARTICLES.length >= VFX_MAX_PARTICLES) {
+      // reuse oldest
+      var p = VFX_PARTICLES.shift();
+      p.x = spawnX + (Math.random() - 0.5) * noteW;
+      p.y = spawnY;
+      p.vx = (Math.random() - 0.5) * 2.5;
+      p.vy = -(1.5 + Math.random() * 3 + (velocity / 127) * 2);
+      p.r = c.r; p.g = c.g; p.b = c.b;
+      p.life = 1.0;
+      p.decay = 0.015 + Math.random() * 0.01;
+      p.size = 1.5 + Math.random() * 2;
+      VFX_PARTICLES.push(p);
+    } else {
+      VFX_PARTICLES.push({
+        x: spawnX + (Math.random() - 0.5) * noteW,
+        y: spawnY,
+        vx: (Math.random() - 0.5) * 2.5,
+        vy: -(1.5 + Math.random() * 3 + (velocity / 127) * 2),
+        r: c.r, g: c.g, b: c.b,
+        life: 1.0,
+        decay: 0.015 + Math.random() * 0.01,
+        size: 1.5 + Math.random() * 2
+      });
+    }
+  }
+  // Also spawn a flash
+  VFX_FLASHES.push({
+    x: spawnX,
+    y: spawnY,
+    w: noteW * 1.8,
+    r: c.r, g: c.g, b: c.b,
+    life: 1.0,
+    decay: 0.06
+  });
+}
+
+function vfxUpdate() {
+  // Update particles
+  for (var i = VFX_PARTICLES.length - 1; i >= 0; i--) {
+    var p = VFX_PARTICLES[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.08; // gentle gravity
+    p.life -= p.decay;
+    if (p.life <= 0) VFX_PARTICLES.splice(i, 1);
+  }
+  // Update flashes
+  for (var j = VFX_FLASHES.length - 1; j >= 0; j--) {
+    var f = VFX_FLASHES[j];
+    f.life -= f.decay;
+    if (f.life <= 0) VFX_FLASHES.splice(j, 1);
+  }
+}
+
+function vfxDrawParticles(ctx) {
+  for (var i = 0; i < VFX_PARTICLES.length; i++) {
+    var p = VFX_PARTICLES[i];
+    var alpha = p.life * 0.8;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = 'rgb(' + p.r + ',' + p.g + ',' + p.b + ')';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+    ctx.fill();
+    // Soft glow around particle
+    ctx.globalAlpha = alpha * 0.3;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * p.life * 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1.0;
+}
+
+function vfxDrawFlashes(ctx, waterfallH) {
+  for (var i = 0; i < VFX_FLASHES.length; i++) {
+    var f = VFX_FLASHES[i];
+    var grad = ctx.createRadialGradient(f.x, waterfallH, 0, f.x, waterfallH, f.w * f.life);
+    grad.addColorStop(0, 'rgba(' + f.r + ',' + f.g + ',' + f.b + ',' + (f.life * 0.6) + ')');
+    grad.addColorStop(0.4, 'rgba(' + f.r + ',' + f.g + ',' + f.b + ',' + (f.life * 0.2) + ')');
+    grad.addColorStop(1, 'rgba(' + f.r + ',' + f.g + ',' + f.b + ',0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(f.x - f.w, waterfallH - f.w * 0.7, f.w * 2, f.w * 0.7);
+  }
+}
+
+// ============================================================================
 // Chat / Conversation panel
 // ============================================================================
 function addMessage(text, type) {
@@ -882,6 +992,7 @@ function handleNoteOn(note, velocity, nowMs) {
   if (noteHistory.length > 500) noteHistory.splice(0, noteHistory.length - 500);
   recentMidiNotes.push({ note: note, velocity: velocity, timestampMs: nowMs });
   if (recentMidiNotes.length > 64) recentMidiNotes.splice(0, recentMidiNotes.length - 64);
+  vfxSpawnParticles(note, velocity);
   onsets.push(nowMs);
   while (onsets.length && nowMs - onsets[0] > 30000) onsets.shift();
   scheduleMidiSnapshot();
@@ -1269,6 +1380,7 @@ function drawLoop() {
 }
 
 function drawPianoRoll() {
+  vfxUpdate();
   var canvas = document.getElementById('pianoRollCanvas');
   var ctx = canvas.getContext('2d');
   var dpr = window.devicePixelRatio || 1;
@@ -1289,10 +1401,10 @@ function drawPianoRoll() {
   var msPerBeat = 60000 / bpm;
 
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#0a0a0f';
+  ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, W, waterfallH);
 
-  ctx.strokeStyle = '#24243C';
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
   ctx.lineWidth = 0.5;
   for (var i = 0; i <= WHITE_KEYS_COUNT; i++) {
     var laneX = i * whiteKeyW;
@@ -1302,7 +1414,7 @@ function drawPianoRoll() {
     ctx.stroke();
   }
 
-  ctx.strokeStyle = '#2A2A4A';
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 1;
   KEYBOARD.forEach(function(key) {
     if (!key.isBlack && key.midi % 12 === 0) {
@@ -1317,7 +1429,7 @@ function drawPianoRoll() {
   KEYBOARD.forEach(function(key) {
     if (!key.isBlack) return;
     var x = (key.whiteIndex + 1) * whiteKeyW - blackKeyW / 2;
-    ctx.fillStyle = '#0F1430';
+    ctx.fillStyle = '#0d0d0d';
     ctx.fillRect(x, 0, blackKeyW, waterfallH);
   });
 
@@ -1356,7 +1468,7 @@ function drawPianoRoll() {
       var fingerEndMs = (entry.fingerDurationMs > 0) ? entry.startMs + entry.fingerDurationMs : null;
       var finalEndMs = entry.endMs || nowMs;
 
-      function drawSegment(segStartMs, segEndMs, color) {
+      function drawSegment(segStartMs, segEndMs, color, isHead) {
         var ageStart = nowMs - segStartMs;
         var ageEnd = nowMs - segEndMs;
         var yBottom = segEndMs === nowMs ? waterfallH : waterfallH - ageEnd * pixelsPerMs;
@@ -1370,13 +1482,24 @@ function drawPianoRoll() {
 
         ctx.fillStyle = color;
         ctx.fillRect(bodyX, clampedTop, bodyW, noteH);
+
+        // VFX: Gradient tail below note bar (comet trail)
+        if (isHead && clampedBottom < waterfallH) {
+          var tailH = 12;
+          var c = dynamicsRgb(entry.velocity);
+          var tailGrad = ctx.createLinearGradient(0, clampedBottom, 0, clampedBottom + tailH);
+          tailGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.35)');
+          tailGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
+          ctx.fillStyle = tailGrad;
+          ctx.fillRect(bodyX, clampedBottom, bodyW, tailH);
+        }
       }
 
       if (fingerEndMs && fingerEndMs < finalEndMs) {
-        drawSegment(entry.startMs, fingerEndMs, headColor);
-        drawSegment(fingerEndMs, finalEndMs, pedalColor);
+        drawSegment(entry.startMs, fingerEndMs, headColor, true);
+        drawSegment(fingerEndMs, finalEndMs, pedalColor, false);
       } else {
-        drawSegment(entry.startMs, finalEndMs, headColor);
+        drawSegment(entry.startMs, finalEndMs, headColor, true);
       }
 
       var headY = waterfallH - totalAge * pixelsPerMs;
@@ -1408,9 +1531,9 @@ function drawPianoRoll() {
       ? (keyInfo.whiteIndex + 1) * whiteKeyW - blackKeyW / 2
       : keyInfo.whiteIndex * whiteKeyW + 1;
     var tnW = keyInfo.isBlack ? blackKeyW : whiteKeyW - 2;
-    // Target arrives at waterfallH (bottom), comes down from top
-    var tnY = waterfallH - (-timeUntilArrive) * pixelsPerMs;
+    // Target falls from top (y=0) to bottom (y=waterfallH) as arriveMs approaches
     var tnH = Math.max(4, tn.durationBeats * targetMsPerBeat * pixelsPerMs);
+    var tnY = waterfallH - timeUntilArrive * pixelsPerMs - tnH;
 
     if (tnY + tnH < 0 || tnY > waterfallH) continue;
 
@@ -1424,6 +1547,12 @@ function drawPianoRoll() {
     ctx.fillRect(tnX + 1, Math.max(0, tnY), tnW - 2, tnH);
   }
 
+  // VFX: Note-hit flashes at keyboard edge
+  vfxDrawFlashes(ctx, waterfallH);
+
+  // VFX: Particles above keyboard
+  vfxDrawParticles(ctx);
+
   ctx.strokeStyle = 'rgba(255,255,255,0.6)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -1433,8 +1562,8 @@ function drawPianoRoll() {
 
   var fadeH = waterfallH * 0.1;
   var fadeGrad = ctx.createLinearGradient(0, 0, 0, fadeH);
-  fadeGrad.addColorStop(0, '#0a0a0f');
-  fadeGrad.addColorStop(1, 'rgba(26,26,46,0)');
+  fadeGrad.addColorStop(0, '#0a0a0a');
+  fadeGrad.addColorStop(1, 'rgba(10,10,10,0)');
   ctx.fillStyle = fadeGrad;
   ctx.fillRect(0, 0, W, fadeH);
 
@@ -2077,6 +2206,35 @@ function drawKeyboard() {
   drawDynBars(false);
   drawDynBars(true);
 
+  // Target note dynamic bars — ghost indicators showing expected velocity
+  var nowMsKb = Date.now();
+  for (var ti = 0; ti < targetNotes.length; ti++) {
+    var tn = targetNotes[ti];
+    var timeUntil = tn.arriveMs - nowMsKb;
+    if (timeUntil < -500 || timeUntil > 3000) continue;
+    if (tn.hit) continue;
+    var keyInfo = KEY_BY_MIDI.get(tn.midi);
+    if (!keyInfo) continue;
+    var vel = tn.velocity || 64;
+    var barH = (vel / 127) * (dynamicsH - 2);
+    var barX = keyInfo.isBlack
+      ? (keyInfo.whiteIndex + 1) * whiteKeyW - blackKeyW / 2
+      : keyInfo.whiteIndex * whiteKeyW + 1;
+    var barW = keyInfo.isBlack ? blackKeyW : whiteKeyW - 2;
+    // Fade in as note approaches (3s → 0s = 0.15 → 0.5 alpha)
+    var approachAlpha = Math.min(0.5, Math.max(0.15, 1 - timeUntil / 3000));
+    // Pulsing outline
+    var pulse = 0.7 + 0.3 * Math.sin(nowMsKb / 500 + tn.midi * 0.3);
+    ctx.strokeStyle = dynamicsColor(vel, approachAlpha * pulse);
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeRect(barX, keyTop - barH, barW, barH);
+    ctx.setLineDash([]);
+    // Faint fill
+    ctx.fillStyle = dynamicsColor(vel, approachAlpha * 0.1);
+    ctx.fillRect(barX, keyTop - barH, barW, barH);
+  }
+
   // --- Keyboard keys ---
   ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, keyTop, W, keyboardH);
@@ -2380,13 +2538,21 @@ function loadScoreToTargets() {
     }
   }
 
+  // Map dynamics markings to MIDI velocity
+  var dynamicsToVelocity = { 'ppp': 16, 'pp': 32, 'p': 48, 'mp': 64, 'mf': 80, 'f': 96, 'ff': 112, 'fff': 127 };
+  var currentVelocity = dynamicsToVelocity[currentScore.dynamics] || 64;
+
   currentScore.measures.forEach(function(measure, mIdx) {
+    if (measure.dynamics && dynamicsToVelocity[measure.dynamics]) {
+      currentVelocity = dynamicsToVelocity[measure.dynamics];
+    }
     var measureStartMs = startMs + mIdx * beatsPerMeasure * msPerBeat;
     measure.notes.forEach(function(note) {
       targetNotes.push({
         midi: note.midi,
         arriveMs: measureStartMs + note.beat * msPerBeat,
         durationBeats: note.dur,
+        velocity: note.velocity || currentVelocity,
         hit: false
       });
     });
