@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.32] - 2026-03-16
+
+### Fixed
+- **Gemini now answers questions** — rewrote system instruction with explicit Rule #1: ALWAYS respond when spoken to. Previously Gemini would say "I'm ready when you are" instead of answering general piano questions. Now conversation-first, analysis when MIDI data is available.
+
 ## [3.2.31] - 2026-03-16
 
 ### Changed
