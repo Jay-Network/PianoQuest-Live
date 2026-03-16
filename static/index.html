@@ -98,10 +98,11 @@
     grid-template-columns: 260px 1fr 560px;
     gap: 12px;
     flex: 1;
+    min-height: 0;
   }
 
   /* Left column */
-  .left-col { display: flex; flex-direction: column; gap: 12px; }
+  .left-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
 
   .panel {
     border-radius: 12px; border: 1px solid var(--border);
@@ -116,53 +117,6 @@
   .panel-header .dot { width: 5px; height: 5px; border-radius: 50%; }
 
   /* Camera */
-  .video-container {
-    position: relative; background: #000; aspect-ratio: 4/3;
-  }
-  .video-container video {
-    width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
-  }
-  .video-container canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    transform: scaleX(-1);
-  }
-  .video-placeholder {
-    position: absolute; inset: 0; display: flex; align-items: center;
-    justify-content: center; flex-direction: column; gap: 6px;
-    color: var(--text3); font-size: 11px;
-  }
-  .video-placeholder .icon { font-size: 28px; opacity: 0.3; }
-  .camera-badge {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
-    z-index: 2;
-    padding: 6px 9px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(10,10,20,0.72);
-    color: var(--text2);
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    backdrop-filter: blur(10px);
-  }
-  .camera-badge.ready {
-    border-color: rgba(134,239,172,0.28);
-    color: var(--green);
-  }
-  .camera-badge.warn {
-    border-color: rgba(255,255,255,0.12);
-    color: var(--accent);
-  }
-  .camera-badge.off {
-    border-color: rgba(251,113,133,0.28);
-    color: var(--rose);
-  }
-
   .level-meter {
     padding: 6px 12px; display: flex; align-items: center; gap: 6px;
   }
@@ -260,22 +214,6 @@
   .bpm-control input[type=range] { width: 74px; accent-color: var(--green); }
   .bpm-control .bpm-val { font-size: 10px; color: var(--green); min-width: 20px; }
 
-  /* Technique observation panel */
-  .technique-panel { margin-top: 4px; }
-  .technique-entry {
-    padding: 8px 10px; border-radius: 8px; margin-bottom: 6px;
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
-    animation: techFadeIn 0.4s ease-out;
-  }
-  .technique-entry:first-child { border-color: rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
-  .technique-finger { font-size: 10px; font-weight: 700; color: var(--purple); letter-spacing: 0.03em; margin-bottom: 3px; }
-  .technique-row { display: flex; gap: 8px; margin-bottom: 3px; }
-  .technique-label { font-size: 8px; font-weight: 600; letter-spacing: 0.05em; padding: 1px 4px; border-radius: 3px; flex-shrink: 0; }
-  .technique-label.eye { background: rgba(96,165,250,0.2); color: var(--blue); }
-  .technique-label.ear { background: rgba(255,255,255,0.06); color: var(--accent); }
-  .technique-obs { font-size: 11px; color: var(--text2); }
-  .technique-suggestion { font-size: 11px; color: var(--green); margin-top: 3px; padding-left: 2px; }
-  @keyframes techFadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
   @media (max-width: 900px) {
     .main { grid-template-columns: 1fr; }
@@ -354,15 +292,8 @@
   .secondary-role-card.active .role-name { color: var(--green); }
   .secondary-role-card .role-status { font-size: 9px; color: var(--text3); margin-top: 4px; }
   .secondary-role-card.active .role-status { color: var(--green); }
-  .secondary-camera-preview {
-    width: 90vw; max-width: 480px; border-radius: 12px; background: #000;
-  }
-  .secondary-camera-preview video {
-    width: 100%; border-radius: 12px; display: block;
-  }
-
   /* Score panel (right column) */
-  .score-col { display: flex; flex-direction: column; gap: 12px; position: relative; }
+  .score-col { display: flex; flex-direction: column; gap: 12px; position: relative; min-height: 0; overflow: hidden; }
   .score-resize-handle {
     position: absolute; left: -4px; top: 0; bottom: 0; width: 8px;
     cursor: col-resize; z-index: 10;
@@ -453,7 +384,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.0.3</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.0</div>
       </div>
     </div>
     <div class="controls">
@@ -469,7 +400,6 @@
         <div class="vol-bar"><div class="vol-fill" id="geminiVolFill"></div></div>
       </div>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
-      <button class="secondary" id="btnCamera" onclick="toggleCamera()" disabled style="display:none">Camera On</button>
     </div>
   </div>
 
@@ -499,16 +429,7 @@
 
       <div class="panel">
         <div class="panel-header">
-          <div class="dot" style="background:var(--rose)"></div>CAMERA
-        </div>
-        <div class="video-container">
-          <video id="cameraVideo" autoplay playsinline muted></video>
-          <canvas id="handOverlay"></canvas>
-          <div class="video-placeholder" id="videoPlaceholder">
-            <div class="icon">&#x1F4F9;</div>
-            <div>Point camera at keyboard</div>
-          </div>
-          <div class="camera-badge warn" id="cameraBadge">Show both hands for fingering feedback</div>
+          <div class="dot" style="background:var(--accent)"></div>AUDIO LEVEL
         </div>
         <div class="level-meter">
           <div class="dot" style="background:var(--accent);width:5px;height:5px;border-radius:50%"></div>
@@ -517,16 +438,7 @@
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-header">
-          <div class="dot" style="background:var(--purple)"></div>FINGER TRACKING
-        </div>
-        <div class="technique-panel" id="techniquePanel">
-          <div style="font-size:11px;color:var(--text3);padding:4px 0;">Waiting for vision-audio analysis...</div>
-        </div>
-      </div>
-
-      <div class="panel" style="flex:1;display:flex;flex-direction:column;min-height:200px;">
+      <div class="panel" style="flex:1;display:flex;flex-direction:column;min-height:100px;">
         <div class="panel-header">
           <div class="dot" style="background:var(--gemini)"></div>CONVERSATION
         </div>
@@ -616,7 +528,6 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script>
 // ============================================================================
 // State
@@ -627,22 +538,10 @@ let playbackCtx = null;
 let mediaStream = null;
 let analyser = null;
 let processor = null;
-let videoInterval = null;
 let animFrame = null;
 let nextPlayTime = 0;
 let sessionActive = false;
 let playbackActiveUntil = 0;
-let cameraEnabled = false;
-let handsTracker = null;
-let handTrackerReady = false;
-let handTrackerBusy = false;
-let lastHandProcessAt = 0;
-let handTrackingError = false;
-let handLandmarks = [];
-let detectedHandCount = 0;
-let bothHandsDetected = false;
-let lastSentHandState = '';
-let lastSentCameraState = '';
 let reconnectDelay = 1000;
 
 // Device management state
@@ -650,7 +549,7 @@ let isPrimaryDevice = false;
 let isSecondaryDevice = false;
 let myDeviceId = '';
 let myRoomCode = '';
-let myRoles = { mic: false, camera: false, midi: false };
+let myRoles = { mic: false, midi: false };
 let deviceList = [];
 
 let midiAccess = null;
@@ -693,15 +592,6 @@ const DYNAMICS_LABELS = [
   { vel: 112, label: 'ff' },
   { vel: 127, label: 'fff' }
 ];
-const HAND_CONNECTIONS = [
-  [0, 1], [1, 2], [2, 3], [3, 4],
-  [0, 5], [5, 6], [6, 7], [7, 8],
-  [5, 9], [9, 10], [10, 11], [11, 12],
-  [9, 13], [13, 14], [14, 15], [15, 16],
-  [13, 17], [17, 18], [18, 19], [19, 20],
-  [0, 17]
-];
-
 var KEYBOARD = buildKeyboard();
 var KEY_BY_MIDI = new Map(KEYBOARD.map(function(key) { return [key.midi, key]; }));
 
@@ -855,58 +745,8 @@ function addMessage(text, type) {
 function handleToolEvent(msg) {
   if (msg.type === 'coaching_focus') {
     document.getElementById('coachingText').textContent = msg.text;
-  } else if (msg.type === 'technique_report') {
-    showTechniqueReport(msg);
   }
   // scene, badge, quest events silently ignored (gamification stripped for now)
-}
-
-function showTechniqueReport(msg) {
-  var panel = document.getElementById('techniquePanel');
-  if (!panel.querySelector('.technique-entry')) {
-    panel.textContent = '';
-  }
-  var entry = document.createElement('div');
-  entry.className = 'technique-entry';
-
-  var fingerEl = document.createElement('div');
-  fingerEl.className = 'technique-finger';
-  fingerEl.textContent = msg.finger.toUpperCase();
-  entry.appendChild(fingerEl);
-
-  var eyeRow = document.createElement('div');
-  eyeRow.className = 'technique-row';
-  var eyeLabel = document.createElement('span');
-  eyeLabel.className = 'technique-label eye';
-  eyeLabel.textContent = 'EYE';
-  var eyeObs = document.createElement('span');
-  eyeObs.className = 'technique-obs';
-  eyeObs.textContent = msg.visual;
-  eyeRow.appendChild(eyeLabel);
-  eyeRow.appendChild(eyeObs);
-  entry.appendChild(eyeRow);
-
-  var earRow = document.createElement('div');
-  earRow.className = 'technique-row';
-  var earLabel = document.createElement('span');
-  earLabel.className = 'technique-label ear';
-  earLabel.textContent = 'EAR';
-  var earObs = document.createElement('span');
-  earObs.className = 'technique-obs';
-  earObs.textContent = msg.audio;
-  earRow.appendChild(earLabel);
-  earRow.appendChild(earObs);
-  entry.appendChild(earRow);
-
-  var sugEl = document.createElement('div');
-  sugEl.className = 'technique-suggestion';
-  sugEl.textContent = msg.suggestion;
-  entry.appendChild(sugEl);
-
-  panel.insertBefore(entry, panel.firstChild);
-  while (panel.children.length > 5) {
-    panel.removeChild(panel.lastChild);
-  }
 }
 
 function resetMidiState() {
@@ -928,203 +768,6 @@ function updatePedalStatus() {
   var el = document.getElementById('pedalStatus');
   el.textContent = pedalDown ? 'Pedal Down' : 'Pedal Up';
   el.className = pedalDown ? 'pedal-pill active' : 'pedal-pill';
-}
-
-function updateCameraUi() {
-  var btn = document.getElementById('btnCamera');
-  var placeholder = document.getElementById('videoPlaceholder');
-  var video = document.getElementById('cameraVideo');
-  var badge = document.getElementById('cameraBadge');
-  btn.textContent = cameraEnabled ? 'Camera On' : 'Camera Off';
-  btn.className = cameraEnabled ? 'secondary' : 'danger';
-  if (placeholder) {
-    placeholder.style.display = cameraEnabled ? 'none' : '';
-    placeholder.querySelector('div:last-child').textContent = cameraEnabled ? 'Point camera at keyboard' : 'Camera is off';
-  }
-  if (video) {
-    video.style.opacity = cameraEnabled ? '1' : '0.15';
-  }
-  if (badge) {
-    if (!cameraEnabled) {
-      badge.textContent = 'Camera is off';
-      badge.className = 'camera-badge off';
-    } else if (bothHandsDetected) {
-      badge.textContent = 'Both hands tracked';
-      badge.className = 'camera-badge ready';
-    } else if (detectedHandCount === 1) {
-      badge.textContent = 'Only one hand detected';
-      badge.className = 'camera-badge warn';
-    } else if (handTrackingError) {
-      badge.textContent = 'Hand tracking unavailable';
-      badge.className = 'camera-badge off';
-    } else {
-      badge.textContent = 'Show both hands for fingering feedback';
-      badge.className = 'camera-badge warn';
-    }
-  }
-}
-
-function sendCameraState() {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
-  var stateKey = String(cameraEnabled);
-  if (lastSentCameraState === stateKey) return;
-  lastSentCameraState = stateKey;
-  ws.send(JSON.stringify({ type: 'camera_state', enabled: cameraEnabled }));
-}
-
-function sendHandState(force) {
-  if (!ws || ws.readyState !== WebSocket.OPEN) return;
-  var payload = {
-    type: 'hand_state',
-    detected_count: cameraEnabled ? detectedHandCount : 0,
-    both_hands_detected: cameraEnabled && bothHandsDetected
-  };
-  var stateKey = JSON.stringify(payload);
-  if (!force && lastSentHandState === stateKey) return;
-  lastSentHandState = stateKey;
-  ws.send(JSON.stringify(payload));
-}
-
-function toggleCamera() {
-  if (!mediaStream) return;
-  cameraEnabled = !cameraEnabled;
-  mediaStream.getVideoTracks().forEach(function(track) { track.enabled = cameraEnabled; });
-  if (!cameraEnabled) {
-    setHandTrackingState(0);
-    clearHandOverlay();
-  }
-  updateCameraUi();
-  lastSentCameraState = '';
-  sendCameraState();
-  sendHandState(true);
-}
-
-async function activateCamera() {
-  try {
-    var camStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480, facingMode: 'user' }
-    });
-    var videoTrack = camStream.getVideoTracks()[0];
-    if (mediaStream) {
-      mediaStream.addTrack(videoTrack);
-    }
-    var video = document.getElementById('cameraVideo');
-    video.srcObject = mediaStream;
-    cameraEnabled = true;
-    updateCameraUi();
-    document.getElementById('btnCamera').style.display = '';
-    document.getElementById('btnCamera').disabled = false;
-    lastSentCameraState = '';
-    sendCameraState();
-    initHandTracking();
-  } catch (err) {
-    console.error('Failed to activate camera:', err);
-  }
-}
-
-async function initHandTracking() {
-  if (handTrackerReady || handsTracker || !window.Hands) return;
-  try {
-    handsTracker = new window.Hands({
-      locateFile: function(file) {
-        return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/' + file;
-      }
-    });
-    handsTracker.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.65,
-      minTrackingConfidence: 0.55
-    });
-    handsTracker.onResults(function(results) {
-      handLandmarks = results.multiHandLandmarks || [];
-      handTrackingError = false;
-      setHandTrackingState(handLandmarks.length);
-      drawHandOverlay();
-    });
-    handTrackerReady = true;
-  } catch (err) {
-    handTrackingError = true;
-    console.error('Failed to initialize hand tracking', err);
-    updateCameraUi();
-  }
-}
-
-function setHandTrackingState(count) {
-  detectedHandCount = count;
-  bothHandsDetected = count >= 2 && cameraEnabled;
-  updateCameraUi();
-  sendHandState(false);
-}
-
-async function processHandTracking() {
-  if (!cameraEnabled || !handsTracker || !handTrackerReady || handTrackerBusy) return;
-  var video = document.getElementById('cameraVideo');
-  if (!video || !video.videoWidth || !video.videoHeight) return;
-
-  var now = Date.now();
-  if (now - lastHandProcessAt < 150) return;
-  lastHandProcessAt = now;
-  handTrackerBusy = true;
-  try {
-    await handsTracker.send({ image: video });
-  } catch (err) {
-    handTrackingError = true;
-    console.error('Hand tracking frame failed', err);
-    updateCameraUi();
-  } finally {
-    handTrackerBusy = false;
-  }
-}
-
-function clearHandOverlay() {
-  var canvas = document.getElementById('handOverlay');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
-}
-
-function drawHandOverlay() {
-  var canvas = document.getElementById('handOverlay');
-  var video = document.getElementById('cameraVideo');
-  if (!canvas || !video) return;
-
-  var rect = video.getBoundingClientRect();
-  var dpr = window.devicePixelRatio || 1;
-  var width = Math.max(1, Math.round(rect.width * dpr));
-  var height = Math.max(1, Math.round(rect.height * dpr));
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width;
-    canvas.height = height;
-  }
-
-  var ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, rect.width, rect.height);
-
-  if (!cameraEnabled || !handLandmarks.length) return;
-
-  handLandmarks.forEach(function(points, handIndex) {
-    var lineColor = handIndex === 0 ? 'rgba(96,165,250,0.92)' : 'rgba(255,255,255,0.70)';
-    var jointColor = handIndex === 0 ? 'rgba(191,219,254,0.98)' : 'rgba(254,240,138,0.98)';
-    ctx.lineWidth = 2.2;
-    ctx.strokeStyle = lineColor;
-    HAND_CONNECTIONS.forEach(function(pair) {
-      var a = points[pair[0]];
-      var b = points[pair[1]];
-      if (!a || !b) return;
-      ctx.beginPath();
-      ctx.moveTo(a.x * rect.width, a.y * rect.height);
-      ctx.lineTo(b.x * rect.width, b.y * rect.height);
-      ctx.stroke();
-    });
-    points.forEach(function(point, idx) {
-      ctx.beginPath();
-      ctx.fillStyle = jointColor;
-      ctx.arc(point.x * rect.width, point.y * rect.height, idx === 0 ? 4.5 : 3, 0, Math.PI * 2);
-      ctx.fill();
-    });
-  });
 }
 
 async function refreshMidiInputs() {
@@ -1355,18 +998,6 @@ async function startSession() {
       video: false
     });
 
-    var video = document.getElementById('cameraVideo');
-    video.srcObject = mediaStream;
-    cameraEnabled = false;
-    handLandmarks = [];
-    detectedHandCount = 0;
-    bothHandsDetected = false;
-    handTrackingError = false;
-    lastSentHandState = '';
-    lastSentCameraState = '';
-    updateCameraUi();
-    initHandTracking();
-
     audioCtx = new AudioContext();
     var nativeRate = audioCtx.sampleRate;
     var source = audioCtx.createMediaStreamSource(mediaStream);
@@ -1399,11 +1030,6 @@ async function startSession() {
       ws.send(pcm16.buffer);
     };
 
-    var captureCanvas = document.createElement('canvas');
-    captureCanvas.width = 640;
-    captureCanvas.height = 480;
-    var captureCtx = captureCanvas.getContext('2d');
-
     function connectWebSocket(isReconnect) {
       var proto = location.protocol === 'https:' ? 'wss' : 'ws';
       ws = new WebSocket(proto + '://' + location.host + '/ws/session');
@@ -1413,34 +1039,13 @@ async function startSession() {
         setStatus('connected');
         reconnectDelay = 1000;
         sessionActive = true;
-        document.getElementById('btnCamera').disabled = false;
         if (!isReconnect) {
           sessionStartTime = Date.now();
           resetMidiState();
           currentScore = 0;
         }
         ws.send(JSON.stringify({ type: 'set_mode', mode: 'storyteller' }));
-        sendCameraState();
-        sendHandState(true);
         refreshMidiInputs();
-
-        if (!videoInterval) {
-          videoInterval = setInterval(function() {
-            if (!ws || ws.readyState !== WebSocket.OPEN) return;
-            if (!cameraEnabled) return;
-            captureCtx.drawImage(video, 0, 0, 640, 480);
-            captureCanvas.toBlob(function(blob) {
-              if (!blob || !ws || ws.readyState !== WebSocket.OPEN) return;
-              var reader = new FileReader();
-              reader.onloadend = function() {
-                if (!reader.result || !ws || ws.readyState !== WebSocket.OPEN) return;
-                var b64 = reader.result.split(',')[1];
-                ws.send(JSON.stringify({ type: 'video_frame', data: b64 }));
-              };
-              reader.readAsDataURL(blob);
-            }, 'image/jpeg', 0.5);
-          }, 1000);
-        }
 
         if (!animFrame) {
           drawLoop();
@@ -1453,8 +1058,7 @@ async function startSession() {
         } else {
           var msg = JSON.parse(event.data);
           if (msg.type === 'story_scene' || msg.type === 'achievement' ||
-                     msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
-                     msg.type === 'technique_report') {
+                     msg.type === 'coaching_focus' || msg.type === 'quest_advance') {
             handleToolEvent(msg);
           } else if (msg.type === 'you_are_primary') {
             isPrimaryDevice = true;
@@ -1463,6 +1067,7 @@ async function startSession() {
             document.getElementById('deviceManagerPanel').style.display = '';
             document.getElementById('roomCodeDisplay').textContent = msg.room;
             updateQr(msg.room);
+            startSpeechRecognition();
           } else if (msg.type === 'room_code') {
             myRoomCode = msg.room;
             var label = document.getElementById('statusLabel');
@@ -1472,15 +1077,6 @@ async function startSession() {
             renderDeviceList();
           } else if (msg.type === 'role_assigned') {
             myRoles = msg.roles;
-            // Activate/deactivate camera based on role
-            if (myRoles.camera && !cameraEnabled) {
-              activateCamera();
-            } else if (!myRoles.camera && cameraEnabled) {
-              cameraEnabled = false;
-              if (mediaStream) mediaStream.getVideoTracks().forEach(function(t) { t.enabled = false; });
-              updateCameraUi();
-              document.getElementById('btnCamera').style.display = 'none';
-            }
           } else if (msg.type === 'input_transcript') {
             if (msg.text) addMessage(msg.text, 'input');
           } else if (msg.type === 'output_transcript') {
@@ -1530,32 +1126,64 @@ function resetStartButton() {
   btn.className = 'primary';
 }
 
+// ============================================================================
+// Web Speech API — browser-side speech-to-text for user transcript
+// ============================================================================
+var speechRecognition = null;
+
+function startSpeechRecognition() {
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) { console.log('SpeechRecognition not supported'); return; }
+  speechRecognition = new SpeechRec();
+  speechRecognition.lang = 'en-US';
+  speechRecognition.continuous = true;
+  speechRecognition.interimResults = false;
+  speechRecognition.onresult = function(e) {
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        var text = e.results[i][0].transcript.trim();
+        if (text && ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'user_speech_transcript', text: text }));
+        }
+      }
+    }
+  };
+  speechRecognition.onend = function() {
+    // Auto-restart — Chrome and Safari can stop unexpectedly
+    if (sessionActive && speechRecognition) {
+      try { speechRecognition.start(); } catch(e) {}
+    }
+  };
+  speechRecognition.onerror = function(e) {
+    console.log('SpeechRecognition error:', e.error);
+  };
+  try { speechRecognition.start(); } catch(e) {}
+}
+
+function stopSpeechRecognition() {
+  if (speechRecognition) {
+    var sr = speechRecognition;
+    speechRecognition = null;
+    try { sr.stop(); } catch(e) {}
+  }
+}
+
 function stopSession() {
   sessionActive = false;
+  stopSpeechRecognition();
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: 'close' }));
     ws.close();
   }
   ws = null;
   if (midiSnapshotTimer) { clearTimeout(midiSnapshotTimer); midiSnapshotTimer = null; }
-  if (videoInterval) { clearInterval(videoInterval); videoInterval = null; }
   if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
   if (processor) { processor.disconnect(); processor = null; }
   if (analyser) { analyser.disconnect(); analyser = null; }
   if (audioCtx) { audioCtx.close(); audioCtx = null; }
   if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
   if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
-  document.getElementById('cameraVideo').srcObject = null;
-  cameraEnabled = true;
-  handLandmarks = [];
-  detectedHandCount = 0;
-  bothHandsDetected = false;
-  lastSentHandState = '';
-  lastSentCameraState = '';
-  clearHandOverlay();
-  updateCameraUi();
   resetStartButton();
-  document.getElementById('btnCamera').disabled = true;
   resetMidiState();
   setStatus('disconnected');
 }
@@ -1622,11 +1250,9 @@ function sizeMidiStack() {
 function drawLoop() {
   if (!sessionActive) return;
   sizeMidiStack();
-  processHandTracking();
   drawPianoRoll();
   drawGrandStaff();
   drawKeyboard();
-  drawHandOverlay();
   updateLevelMeter();
   animFrame = requestAnimationFrame(drawLoop);
 }
@@ -1968,19 +1594,23 @@ function drawGrandStaff() {
   var bassF3Y = midiToY(53); // F3 — bass clef reference line
   var staffH = trebleBottom - trebleTop; // pixel height of one staff
 
-  // Treble clef — Unicode 𝄞, centered on G4 line
+  // Treble clef — Unicode 𝄞, centered on G4 line (shrunk 20%)
   ctx.fillStyle = '#AAAAAA';
-  ctx.font = Math.round(staffH * 1.05) + 'px serif';
+  ctx.font = Math.round(staffH * 0.84) + 'px serif';
   ctx.textBaseline = 'middle';
   ctx.fillText('\uD834\uDD1E', 1, trebleG4Y);
-  // Bass clef — Unicode 𝄢, centered on F3 line
-  ctx.font = Math.round(staffH * 0.72) + 'px serif';
-  ctx.fillText('\uD834\uDD22', 1, bassF3Y);
+  // Bass clef — Unicode 𝄢, enlarged 40%, positioned lower-right and aligned with treble dots
+  var bassClefSize = Math.round(staffH * 1.008);
+  ctx.font = bassClefSize + 'px serif';
+  var bassLineSpacing = (bassBottom - bassTop) / 4;
+  var bassClefY = bassTop + 2 * bassLineSpacing;
+  ctx.fillText('\uD834\uDD22', 3, bassClefY);
   ctx.textBaseline = 'alphabetic';
 
   // Time signature — each number fills half the staff height
   // Standard: top number between lines 3-5, bottom between lines 1-3
-  var tsX = clefW + 2;
+  // Shifted right to give clefs room
+  var tsX = clefW + 6;
   var tsFontSize = Math.round(staffH * 0.48);
   ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
@@ -2235,10 +1865,10 @@ function drawGrandStaff() {
   // Redraw clefs and key sig on top (same as initial draw)
   ctx.fillStyle = '#AAAAAA';
   ctx.textBaseline = 'middle';
-  ctx.font = Math.round(staffH * 1.05) + 'px serif';
+  ctx.font = Math.round(staffH * 0.84) + 'px serif';
   ctx.fillText('\uD834\uDD1E', 1, trebleG4Y);
-  ctx.font = Math.round(staffH * 0.72) + 'px serif';
-  ctx.fillText('\uD834\uDD22', 1, bassF3Y);
+  ctx.font = bassClefSize + 'px serif';
+  ctx.fillText('\uD834\uDD22', 3, bassClefY);
   ctx.textBaseline = 'alphabetic';
 
   // Redraw time sig
@@ -2844,7 +2474,6 @@ function updateQr(roomCode) {
 
   var roleConfigs = [
     { key: 'mic', icon: '\uD83C\uDF99\uFE0F', name: 'MIC' },
-    { key: 'camera', icon: '\uD83D\uDCF7', name: 'CAM' },
     { key: 'midi', icon: '\uD83C\uDFB9', name: 'MIDI' }
   ];
   roleConfigs.forEach(function(rc) {
@@ -2868,19 +2497,6 @@ function updateQr(roomCode) {
   });
   app.appendChild(rolesContainer);
 
-  // Camera preview area (shown when camera role is active)
-  var camPreview = document.createElement('div');
-  camPreview.className = 'secondary-camera-preview';
-  camPreview.id = 'secondaryCamPreview';
-  camPreview.style.display = 'none';
-  var camVideo = document.createElement('video');
-  camVideo.autoplay = true;
-  camVideo.playsInline = true;
-  camVideo.muted = true;
-  camVideo.id = 'secondaryCamVideo';
-  camPreview.appendChild(camVideo);
-  app.appendChild(camPreview);
-
   document.body.appendChild(app);
 
   // Audio playback context for secondary (to hear agent)
@@ -2891,7 +2507,6 @@ function updateQr(roomCode) {
   var secMediaStream = null;
   var secAudioCtx = null;
   var secProcessor = null;
-  var secVideoInterval = null;
   var secMidiAccess = null;
   var secMidiInput = null;
 
@@ -2956,10 +2571,10 @@ function updateQr(roomCode) {
     stopSecondaryHardware();
   };
 
-  var prevRoles = { mic: false, camera: false, midi: false };
+  var prevRoles = { mic: false, midi: false };
 
   function updateSecondaryRoles() {
-    ['mic', 'camera', 'midi'].forEach(function(role) {
+    ['mic', 'midi'].forEach(function(role) {
       var card = document.getElementById('secRole_' + role);
       var rstatus = document.getElementById('secRoleStatus_' + role);
       if (!card || !rstatus) return;
@@ -2972,19 +2587,16 @@ function updateQr(roomCode) {
       }
     });
 
-    if (myRoles.mic && !prevRoles.mic) startSecondaryMic();
-    if (!myRoles.mic && prevRoles.mic) stopSecondaryMic();
-    if (myRoles.camera && !prevRoles.camera) startSecondaryCamera();
-    if (!myRoles.camera && prevRoles.camera) stopSecondaryCamera();
+    if (myRoles.mic && !prevRoles.mic) { startSecondaryMic(); startSecondarySpeechRec(); }
+    if (!myRoles.mic && prevRoles.mic) { stopSecondaryMic(); stopSecondarySpeechRec(); }
     if (myRoles.midi && !prevRoles.midi) startSecondaryMidi();
     if (!myRoles.midi && prevRoles.midi) stopSecondaryMidi();
 
-    prevRoles = { mic: myRoles.mic, camera: myRoles.camera, midi: myRoles.midi };
+    prevRoles = { mic: myRoles.mic, midi: myRoles.midi };
 
-    if (myRoles.mic || myRoles.camera || myRoles.midi) {
+    if (myRoles.mic || myRoles.midi) {
       var active = [];
       if (myRoles.mic) active.push('Microphone');
-      if (myRoles.camera) active.push('Camera');
       if (myRoles.midi) active.push('MIDI');
       statusEl.textContent = active.join(' + ') + ' active';
     } else {
@@ -3032,49 +2644,6 @@ function updateQr(roomCode) {
     }
   }
 
-  function startSecondaryCamera() {
-    var video = document.getElementById('secondaryCamVideo');
-    var preview = document.getElementById('secondaryCamPreview');
-    navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480, facingMode: 'environment' }
-    }).then(function(stream) {
-      video.srcObject = stream;
-      if (preview) preview.style.display = '';
-      var canvas = document.createElement('canvas');
-      canvas.width = 640;
-      canvas.height = 480;
-      var ctx = canvas.getContext('2d');
-      secVideoInterval = setInterval(function() {
-        if (!secWs || secWs.readyState !== WebSocket.OPEN || !myRoles.camera) return;
-        if (video.readyState < 2) return;
-        ctx.drawImage(video, 0, 0, 640, 480);
-        canvas.toBlob(function(blob) {
-          if (!blob || !secWs || secWs.readyState !== WebSocket.OPEN) return;
-          var reader = new FileReader();
-          reader.onloadend = function() {
-            if (!reader.result) return;
-            var b64 = reader.result.split(',')[1];
-            secWs.send(JSON.stringify({ type: 'video_frame', data: b64 }));
-          };
-          reader.readAsDataURL(blob);
-        }, 'image/jpeg', 0.5);
-      }, 1000);
-    }).catch(function(err) {
-      statusEl.textContent = 'Camera error: ' + err.message;
-    });
-  }
-
-  function stopSecondaryCamera() {
-    if (secVideoInterval) { clearInterval(secVideoInterval); secVideoInterval = null; }
-    var video = document.getElementById('secondaryCamVideo');
-    var preview = document.getElementById('secondaryCamPreview');
-    if (video && video.srcObject) {
-      video.srcObject.getVideoTracks().forEach(function(t) { t.stop(); });
-      video.srcObject = null;
-    }
-    if (preview) preview.style.display = 'none';
-  }
-
   function startSecondaryMidi() {
     if (!navigator.requestMIDIAccess) {
       statusEl.textContent = 'Web MIDI not supported on this device';
@@ -3099,10 +2668,48 @@ function updateQr(roomCode) {
     if (secMidiInput) { secMidiInput.onmidimessage = null; secMidiInput = null; }
   }
 
+  var secSpeechRec = null;
+
+  function startSecondarySpeechRec() {
+    var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) return;
+    secSpeechRec = new SpeechRec();
+    secSpeechRec.lang = 'en-US';
+    secSpeechRec.continuous = true;
+    secSpeechRec.interimResults = false;
+    secSpeechRec.onresult = function(e) {
+      for (var i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          var text = e.results[i][0].transcript.trim();
+          if (text && secWs && secWs.readyState === WebSocket.OPEN) {
+            secWs.send(JSON.stringify({ type: 'user_speech_transcript', text: text }));
+          }
+        }
+      }
+    };
+    secSpeechRec.onend = function() {
+      if (myRoles.mic && secSpeechRec) {
+        try { secSpeechRec.start(); } catch(e) {}
+      }
+    };
+    secSpeechRec.onerror = function(e) {
+      console.log('Secondary SpeechRecognition error:', e.error);
+    };
+    try { secSpeechRec.start(); } catch(e) {}
+  }
+
+  function stopSecondarySpeechRec() {
+    if (secSpeechRec) {
+      var sr = secSpeechRec;
+      secSpeechRec = null;
+      try { sr.stop(); } catch(e) {}
+    }
+  }
+
   function stopSecondaryHardware() {
     stopSecondaryMic();
-    stopSecondaryCamera();
     stopSecondaryMidi();
+    stopSecondarySpeechRec();
   }
 })();
 
@@ -3116,13 +2723,6 @@ function updateQr(roomCode) {
   // Hide controls that spectators don't need
   var controls = document.querySelector('.controls');
   if (controls) controls.style.display = 'none';
-  var cameraPanel = document.querySelector('.left-col .panel');
-  if (cameraPanel) {
-    var ph = cameraPanel.querySelector('.video-container');
-    if (ph) ph.style.display = 'none';
-    var lm = cameraPanel.querySelector('.level-meter');
-    if (lm) lm.style.display = 'none';
-  }
 
   // Update header to show spectator mode
   var headerSub = document.querySelector('.header-sub');
@@ -3174,85 +2774,6 @@ function updateQr(roomCode) {
   };
 })();
 
-// ============================================================================
-// Remote Camera Mode — ?camera=1&room=CODE
-// ============================================================================
-(function() {
-  var params = new URLSearchParams(window.location.search);
-  if (params.get('camera') !== '1') return;
-  var room = params.get('room') || '';
-  if (!room) return;
-
-  // Replace page with minimal camera UI using safe DOM methods
-  while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
-  document.body.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#000000;color:#ffffff;font-family:sans-serif';
-
-  var heading = document.createElement('h2');
-  heading.textContent = 'PianoQuest Camera';
-  heading.style.marginBottom = '8px';
-  document.body.appendChild(heading);
-
-  var statusEl = document.createElement('div');
-  statusEl.style.cssText = 'margin-bottom:16px;color:rgba(255,255,255,0.5)';
-  statusEl.textContent = 'Connecting to room ' + room + '...';
-  document.body.appendChild(statusEl);
-
-  var video = document.createElement('video');
-  video.autoplay = true;
-  video.playsInline = true;
-  video.muted = true;
-  video.style.cssText = 'width:90vw;max-width:640px;border-radius:12px;background:#000';
-  document.body.appendChild(video);
-
-  var proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  var wsUrl = proto + '://' + location.host + '/ws/camera?room=' + encodeURIComponent(room);
-  var camWs = new WebSocket(wsUrl);
-
-  camWs.onopen = function() {
-    statusEl.textContent = 'Connected to room ' + room;
-    statusEl.style.color = '#86efac';
-    startCamera();
-  };
-
-  camWs.onmessage = function(event) {
-    try {
-      var msg = JSON.parse(event.data);
-      if (msg.type === 'error') {
-        statusEl.textContent = msg.message;
-        statusEl.style.color = '#fb7185';
-      }
-    } catch {}
-  };
-
-  camWs.onclose = function() {
-    statusEl.textContent = 'Disconnected';
-    statusEl.style.color = '#fb7185';
-  };
-
-  function startCamera() {
-    navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480, facingMode: 'environment' }
-    }).then(function(stream) {
-      video.srcObject = stream;
-      var canvas = document.createElement('canvas');
-      canvas.width = 640;
-      canvas.height = 480;
-      var ctx = canvas.getContext('2d');
-
-      setInterval(function() {
-        if (camWs.readyState !== WebSocket.OPEN) return;
-        if (video.readyState < 2) return;
-        ctx.drawImage(video, 0, 0, 640, 480);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-        var base64 = dataUrl.split(',')[1];
-        camWs.send(JSON.stringify({ type: 'video_frame', data: base64 }));
-      }, 1000);
-    }).catch(function(err) {
-      statusEl.textContent = 'Camera error: ' + err.message;
-      statusEl.style.color = '#fb7185';
-    });
-  }
-})();
 </script>
 </body>
 </html>

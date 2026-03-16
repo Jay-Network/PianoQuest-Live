@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-03-16
+
+### Added
+- **Web Speech API transcription**: Browser-side SpeechRecognition for user input transcript (replaces broken Gemini `inputAudioTranscription` which outputs wrong languages)
+- SpeechRecognition on primary device (auto-starts on connect)
+- SpeechRecognition on secondary mic device (starts/stops with mic role)
+- `user_speech_transcript` WebSocket message type relayed to all room devices as `input_transcript`
+- Safari compatibility via `webkitSpeechRecognition` fallback
+- Auto-restart on unexpected stop (both Chrome and Safari)
+
+### Fixed
+- **Output transcription accumulation**: Gemini output transcript now appends chunks instead of replacing buffer (was showing only last few words)
+- **Grand staff treble clef**: Shrunk 20% (staffH * 1.05 → 0.84)
+- **Grand staff bass clef**: Enlarged 40% (staffH * 0.72 → 1.008), repositioned to lower-right
+- **Grand staff time signature**: Shifted right to give clefs room
+
+### Removed
+- `inputAudioTranscription` from Gemini config (known API bug — outputs Arabic, Korean instead of English)
+
 ## [2.0.3] - 2026-03-16
 
 ### Fixed

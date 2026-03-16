@@ -47,6 +47,12 @@ Each idea: ID, version proposed, severity (major/minor), status, description.
 - **Severity:** minor
 - **Description:** 8 themed visual environments driven by narrative (forest, ocean, castle, space, garden, volcano, crystal, storm) with CSS gradient backgrounds. `set_scene` tool lets agent switch scenes. Requires `set_scene` tool re-added to agent.
 
+**IDEA: Camera + Finger Tracking (stripped in v2.1.0, re-add post-competition)**
+- **Version:** 2.1.0
+- **Status:** proposed (stripped in v2.1.0)
+- **Severity:** major
+- **Description:** MediaPipe hand tracking overlay, camera panel, report_technique tool (vision+audio correlation), video frame sending to Gemini, standalone phone camera mode, multi-device camera role. Full restoration guide: `docs/removed-camera-finger-tracking.md`
+
 **IDEA: Custom desktop UI for VoiceLauncher integration**
 - **Version:** 0.4.7
 - **Status:** proposed

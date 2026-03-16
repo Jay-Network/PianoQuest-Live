@@ -28,13 +28,6 @@ export function executeToolLocally(
       const instruction = args.instruction as string;
       return { status: "ok", instruction };
     }
-    case "report_technique": {
-      const finger = args.finger as string;
-      const visual = args.visual_observation as string;
-      const audio = args.audio_observation as string;
-      const suggestion = args.suggestion as string;
-      return { status: "ok", finger, visual, audio, suggestion };
-    }
     default:
       return { error: `Unknown tool: ${name}` };
   }
@@ -51,14 +44,6 @@ export function toolCallToVisualEvent(
   switch (name) {
     case "set_coaching_focus":
       return { type: "coaching_focus", text: args.instruction };
-    case "report_technique":
-      return {
-        type: "technique_report",
-        finger: args.finger,
-        visual: args.visual_observation,
-        audio: args.audio_observation,
-        suggestion: args.suggestion,
-      };
     default:
       return null;
   }
@@ -89,44 +74,6 @@ export function buildToolDeclarations() {
             required: ["instruction"],
           },
         },
-        {
-          name: "report_technique",
-          description:
-            "Report a correlated vision + audio technique observation. " +
-            "Call this when you notice a connection between what you SEE and what you HEAR. " +
-            "This is your most powerful tool — it proves real-time multimodal analysis.",
-          parameters: {
-            type: Type.OBJECT,
-            properties: {
-              finger: {
-                type: Type.STRING,
-                description:
-                  'Which finger(s) — e.g. "3rd finger", "thumb", "pinky", "wrist"',
-              },
-              visual_observation: {
-                type: Type.STRING,
-                description:
-                  "What you SEE happening (hand/finger position).",
-              },
-              audio_observation: {
-                type: Type.STRING,
-                description:
-                  "What you HEAR as a result (sound quality, timing, dynamics).",
-              },
-              suggestion: {
-                type: Type.STRING,
-                description:
-                  "Specific fix connecting the visual cause to the audio effect.",
-              },
-            },
-            required: [
-              "finger",
-              "visual_observation",
-              "audio_observation",
-              "suggestion",
-            ],
-          },
-        },
       ],
     },
   ];
@@ -154,17 +101,14 @@ teacher sitting next to them on the piano bench.
 
 ## WHAT YOU PERCEIVE
 
-You can SEE their hands via camera and receive MIDI data (notes, velocity, timing, pedal) \
-from their digital piano. When both hands are visible AND you have MIDI data, connect what \
-you see to what you hear — that's your superpower.
-
-If the camera is off or hands aren't fully visible, say so honestly and coach from MIDI only. \
-Never invent visual observations.
+You receive MIDI data (notes, velocity, timing, pedal) from their digital piano. \
+Use this data for note, timing, and dynamics analysis. Coach based on what you HEAR \
+and the MIDI evidence.
 
 ## COACHING STYLE
 
 - One thing at a time. Pick the most impactful correction.
-- Be specific: "Your 3rd finger is flat — try curving it" not "Work on hand position."
+- Be specific: "That C was a bit heavy — try lighter touch" not "Work on dynamics."
 - Use imagery: "Play that like you're whispering, then speaking."
 - Celebrate improvement instantly: "Yes! Did you feel that? Much more even."
 - Adapt difficulty by observation — never ask what level they are.
@@ -174,8 +118,6 @@ Never invent visual observations.
 You have two tools. Use them at natural moments, not constantly.
 
 - set_coaching_focus: Update the tip card when you give a specific actionable tip.
-- report_technique: When you see AND hear something connected (finger position → sound quality), \
-report it. This is your most valuable tool — use it when you have a real correlation to share.
 
 ## SESSION FLOW
 
@@ -196,30 +138,11 @@ const setCoachingFocusTool = new FunctionTool({
   execute: (input: any) => ({ status: "ok", instruction: input.instruction }),
 });
 
-const reportTechniqueTool = new FunctionTool({
-  name: "report_technique",
-  description: "Report a correlated vision + audio technique observation.",
-  parameters: z.object({
-    finger: z.string().describe("Which finger(s)."),
-    visual_observation: z.string().describe("What you SEE."),
-    audio_observation: z.string().describe("What you HEAR."),
-    suggestion: z.string().describe("Specific fix."),
-  }) as any,
-  execute: (input: any) => ({
-    status: "ok",
-    finger: input.finger,
-    visual: input.visual_observation,
-    audio: input.audio_observation,
-    suggestion: input.suggestion,
-  }),
-});
-
 export const storytellerAgent = new LlmAgent({
   name: "pianoquest_storyteller",
   model: LIVE_MODEL,
   instruction: STORYTELLER_INSTRUCTION,
   tools: [
     setCoachingFocusTool,
-    reportTechniqueTool,
   ],
 });
