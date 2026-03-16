@@ -714,16 +714,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
           sendDeviceList(roomSession);
 
-          // Send greeting to make Gemini speak first
-          setTimeout(() => {
-            if (!closed && session) {
-              session.sendClientContent({
-                turns: [{ role: "user", parts: [{ text: "Hi! I just sat down at the piano. Say hello briefly." }] }],
-                turnComplete: true,
-              });
-              console.log(`[${APP_NAME}] Sent greeting to Gemini`);
-            }
-          }, 1000);
+          // No greeting — Gemini stays silent until user speaks
         },
         onerror: (e: unknown) => {
           console.error(`[${APP_NAME}] Gemini error: ${sessionId}`, e);
@@ -844,8 +835,6 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         const msg = JSON.parse(rawMsg);
         const msgType = msg.type;
 
-        // Debug: log ALL text message types from primary
-        console.log(`[${APP_NAME}] WS recv: ${msgType} from primary`);
 
         if (msgType === "text") {
           session.sendClientContent({

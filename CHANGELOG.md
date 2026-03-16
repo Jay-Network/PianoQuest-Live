@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-03-16
+
+### Fixed
+- **CRITICAL: wsMessages Buffer/string fix** — ws library delivered all messages as Buffer; text JSON (midi_event, midi_snapshot, text) was silently treated as PCM audio. Fixed with isBinary flag.
+- **Removed debug logging** from v2.1.50-v2.1.51
+
+### Changed
+- **Gemini stays silent until spoken to** — rewrote system instruction so Gemini only responds when user addresses it by voice. No unsolicited coaching. No greeting on connect.
+- **Removed auto-greeting** — server no longer sends "Hi!" to Gemini on session start
+
 ## [2.1.52] - 2026-03-16
 
 ### Fixed
