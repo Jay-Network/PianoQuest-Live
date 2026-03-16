@@ -1,0 +1,229 @@
+Implement the following plan:
+
+# Plan: Camera Finger Tracking (Hybrid: MediaPipe + Gemini Vision)
+
+## Context
+PianoQuest Live competition deadline is TODAY (March 16). Jay wants camera finger tracking integrated with the drill system. Camera/video existed in v1.2-1.5 but was stripped in v2.0-2.1. Full restoration guide at `docs/removed-camera-finger-tracking.md`. Prioritizing Gemini features for maximum demo impact.
+
+**Hybrid approach (Option C):**
+1. Phone camera sends JPEG frames (1fps) to Gemini for vision coaching
+2. MediaPipe HandLandmarker runs client-side on phone for hand detection + skeleton overlay
+3. Gemini sees hands + hears piano + gets MIDI = multimodal coaching (the killer demo feature)
+
+---
+
+## Phase 1: Camera Frames to Gemini (~30 min) — HIGHEST PRIORITY
+
+### 1a. `src/agent/server.ts`
+
+1. **Restore `camera` to DeviceRoles** (line 112-115):
+   ```typescript
+   interface DeviceRoles {
+     mic: boolean;
+     camera: boolean;
+     midi: boolean;
+   }
+   ```
+
+2. **Add camera state to RoomSession** (line 128-136):
+   ```typescript
+   cameraEnabled: boolean;
+   bothHandsDetected: boolean;
+   ```
+
+3. **Initialize camera fields** in roomSession creation (line 722) — `cameraEnabled: false, bothHandsDetected: false`
+
+4. **Initialize `camera: false`** in primary device roles (line 682) and secondary device roles (line 575)
+
+5. **Add message handlers** in secondary device message loop (after line 623):
+   - `video_frame` (camera role required): forward to `room.sendRealtimeInput({ media: { data, mimeType: "image/jpeg" } })`
+   - `camera_state`: set `room.cameraEnabled`, broadcast to all devices
+   - `hand_state`: set `room.bothHandsDetected`, broadcast to all devices
+
+6. **Add message handlers** in primary device message loop (after line 882):
+   - Same `video_frame`, `camera_state`, `hand_state` handlers (primary can also have camera)
+
+7. **Extend role check** at line 886: add `|| role === "camera"` to the valid roles condition
+
+### 1b. `src/agent/agent.ts`
+
+1. **Add vision section to STORYTELLER_INSTRUCTION** (after line 106):
+   ```
+   ## WHAT YOU SEE
+   When camera is enabled, you receive video frames of the user's hands on the keyboard.
+   Connect what you SEE to what you HEAR for technique coaching.
+   Use the report_technique tool for correlated vision+audio feedback.
+   If camera is off or hands not visible, coach from audio/MIDI only.
+   ```
+
+2. **Add `report_technique` tool** to `buildToolDeclarations()` functionDeclarations array:
+   - Parameters: finger (STRING), visual_observation (STRING), audio_observation (STRING), suggestion (STRING)
+   - All required
+
+3. **Add to `executeToolLocally()`**: `case "report_technique": return { status: "ok", ...args };`
+
+4. **Add to `toolCallToVisualEvent()`**: `case "report_technique": return { type: "technique_report", ...args };`
+
+5. **Add ADK FunctionTool** for `report_technique` (structural, matching pattern of `setCoachingFocusTool`)
+
+### 1c. `static/index.html` — Secondary Camera Device
+
+1. **Add camera to roleConfigs** (line 3151-3154):
+   ```javascript
+   { key: 'camera', icon: '\uD83D\uDCF7', name: 'CAMERA' }
+   ```
+
+2. **Add `camera: false` to prevRoles** (line 3250)
+
+3. **Add camera role handling** in `updateSecondaryRoles()` (after line 3269):
+   ```javascript
+   if (myRoles.camera && !prevRoles.camera) startSecondaryCamera();
+   if (!myRoles.camera && prevRoles.camera) stopSecondaryCamera();
+   ```
+
+4. **Update prevRoles** to include camera (line 3271)
+
+5. **Update status text** to include Camera in active roles (line 3273-3280)
+
+6. **Add camera preview container** in secondary UI DOM build (after rolesContainer)
+
+7. **Implement `startSecondaryCamera()`**:
+   - `getUserMedia({ video: { facingMode: 'environment', width: 640, height: 480 } })`
+   - Create video element, append to preview container
+   - Create off-screen canvas (640x480)
+   - setInterval 1s: draw video to canvas → toDataURL('image/jpeg', 0.7) → extract base64 → send `{ type: 'video_frame', data: base64 }`
+   - Send `{ type: 'camera_state', enabled: true }`
+
+8. **Implement `stopSecondaryCamera()`**:
+   - clearInterval, stop stream tracks, remove video element
+   - Send `{ type: 'camera_state', enabled: false }`
+
+9. **Add stub `updateCameraUi()`** (dead reference exists at line 3043)
+
+---
+
+## Phase 2: Technique Report UI on Primary (~20 min)
+
+### 2a. `static/index.html` — CSS
+
+Add technique panel styles (after line 339):
+- `.technique-entry` — card with border, padding, fade-in animation
+- `.technique-finger` — bold green header
+- `.technique-row` — flex row for EYE/EAR labels
+- `.technique-label.eye` / `.technique-label.ear` — colored icons
+- `.technique-obs` — observation text
+- `.technique-suggestion` — italic suggestion text
+- `.camera-badge` — status indicator (`.off`, `.warn`, `.ready` states)
+
+### 2b. `static/index.html` — HTML
+
+Add FINGER TRACKING panel in left column (after Conversation panel, ~line 487):
+```html
+<div class="panel" id="techniquePanel" style="display:none;">
+  <div class="panel-header"><div class="dot" style="background:#c084fc"></div>FINGER TRACKING</div>
+  <div id="techniqueEntries" style="padding:8px;max-height:200px;overflow-y:auto;">
+    <div style="font-size:11px;color:var(--text3);">Camera off</div>
+  </div>
+</div>
+```
+
+Add camera status badge in header or left panel showing: "Camera Off" / "1 Hand" / "2 Hands Ready"
+
+### 2c. `static/index.html` — JS
+
+1. **`showTechniqueReport(data)`** — creates a technique entry card:
+   - Shows finger name, EYE observation, EAR observation, suggestion
+   - Prepends to `#techniqueEntries`, max 10 entries
+   - Shows the panel if hidden
+
+2. **Handle `technique_report`** in primary WS message handler (in the `handleToolEvent` switch or alongside it)
+
+3. **Handle `camera_state`** and **`hand_state`** messages on primary — update badge + technique panel placeholder text
+
+4. **Track `cameraEnabled` and `bothHandsDetected`** as global state vars
+
+---
+
+## Phase 3: MediaPipe Hand Detection on Camera Device (~30 min)
+
+### 3a. `static/index.html` — Script tag
+
+Add MediaPipe tasks-vision CDN (in `<head>` or before closing `</body>`):
+```html
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.min.js" crossorigin="anonymous"></script>
+```
+
+### 3b. `static/index.html` — HandLandmarker init
+
+In `startSecondaryCamera()`, after video is playing:
+1. Load `FilesetResolver.forVisionTasks()` with WASM CDN path
+2. Create `HandLandmarker` with `float16` model, `runningMode: "VIDEO"`, `numHands: 2`
+3. Add overlay canvas on top of video element (same dimensions)
+
+### 3c. `static/index.html` — Hand processing loop
+
+`processHands(timestamp)` via requestAnimationFrame:
+- Throttle to ~15fps (66ms between calls)
+- `handLandmarker.detectForVideo(video, timestamp)`
+- Draw skeleton on overlay canvas using HAND_CONNECTIONS
+- Track hand count, send `hand_state` only on change
+- Color-code: 0 hands = red badge, 1 = yellow, 2 = green
+
+### 3d. Hand skeleton drawing
+
+`drawHandOverlay(landmarks)`:
+- Clear overlay canvas
+- For each hand: draw HAND_CONNECTIONS as white lines, keypoints as colored circles
+- Fingertips (indices 4,8,12,16,20) get larger circles
+- Semi-transparent so video shows through
+
+---
+
+## Phase 4: Drill Integration (Light) (~15 min)
+
+### 4a. `static/index.html`
+
+1. **Drill camera indicator**: In drills tab, show `"Camera active — Gemini watching technique"` when `cameraEnabled` is true
+
+2. **On drill start**: If camera active, send text to Gemini: `"Starting drill [name]. Camera is active — watch my hand technique."`
+
+3. **On drill complete**: If camera was active during drill, include `cameraActive: true` in completion data so Gemini can reference visual observations
+
+---
+
+## Files Modified
+
+| File | Changes |
+|------|---------|
+| `src/agent/server.ts` | camera role in DeviceRoles, video_frame/camera_state/hand_state handlers, RoomSession camera fields |
+| `src/agent/agent.ts` | report_technique tool + declarations, vision system instruction section |
+| `static/index.html` | Secondary camera mode, MediaPipe HandLandmarker, technique panel UI, camera badge, drill camera indicator |
+| `VERSION` | Bump per commit |
+| `package.json` | Version sync |
+| `CHANGELOG.md` | Document changes |
+
+---
+
+## Verification
+
+1. `npx tsc` — clean compile after server/agent changes
+2. Start session on desktop → connect phone as secondary → assign camera role
+3. Phone should show rear camera preview with hand skeleton overlay
+4. Primary should show camera badge (0/1/2 hands) + technique panel
+5. When Gemini sees hands + hears piano, it should use `report_technique` tool → technique cards appear on primary
+6. Start a drill with camera active → drill indicator shows camera status
+7. Gemini's coaching should reference both visual and audio observations
+
+## What NOT to build today
+- No finger-to-key mapping (needs calibration UI — too complex)
+- No dedicated `/ws/camera` endpoint (reuse `/ws/session` with camera role)
+- No server-side MediaPipe (runs client-side only)
+- No camera on primary device (phone only, pointed at keyboard)
+- No drill finger assignment scoring (future feature)
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/takuma/.claude/projects/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/ace004ce-7f50-4ec7-939c-f95d3f56a5cf.jsonl
+
+---
+
+whats next? please document everything well
