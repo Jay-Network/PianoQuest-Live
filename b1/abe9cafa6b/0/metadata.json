@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "b1abe9cafa6b",
+  "session_id": "5ca40932-83c2-42b5-a897-70a69faf321f",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-16T03:16:24.671737181Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "CHANGELOG.md",
+    "VERSION",
+    "docs/IDEAS.md",
+    "docs/removed-camera-finger-tracking.md",
+    "package.json",
+    "src/agent/agent.ts",
+    "src/agent/server.ts",
+    "static/index.html"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "4e9192400219",
+  "token_usage": {
+    "input_tokens": 35,
+    "cache_creation_tokens": 61833,
+    "cache_read_tokens": 1756835,
+    "output_tokens": 9581,
+    "api_call_count": 28
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-16T03:16:23.581493336Z",
+    "agent_lines": 337,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 337,
+    "agent_percentage": 100
+  }
+}

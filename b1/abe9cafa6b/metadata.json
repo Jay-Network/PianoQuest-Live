@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "b1abe9cafa6b",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "CHANGELOG.md",
+    "VERSION",
+    "docs/IDEAS.md",
+    "docs/removed-camera-finger-tracking.md",
+    "package.json",
+    "src/agent/agent.ts",
+    "src/agent/server.ts",
+    "static/index.html"
+  ],
+  "sessions": [
+    {
+      "metadata": "/b1/abe9cafa6b/0/metadata.json",
+      "transcript": "/b1/abe9cafa6b/0/full.jsonl",
+      "context": "/b1/abe9cafa6b/0/context.md",
+      "content_hash": "/b1/abe9cafa6b/0/content_hash.txt",
+      "prompt": "/b1/abe9cafa6b/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 35,
+    "cache_creation_tokens": 61833,
+    "cache_read_tokens": 1756835,
+    "output_tokens": 9581,
+    "api_call_count": 28
+  }
+}
