@@ -370,16 +370,36 @@ export function createApp() {
   });
 
   wssSpectator.on("connection", (ws: WebSocket) => {
-    console.log(`[${APP_NAME}] Spectator connected (total: ${spectators.size + 1})`);
     spectators.add(ws);
-    // Keepalive ping every 25s to prevent Cloud Run timeout
+    console.log(`[${APP_NAME}] Spectator connected (total: ${spectators.size})`);
+
+    // Send immediate status so bridge knows connection is live
+    const activeRoom = Array.from(rooms.values())[0];
+    ws.send(JSON.stringify({
+      type: "spectator_status",
+      connected: true,
+      spectators: spectators.size,
+      activeSession: !!activeRoom,
+      room: activeRoom ? Array.from(rooms.keys())[0] : null,
+    }));
+
+    // Keepalive ping every 20s to prevent Cloud Run timeout
+    let alive = true;
     const pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.ping();
-      } else {
+      if (ws.readyState !== WebSocket.OPEN) {
         clearInterval(pingInterval);
+        return;
       }
-    }, 25000);
+      if (!alive) {
+        // Missed pong — connection dead
+        ws.terminate();
+        return;
+      }
+      alive = false;
+      ws.ping();
+    }, 20000);
+
+    ws.on("pong", () => { alive = true; });
     ws.on("close", () => {
       clearInterval(pingInterval);
       spectators.delete(ws);

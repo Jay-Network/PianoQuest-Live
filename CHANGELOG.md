@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.0.4] - 2026-03-16
+
+### Fixed
+- **Spectator endpoint hardened** — sends `spectator_status` on connect (bridge knows it's live), pong-based dead connection detection, 20s keepalive pings. Bridge reconnections immediately start receiving MIDI.
+
 ## [3.0.3] - 2026-03-16
 
 ### Fixed
