@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.9] - 2026-03-15
+
+### Fixed
+- Treble clef too large: reduced from staffH*1.6 to staffH*1.05 (~35% smaller)
+- Bass clef too high: removed upward offset (staffH*0.08), now centered directly on F3 line
+- Bass clef size reduced from staffH*0.95 to staffH*0.72 for proper proportions
+
 ## [1.8.8] - 2026-03-15
 
 ### Fixed

@@ -451,7 +451,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.8</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.9</div>
       </div>
     </div>
     <div class="controls">
@@ -1954,14 +1954,14 @@ function drawGrandStaff() {
   var bassF3Y = midiToY(53); // F3 — bass clef reference line
   var staffH = trebleBottom - trebleTop; // pixel height of one staff
 
-  // Treble clef — Unicode 𝄞, baseline = G4 line
+  // Treble clef — Unicode 𝄞, centered on G4 line
   ctx.fillStyle = '#AAAAAA';
-  ctx.font = Math.round(staffH * 1.6) + 'px serif';
+  ctx.font = Math.round(staffH * 1.05) + 'px serif';
   ctx.textBaseline = 'middle';
   ctx.fillText('\uD834\uDD1E', 1, trebleG4Y);
-  // Bass clef — Unicode 𝄢, top dot at F3 line
-  ctx.font = Math.round(staffH * 0.95) + 'px serif';
-  ctx.fillText('\uD834\uDD22', 1, bassF3Y + staffH * 0.08);
+  // Bass clef — Unicode 𝄢, centered on F3 line
+  ctx.font = Math.round(staffH * 0.72) + 'px serif';
+  ctx.fillText('\uD834\uDD22', 1, bassF3Y);
   ctx.textBaseline = 'alphabetic';
 
   // Time signature — each number fills half the staff height
@@ -2223,10 +2223,10 @@ function drawGrandStaff() {
   // Redraw clefs and key sig on top (same as initial draw)
   ctx.fillStyle = '#AAAAAA';
   ctx.textBaseline = 'middle';
-  ctx.font = Math.round(staffH * 1.6) + 'px serif';
+  ctx.font = Math.round(staffH * 1.05) + 'px serif';
   ctx.fillText('\uD834\uDD1E', 1, trebleG4Y);
-  ctx.font = Math.round(staffH * 0.95) + 'px serif';
-  ctx.fillText('\uD834\uDD22', 1, bassF3Y + staffH * 0.08);
+  ctx.font = Math.round(staffH * 0.72) + 'px serif';
+  ctx.fillText('\uD834\uDD22', 1, bassF3Y);
   ctx.textBaseline = 'alphabetic';
 
   // Redraw time sig
