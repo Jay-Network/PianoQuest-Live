@@ -305,6 +305,12 @@
     -webkit-tap-highlight-color: transparent;
   }
   .cam-btn.exit-btn { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.15); font-size: 12px; font-weight: 600; }
+  .cam-fs-btn {
+    position: absolute; bottom: 8px; right: 8px; z-index: 10;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; font-weight: 600;
+    cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
   .secondary-header { text-align: center; }
   .secondary-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
   .secondary-header h2 span { color: var(--accent); }
@@ -557,7 +563,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.9</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.10</div>
       </div>
     </div>
     <div class="controls">
@@ -819,6 +825,7 @@ let myRoles = { mic: false, camera: false, midi: false };
 let deviceList = [];
 let cameraEnabled = false;
 let bothHandsDetected = false;
+let mediapipeActive = false;
 
 let midiAccess = null;
 let midiInput = null;
@@ -1518,6 +1525,7 @@ async function startSession() {
             updateCameraUi();
           } else if (msg.type === 'hand_state') {
             bothHandsDetected = Boolean(msg.bothHands);
+            mediapipeActive = true;
             updateCameraUi();
           } else if (msg.type === 'you_are_primary') {
             isPrimaryDevice = true;
@@ -3292,12 +3300,15 @@ function updateCameraUi() {
       offMsg.textContent = 'Camera off';
       entries.appendChild(offMsg);
     }
-  } else if (!bothHandsDetected) {
-    badge.className = 'camera-badge warn';
-    badge.textContent = '1 Hand';
-  } else {
+  } else if (mediapipeActive && bothHandsDetected) {
     badge.className = 'camera-badge ready';
-    badge.textContent = '2 Hands Ready';
+    badge.textContent = 'MediaPipe: ON \u00b7 2 Hands';
+  } else if (mediapipeActive) {
+    badge.className = 'camera-badge warn';
+    badge.textContent = 'MediaPipe: ON \u00b7 ' + (bothHandsDetected ? '2 Hands' : '1 Hand');
+  } else {
+    badge.className = 'camera-badge warn';
+    badge.textContent = 'Camera On \u00b7 MediaPipe: OFF';
   }
   var drillCam = document.getElementById('drillCameraStatus');
   if (drillCam) drillCam.style.display = cameraEnabled ? '' : 'none';
@@ -4114,6 +4125,17 @@ function buildSecondaryUI(room, params) {
   cameraPreviewWrap.className = 'camera-preview-wrap';
   cameraPreviewWrap.id = 'cameraPreviewWrap';
   cameraPreviewWrap.style.display = 'none';
+
+  // Fullscreen toggle button — bottom-right corner of camera
+  var fsBtn = document.createElement('button');
+  fsBtn.className = 'cam-fs-btn';
+  fsBtn.textContent = 'Fullscreen';
+  fsBtn.onclick = function() {
+    var isFs = app.classList.toggle('camera-fullscreen');
+    fsBtn.textContent = isFs ? 'Exit' : 'Fullscreen';
+  };
+  cameraPreviewWrap.appendChild(fsBtn);
+
   app.appendChild(cameraPreviewWrap);
 
   // Bottom bar for camera fullscreen mode
@@ -4430,9 +4452,11 @@ function buildSecondaryUI(room, params) {
       return;
     }
     if (camStatus) camStatus.textContent = 'Loading hand tracker...';
+    var savedFileset = null;
     FilesetResolver.forVisionTasks(
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
     ).then(function(fileset) {
+      savedFileset = fileset;
       return HandLandmarker.createFromOptions(fileset, {
         baseOptions: {
           modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
@@ -4446,8 +4470,26 @@ function buildSecondaryUI(room, params) {
       if (camStatus) { camStatus.textContent = 'Hand tracking active'; camStatus.classList.add('tracking'); }
       processHands(video, overlayCanvas);
     }).catch(function(err) {
-      console.log('HandLandmarker init failed:', err);
-      if (camStatus) camStatus.textContent = 'Hand tracking failed: ' + err.message;
+      console.log('HandLandmarker GPU failed, trying CPU:', err);
+      if (!savedFileset) {
+        if (camStatus) camStatus.textContent = 'Hand tracking failed';
+        return;
+      }
+      HandLandmarker.createFromOptions(savedFileset, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+          delegate: 'CPU'
+        },
+        runningMode: 'VIDEO',
+        numHands: 2
+      }).then(function(landmarker) {
+        secHandLandmarker = landmarker;
+        if (camStatus) { camStatus.textContent = 'Hand tracking active'; camStatus.classList.add('tracking'); }
+        processHands(video, overlayCanvas);
+      }).catch(function(err2) {
+        console.log('HandLandmarker CPU also failed:', err2);
+        if (camStatus) camStatus.textContent = 'Hand tracking failed';
+      });
     });
   }
 

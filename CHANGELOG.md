@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.10] - 2026-03-16
+
+### Added
+- **Fullscreen toggle button** on camera preview (bottom-right corner). Starts normal, tap to go fullscreen, tap again to exit.
+- **CPU fallback for MediaPipe** — if GPU hand tracking fails (common on iPhones), automatically retries with CPU delegate.
+- **MediaPipe status indicator on desktop** — finger tracking panel badge shows "MediaPipe: ON/OFF" with hand count.
+
+### Fixed
+- **"Camera off" bug** — finger tracking panel now correctly shows camera/MediaPipe status when phone is connected.
+
 ## [3.2.9] - 2026-03-16
 
 ### Fixed
