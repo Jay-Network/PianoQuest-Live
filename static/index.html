@@ -422,7 +422,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.0.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.0.2</div>
       </div>
     </div>
     <div class="controls">
@@ -559,32 +559,84 @@
     <!-- Resize handle: center ↔ score -->
     <div class="grid-resize-handle" id="scoreResizeHandle"></div>
 
-    <!-- Right column: Score Browser -->
+    <!-- Right column: Drills + Score Browser -->
     <div class="score-col" id="scoreCol">
       <div class="panel" style="flex:1;display:flex;flex-direction:column;">
-        <div class="panel-header">
-          <div class="dot" style="background:var(--accent)"></div>SCORE
+        <div class="right-tabs">
+          <div class="right-tab active" onclick="switchRightTab('drills')">DRILLS</div>
+          <div class="right-tab" onclick="switchRightTab('scores')">SCORES</div>
         </div>
-        <div class="score-browser">
-          <div class="score-tree" id="scoreTree">
-            <div style="color:var(--text3);font-size:10px;">Loading sheets...</div>
+
+        <!-- Drills tab -->
+        <div class="right-tab-content active" id="drillsTab">
+          <div style="padding:8px 8px 4px;font-size:10px;color:var(--text3);letter-spacing:0.05em;font-weight:700;">STAGE 1: SINGLE FINGER</div>
+          <div class="drill-card" id="drill-1-1" onclick="selectDrill('1-1')">
+            <div class="drill-id">1-1</div>
+            <div class="drill-name">Tempo</div>
+            <div class="drill-desc">Play a single note at a steady tempo. Target notes flow down — match the rhythm.</div>
           </div>
-          <div class="sheet-music-view" id="sheetMusicView" style="display:none;flex:1;overflow:auto;padding:4px;">
-            <img src="/static/sheets/fur-elise-reference.png" alt="Fur Elise Sheet Music" style="width:100%;display:block;border-radius:4px;">
-            <div style="text-align:center;padding:4px;">
-              <a href="/static/sheets/fur-elise-full.pdf" target="_blank" style="color:#6af;font-size:11px;">Open full PDF</a>
-            </div>
+          <div class="drill-card" id="drill-1-2" onclick="selectDrill('1-2')">
+            <div class="drill-id">1-2</div>
+            <div class="drill-name">Strength</div>
+            <div class="drill-desc">Play a note at a specific dynamic level. Gemini evaluates your velocity accuracy.</div>
           </div>
-          <div class="score-preview" id="scorePreview" style="display:none;">
-            <div class="score-info" id="scoreInfo"></div>
-            <div class="score-canvas-wrap">
-              <canvas id="scoreCanvas"></canvas>
+          <div id="drillSettings" style="display:none;">
+            <div class="drill-settings">
+              <label>Note
+                <select id="drillNote">
+                  <option value="60">C4 (Middle C)</option>
+                  <option value="62">D4</option>
+                  <option value="64">E4</option>
+                  <option value="65">F4</option>
+                  <option value="67">G4</option>
+                  <option value="69">A4</option>
+                  <option value="71">B4</option>
+                </select>
+              </label>
+              <label>BPM
+                <input type="number" id="drillBpm" value="80" min="40" max="200">
+              </label>
+              <label id="drillDynamicLabel" style="display:none;">Target Dynamic
+                <select id="drillDynamic">
+                  <option value="32">pp</option>
+                  <option value="48">p</option>
+                  <option value="64" selected>mp</option>
+                  <option value="80">mf</option>
+                  <option value="96">f</option>
+                  <option value="112">ff</option>
+                </select>
+              </label>
+              <label>Measures
+                <input type="number" id="drillMeasures" value="8" min="2" max="32">
+              </label>
             </div>
-            <div class="score-actions">
-              <button id="sheetMusicBtn" onclick="toggleSheetMusicView()">Sheet Music</button>
-              <button id="scoreLoadBtn" onclick="loadScoreToTargets()">Load as Target Notes</button>
-              <button id="scoreColorBtn" onclick="toggleScoreColorMode()">Color Mode</button>
-              <button id="scorePlayBtn" onclick="toggleScorePlayback()">Play</button>
+            <div class="drill-start-btn" id="drillStartBtn" onclick="startDrill()">Start Drill</div>
+          </div>
+        </div>
+
+        <!-- Scores tab -->
+        <div class="right-tab-content" id="scoresTab">
+          <div class="score-browser">
+            <div class="score-tree" id="scoreTree">
+              <div style="color:var(--text3);font-size:10px;">Loading sheets...</div>
+            </div>
+            <div class="sheet-music-view" id="sheetMusicView" style="display:none;flex:1;overflow:auto;padding:4px;">
+              <img src="/static/sheets/fur-elise-reference.png" alt="Fur Elise Sheet Music" style="width:100%;display:block;border-radius:4px;">
+              <div style="text-align:center;padding:4px;">
+                <a href="/static/sheets/fur-elise-full.pdf" target="_blank" style="color:#6af;font-size:11px;">Open full PDF</a>
+              </div>
+            </div>
+            <div class="score-preview" id="scorePreview" style="display:none;">
+              <div class="score-info" id="scoreInfo"></div>
+              <div class="score-canvas-wrap">
+                <canvas id="scoreCanvas"></canvas>
+              </div>
+              <div class="score-actions">
+                <button id="sheetMusicBtn" onclick="toggleSheetMusicView()">Sheet Music</button>
+                <button id="scoreLoadBtn" onclick="loadScoreToTargets()">Load as Target Notes</button>
+                <button id="scoreColorBtn" onclick="toggleScoreColorMode()">Color Mode</button>
+                <button id="scorePlayBtn" onclick="toggleScorePlayback()">Play</button>
+              </div>
             </div>
           </div>
         </div>
@@ -608,6 +660,7 @@ let animFrame = null;
 let nextPlayTime = 0;
 let sessionActive = false;
 let playbackActiveUntil = 0;
+let isBotSpeaking = false;
 let reconnectDelay = 1000;
 
 // Device management state
@@ -1192,6 +1245,7 @@ async function startSession() {
     var downsampleRatio = nativeRate / 16000;
     processor.onaudioprocess = function(e) {
       if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      if (isBotSpeaking) return;
       if (playbackCtx && playbackCtx.currentTime < playbackActiveUntil) return;
       var f32 = e.inputBuffer.getChannelData(0);
       // Energy gate: skip silent chunks so Gemini detects end-of-speech
@@ -1317,6 +1371,7 @@ function startSpeechRecognition() {
   speechRecognition.continuous = true;
   speechRecognition.interimResults = false;
   speechRecognition.onresult = function(e) {
+    if (isBotSpeaking) return; // Don't transcribe Gemini's own voice
     for (var i = e.resultIndex; i < e.results.length; i++) {
       if (e.results[i].isFinal) {
         var text = e.results[i][0].transcript.trim();
@@ -1387,6 +1442,7 @@ function queueAudio(arrayBuf) {
     if (labelEl) labelEl.textContent = 'Speaking';
     fillEl.style.width = Math.min(100, rms * 500) + '%';
   }
+  isBotSpeaking = true;
   var buffer = playbackCtx.createBuffer(1, float32.length, 24000);
   buffer.copyToChannel(float32, 0);
   var src = playbackCtx.createBufferSource();
@@ -1400,6 +1456,7 @@ function queueAudio(arrayBuf) {
   // Reset indicator when playback ends
   src.onended = function() {
     if (playbackCtx && playbackCtx.currentTime >= playbackActiveUntil - 0.25) {
+      isBotSpeaking = false;
       if (labelEl) labelEl.textContent = 'Silent';
       if (fillEl) fillEl.style.width = '0%';
     }
@@ -2782,6 +2839,94 @@ function loadScoreToTargets() {
     document.getElementById('scoreLoadBtn').classList.remove('active');
     document.getElementById('scoreLoadBtn').textContent = 'Load as Target Notes';
   }, 3000);
+}
+
+// ============================================================================
+// Right panel tabs + Drills
+// ============================================================================
+var activeDrill = null;
+var drillRunning = false;
+
+function switchRightTab(tab) {
+  var tabs = document.querySelectorAll('.right-tab');
+  var contents = document.querySelectorAll('.right-tab-content');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  contents.forEach(function(c) { c.classList.remove('active'); });
+  if (tab === 'drills') {
+    tabs[0].classList.add('active');
+    document.getElementById('drillsTab').classList.add('active');
+  } else {
+    tabs[1].classList.add('active');
+    document.getElementById('scoresTab').classList.add('active');
+  }
+}
+
+function selectDrill(drillId) {
+  // Deselect all
+  document.querySelectorAll('.drill-card').forEach(function(c) { c.classList.remove('active'); });
+  var card = document.getElementById('drill-' + drillId);
+  if (card) card.classList.add('active');
+  activeDrill = drillId;
+
+  // Show settings
+  var settings = document.getElementById('drillSettings');
+  settings.style.display = '';
+
+  // Show/hide dynamic selector for drill 1-2
+  var dynLabel = document.getElementById('drillDynamicLabel');
+  dynLabel.style.display = drillId === '1-2' ? '' : 'none';
+
+  // Update start button
+  var btn = document.getElementById('drillStartBtn');
+  btn.textContent = drillRunning ? 'Stop Drill' : 'Start Drill';
+}
+
+function startDrill() {
+  if (drillRunning) {
+    stopDrill();
+    return;
+  }
+  if (!activeDrill) return;
+
+  var note = parseInt(document.getElementById('drillNote').value);
+  var bpm = parseInt(document.getElementById('drillBpm').value) || 80;
+  var measures = parseInt(document.getElementById('drillMeasures').value) || 8;
+  var timeSigParts = (document.getElementById('staffTimeSig').value || '4/4').split('/');
+  var beatsPerMeasure = parseInt(timeSigParts[0]) || 4;
+  var targetVelocity = activeDrill === '1-2' ? parseInt(document.getElementById('drillDynamic').value) : null;
+
+  // Sync BPM slider
+  document.getElementById('bpmSlider').value = bpm;
+  document.getElementById('bpmVal').textContent = bpm;
+
+  // Generate target notes
+  targetNotes.length = 0;
+  var msPerBeat = 60000 / bpm;
+  var startMs = Date.now() + 2000; // 2s lead-in
+  var totalBeats = measures * beatsPerMeasure;
+
+  for (var b = 0; b < totalBeats; b++) {
+    targetNotes.push({
+      midi: note,
+      arriveMs: startMs + b * msPerBeat,
+      durationBeats: 0.5,
+      velocity: targetVelocity || 64,
+      hit: false
+    });
+  }
+
+  drillRunning = true;
+  document.getElementById('drillStartBtn').textContent = 'Stop Drill';
+  document.getElementById('drillStartBtn').style.borderColor = 'var(--red, #f66)';
+  document.getElementById('drillStartBtn').style.color = 'var(--red, #f66)';
+}
+
+function stopDrill() {
+  drillRunning = false;
+  targetNotes.length = 0;
+  document.getElementById('drillStartBtn').textContent = 'Start Drill';
+  document.getElementById('drillStartBtn').style.borderColor = '';
+  document.getElementById('drillStartBtn').style.color = '';
 }
 
 function toggleSheetMusicView() {

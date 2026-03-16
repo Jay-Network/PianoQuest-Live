@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.0.2] - 2026-03-16
+
+### Added
+- **Drills tab** on right panel (before Scores tab) with Stage 1 exercises:
+  - 1-1 Tempo: play a single note at steady BPM, target notes flow in waterfall/grand staff
+  - 1-2 Strength: play a note at specific dynamic level, Gemini evaluates velocity
+- Drill settings: note selector, BPM, measures, target dynamic (for 1-2)
+- Tab switching between Drills and Scores
+
+### Fixed
+- **Mic echo prevention** — isBotSpeaking gate mutes mic audio and suppresses SpeechRecognition while Gemini is speaking (pattern from JDialogs Pilot)
+
 ## [3.0.1] - 2026-03-16
 
 ### Fixed
