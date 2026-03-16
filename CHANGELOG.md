@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.7] - 2026-03-16
+
+### Fixed
+- **Camera flip button larger** — increased size/padding so it's tappable on phone in fullscreen mode
+
 ## [3.1.6] - 2026-03-16
 
 ### Improved
