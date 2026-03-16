@@ -24,11 +24,12 @@
     --gemini: #60a5fa;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
   body {
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
+    height: 100%;
   }
   .app {
     max-width: 1920px;
@@ -37,7 +38,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    min-height: 100vh;
+    height: 100vh;
   }
 
   /* Header */
@@ -187,10 +188,10 @@
   }
 
   /* Right column */
-  .right-col { display: flex; flex-direction: column; gap: 12px; }
+  .right-col { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
 
   /* Piano MIDI stack */
-  .midi-stack { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .midi-stack { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; flex: 1; min-height: 0; }
   .midi-header-tools {
     margin-left: auto;
     display: flex;
@@ -451,7 +452,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.9.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.0.0</div>
       </div>
     </div>
     <div class="controls">
@@ -538,15 +539,15 @@
     <!-- Center column: Scene + MIDI UI -->
     <div class="right-col">
 
-      <div class="midi-stack">
-        <div class="roll-wrap" style="background:#0a0a0f;border-radius:12px 12px 0 0;overflow:hidden;">
-          <canvas id="pianoRollCanvas"></canvas>
+      <div class="midi-stack" id="midiStack">
+        <div class="roll-wrap" style="flex:5;min-height:0;background:#0a0a0f;border-radius:12px 12px 0 0;overflow:hidden;">
+          <canvas id="pianoRollCanvas" style="width:100%;height:100%;display:block;"></canvas>
         </div>
-        <div class="keyboard-wrap" style="background:#0a0a0a;">
-          <canvas id="keyboardCanvas"></canvas>
+        <div class="keyboard-wrap" style="flex:2.5;min-height:0;background:#0a0a0a;">
+          <canvas id="keyboardCanvas" style="width:100%;height:100%;display:block;"></canvas>
         </div>
-        <div class="staff-wrap" style="padding:0;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
-          <canvas id="grandStaffCanvas"></canvas>
+        <div class="staff-wrap" style="flex:4;min-height:0;padding:0;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
+          <canvas id="grandStaffCanvas" style="width:100%;height:100%;display:block;"></canvas>
         </div>
       </div>
       <div class="midi-footer" style="display:flex;align-items:center;gap:12px;padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
@@ -1621,10 +1622,11 @@ function drawPianoRoll() {
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
   canvas.width = rect.width * dpr;
-  canvas.height = Math.max(560, rect.width * 0.55) * dpr;
+  canvas.height = rect.height * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   var W = rect.width;
-  var H = canvas.height / dpr;
+  var H = rect.height;
+  if (H < 50) return;
   var waterfallH = H;  // full height — dynamics moved to keyboard canvas
   var whiteKeyW = W / WHITE_KEYS_COUNT;
   var blackKeyW = whiteKeyW * 0.65;
@@ -1878,12 +1880,12 @@ function drawGrandStaff() {
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
-  var desiredH = 520;
   canvas.width = rect.width * dpr;
-  canvas.height = desiredH * dpr;
+  canvas.height = rect.height * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   var W = rect.width;
-  var H = desiredH;
+  var H = rect.height;
+  if (H < 50) return;
 
   // Read settings
   var tempo = parseInt(document.getElementById('bpmSlider').value, 10) || 90;
@@ -1901,23 +1903,19 @@ function drawGrandStaff() {
   ctx.fillStyle = '#050508';
   ctx.fillRect(0, 0, W, H);
 
-  // Diatonic layout: center on B3 (MIDI 59)
-  // Position so highest piano key (C8=MIDI 108) is at y=0 (touching keyboard bottom)
-  var centerMidi = 59;
-  var centerDiatonic = diatonicIndex(centerMidi);
+  // Diatonic layout: fill canvas from C8 (y=0, top) to A0 (y=H, bottom)
+  var highestDi = diatonicIndex(108); // C8
+  var lowestDi = diatonicIndex(21);   // A0
+  var totalDiRange = highestDi - lowestDi; // 51 diatonic steps
+  var halfStep = H / totalDiRange;
+  var lineSpacing = halfStep * 2;
 
   var trebleTopDi = diatonicIndex(TREBLE_LINE_MIDIS[4]);
   var trebleBottomDi = diatonicIndex(TREBLE_LINE_MIDIS[0]);
-  var staffSpanDi = trebleTopDi - trebleBottomDi;
-  var lineSpacing = Math.min(12, (H * 0.28) / staffSpanDi);
-  var halfStep = lineSpacing / 2;
-  // C8 (MIDI 108) at y=0 → touching keyboard panel bottom
-  var highestDi = diatonicIndex(108);
-  var centerY = (highestDi - centerDiatonic) * halfStep;
 
   function midiToY(midi) {
     var di = diatonicIndex(midi);
-    return centerY - (di - centerDiatonic) * halfStep;
+    return (highestDi - di) * halfStep;
   }
 
   // Layout zones
@@ -2147,7 +2145,6 @@ function drawGrandStaff() {
     ctx.strokeStyle = tnColor;
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    drawStem(tnX, tnY, tnColor, noteRadius);
   }
 
   // --- PLAYED NOTES (active) — head scrolls left from play line, tail extends to play line ---
@@ -2161,11 +2158,11 @@ function drawGrandStaff() {
     var headPx = holdMs * pxPerMs; // head moves left at tempo speed
     var headX = Math.max(marginLeft, playLineX - headPx);
 
-    // Draw tail from head to play line
+    // Draw tail from head to play line — always bright while active
     var tailLen = playLineX - headX;
     if (tailLen > 2) {
-      ctx.fillStyle = isPedalOnly ? darkenedColor(noteData.velocity, 0.5) : color;
-      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = color;
+      ctx.globalAlpha = isPedalOnly ? 0.4 : 0.6;
       ctx.beginPath();
       ctx.roundRect(headX, noteY - noteRadius * 0.7, tailLen, noteRadius * 1.4, noteRadius * 0.7);
       ctx.fill();
@@ -2175,7 +2172,6 @@ function drawGrandStaff() {
     drawLedgerLines(headX, noteY);
     drawAccidental(headX, noteY, midi, color);
     drawNoteHead(headX, noteY, color, noteRadius);
-    drawStem(headX, noteY, color, noteRadius);
   });
 
   // --- NOTE HISTORY scrolling left from play line at tempo speed ---
@@ -2275,13 +2271,14 @@ function drawKeyboard() {
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.getBoundingClientRect();
   if (!rect.width) return;
-  var dynamicsH = 144; // dynamic bars zone above keyboard
-  var keyboardH = Math.max(200, rect.width * 0.2);
-  var totalH = dynamicsH + keyboardH;
   canvas.width = rect.width * dpr;
-  canvas.height = totalH * dpr;
+  canvas.height = rect.height * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   var W = rect.width;
+  var totalH = rect.height;
+  if (totalH < 50) return;
+  var dynamicsH = Math.round(totalH * 0.4); // top 40% for dynamic bars
+  var keyboardH = totalH - dynamicsH; // bottom 60% for keys
   var keyTop = dynamicsH; // keys start below dynamics zone
   var whiteKeyW = W / WHITE_KEYS_COUNT;
   var blackKeyW = whiteKeyW * 0.6;

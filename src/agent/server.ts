@@ -10,18 +10,30 @@ import path from "path";
 import fs from "fs";
 import { WebSocketServer, WebSocket } from "ws";
 import type { IncomingMessage } from "http";
-import { GoogleGenAI, Modality, type Session } from "@google/genai";
+import { Modality } from "@google/genai";
+import type { Content, Blob as GenaiBlob } from "@google/genai";
+import {
+  InMemorySessionService,
+  InvocationContext,
+  LiveRequestQueue,
+  type RunConfig,
+  StreamingMode,
+  PluginManager,
+} from "@google/adk";
 import {
   LIVE_MODEL,
   STORYTELLER_INSTRUCTION,
   buildToolDeclarations,
   executeToolLocally,
   toolCallToVisualEvent,
+  storytellerAgent,
 } from "./agent.js";
 
 const APP_NAME = "pianoquest";
 const STATIC_DIR = path.join(__dirname, "..", "..", "static");
 const SHEETS_DIR = path.join(__dirname, "..", "..", "sheets");
+
+const sessionService = new InMemorySessionService();
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -136,8 +148,7 @@ interface Device {
 }
 
 interface RoomSession {
-  sendRealtimeInput: (input: any) => void;
-  sendClientContent: (content: any) => void;
+  liveQueue: LiveRequestQueue;
   primaryWs: WebSocket;
   /** All devices in this room */
   devices: Map<string, Device>;
@@ -427,13 +438,8 @@ export function createApp() {
         try {
           const msg = JSON.parse(data);
           if (msg.type === "video_frame" && msg.data) {
-            const frameBytes = Buffer.from(msg.data, "base64");
-            session.sendRealtimeInput({
-              media: {
-                data: frameBytes.toString("base64"),
-                mimeType: "image/jpeg",
-              },
-            });
+            const blob: GenaiBlob = { data: msg.data, mimeType: "image/jpeg" };
+            session.liveQueue.sendRealtime(blob);
           }
         } catch {}
       }
@@ -477,10 +483,11 @@ export function createApp() {
     );
 
     if (summary) {
-      roomSession.sendClientContent({
-        turns: { role: "user", parts: [{ text: summary }] },
-        turnComplete: true,
-      });
+      const content: Content = {
+        role: "user",
+        parts: [{ text: summary }],
+      };
+      roomSession.liveQueue.sendContent(content);
     }
 
     roomSession.midiBuffer = [];
@@ -636,24 +643,18 @@ async function handleSecondaryWebSocket(
       if (rawMsg instanceof Buffer || rawMsg instanceof ArrayBuffer) {
         if (!device.roles.mic) continue;
         const data = rawMsg instanceof ArrayBuffer ? new Uint8Array(rawMsg) : rawMsg;
-        room.sendRealtimeInput({
-          audio: {
-            data: Buffer.from(data).toString("base64"),
-            mimeType: "audio/pcm;rate=16000",
-          },
-        });
+        const blob: GenaiBlob = {
+          data: Buffer.from(data).toString("base64"),
+          mimeType: "audio/pcm;rate=16000",
+        };
+        room.liveQueue.sendRealtime(blob);
       } else if (typeof rawMsg === "string") {
         const msg = JSON.parse(rawMsg);
         const msgType = msg.type;
 
         if (msgType === "video_frame" && device.roles.camera) {
-          const frameBytes = Buffer.from(msg.data, "base64");
-          room.sendRealtimeInput({
-            media: {
-              data: frameBytes.toString("base64"),
-              mimeType: "image/jpeg",
-            },
-          });
+          const blob: GenaiBlob = { data: msg.data, mimeType: "image/jpeg" };
+          room.liveQueue.sendRealtime(blob);
         } else if (msgType === "midi_snapshot" && device.roles.midi) {
           const summary = describeMidiSnapshot(
             msg,
@@ -662,19 +663,21 @@ async function handleSecondaryWebSocket(
             room.detectedHandCount
           );
           if (summary) {
-            room.sendClientContent({
-              turns: { role: "user", parts: [{ text: summary }] },
-              turnComplete: true,
-            });
+            const content: Content = {
+              role: "user",
+              parts: [{ text: summary }],
+            };
+            room.liveQueue.sendContent(content);
           }
         } else if (msgType === "midi_event" && device.roles.midi) {
           // Forward raw MIDI to all room devices for visualization
           broadcastToRoom(room, JSON.stringify(msg));
         } else if (msgType === "text") {
-          room.sendClientContent({
-            turns: { role: "user", parts: [{ text: msg.content }] },
-            turnComplete: true,
-          });
+          const content: Content = {
+            role: "user",
+            parts: [{ text: msg.content as string }],
+          };
+          room.liveQueue.sendContent(content);
         } else if (msgType === "camera_state") {
           if (device.roles.camera) {
             room.cameraEnabled = Boolean(msg.enabled);
@@ -728,11 +731,9 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   let bothHandsDetected = false;
   let detectedHandCount = 0;
 
-  // Transcription buffers (gated on user speech)
+  // Transcription buffers
   let bufInput = "";
   let bufOutput = "";
-  let turnHasUserSpeech = false;
-  const pendingAudioChunks: Buffer[] = [];
 
   // Device registration for primary
   const devType = detectDeviceType(req);
@@ -750,89 +751,147 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   console.log(`[${APP_NAME}] Primary connected: ${sessionId}, room: ${roomCode}, device: ${primaryDeviceId}`);
 
   // ---------------------------------------------------------------------------
-  // Gemini Live API via @google/genai SDK
+  // Gemini Live API via ADK agent.runLive() (same pattern as JDialogs Copilot)
   // ---------------------------------------------------------------------------
-  const client = new GoogleGenAI({ apiKey });
+  const liveQueue = new LiveRequestQueue();
 
-  // We need session reference inside callbacks, so declare it first
-  let session: Session;
+  // Create ADK session
+  const adkSession = await sessionService.createSession({
+    appName: APP_NAME,
+    userId: `user-${sessionId}`,
+    sessionId,
+  });
 
-  // Room session — created after successful connect
-  let roomSession: RoomSession | null = null;
+  // Register room immediately (queue is ready before runLive starts)
+  const roomSession: RoomSession = {
+    liveQueue,
+    primaryWs: ws,
+    devices: new Map(),
+    midiBuffer: [],
+    midiFlushTimer: null,
+    cameraEnabled,
+    bothHandsDetected,
+    detectedHandCount,
+  };
+  roomSession.devices.set(primaryDeviceId, primaryDevice);
+  rooms.set(roomCode, roomSession);
 
-  try {
-    session = await client.live.connect({
-      model: LIVE_MODEL,
-      config: {
-        responseModalities: [Modality.AUDIO],
-        inputAudioTranscription: {},
-        outputAudioTranscription: {},
-      },
-      callbacks: {
-        onopen: () => {
-          console.log(`[${APP_NAME}] Gemini Live connected: ${sessionId}`);
+  ws.send(JSON.stringify({
+    type: "you_are_primary",
+    room: roomCode,
+    deviceId: primaryDeviceId,
+  }));
+  ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
+  sendDeviceList(roomSession);
 
-          // Register room and notify client
-          roomSession = {
-            sendRealtimeInput: (input: any) => session.sendRealtimeInput(input),
-            sendClientContent: (content: any) => session.sendClientContent(content),
-            primaryWs: ws,
-            devices: new Map(),
-            midiBuffer: [],
-            midiFlushTimer: null,
-            cameraEnabled,
-            bothHandsDetected,
-            detectedHandCount,
-          };
-          roomSession.devices.set(primaryDeviceId, primaryDevice);
-          rooms.set(roomCode, roomSession);
-
-          ws.send(JSON.stringify({
-            type: "you_are_primary",
-            room: roomCode,
-            deviceId: primaryDeviceId,
-          }));
-          ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
-          sendDeviceList(roomSession);
-        },
-        onerror: (e: unknown) => {
-          console.error(`[${APP_NAME}] Gemini error: ${sessionId}`, e);
-          if (!closed && ws.readyState === WebSocket.OPEN) {
-            try { ws.send(JSON.stringify({ type: "gemini_error", error: String(e) })); } catch {}
-          }
-        },
-        onclose: () => {
-          console.error(`[${APP_NAME}] *** Gemini closed: session=${sessionId}`);
-          closed = true;
-          if (ws.readyState === WebSocket.OPEN) {
-            try { ws.send(JSON.stringify({ type: "gemini_error", code: 1000, reason: "Session ended" })); } catch {}
-            try { ws.close(); } catch {}
-          }
-        },
-        onmessage: (msg: unknown) => {
-          if (closed || !roomSession) return;
-          try {
-            processGeminiMessage(msg, roomSession, ws, session, {
-              bufInput: () => bufInput,
-              setBufInput: (v: string) => { bufInput = v; },
-              bufOutput: () => bufOutput,
-              setBufOutput: (v: string) => { bufOutput = v; },
-              turnHasUserSpeech: () => turnHasUserSpeech,
-              setTurnHasUserSpeech: (v: boolean) => { turnHasUserSpeech = v; },
-              pendingAudioChunks,
-            });
-          } catch (e: any) {
-            console.log(`[${APP_NAME}] onmessage error:`, e?.message);
-          }
+  // Run agent event loop in background
+  const agentLoop = (async () => {
+    const runConfig: RunConfig = {
+      streamingMode: StreamingMode.BIDI,
+      responseModalities: [Modality.AUDIO],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName: "Puck" },
         },
       },
+      inputAudioTranscription: {},
+      outputAudioTranscription: {},
+      realtimeInputConfig: {
+        automaticActivityDetection: {
+          disabled: false,
+          silenceDurationMs: 1000,
+        },
+      },
+    };
+
+    const invocationContext = new InvocationContext({
+      sessionService,
+      invocationId: randomHex(8),
+      agent: storytellerAgent,
+      session: adkSession,
+      runConfig,
+      liveRequestQueue: liveQueue,
+      pluginManager: new PluginManager([]),
     });
-  } catch (err) {
-    console.error(`[${APP_NAME}] Failed to connect Gemini Live:`, err);
-    ws.send(JSON.stringify({ type: "error", message: "Failed to connect to Gemini" }));
-    ws.close(1011, "Failed to connect to Gemini");
-    return;
-  }
+
+    const sendAll = (data: Buffer | string, binary = false) => {
+      broadcastToRoom(roomSession, data, binary);
+    };
+
+    try {
+      for await (const event of storytellerAgent.runLive(invocationContext)) {
+        if (closed) break;
+
+        // Audio chunks — stream immediately
+        if (event.content?.parts) {
+          for (const part of event.content.parts) {
+            if (part.inlineData?.data) {
+              sendAll(Buffer.from(part.inlineData.data, "base64"), true);
+            }
+            // Tool calls — intercept for frontend display
+            if (part.functionCall) {
+              const fc = part.functionCall;
+              const args = (fc.args || {}) as Record<string, unknown>;
+              const visualEvent = toolCallToVisualEvent(fc.name || "", args);
+              if (visualEvent) {
+                sendAll(JSON.stringify(visualEvent));
+              }
+              console.log(`[${APP_NAME}] Tool call: ${fc.name}`, args);
+            }
+          }
+        }
+
+        // Buffer transcriptions
+        if (event.inputTranscription) {
+          const text = typeof event.inputTranscription === "object"
+            ? (event.inputTranscription as { text?: string }).text || ""
+            : String(event.inputTranscription);
+          const trimmed = text.trim();
+          if (trimmed) bufInput = trimmed;
+        }
+
+        if (event.outputTranscription) {
+          const text = typeof event.outputTranscription === "object"
+            ? (event.outputTranscription as { text?: string }).text || ""
+            : String(event.outputTranscription);
+          const trimmed = text.trim();
+          if (trimmed) bufOutput = trimmed;
+        }
+
+        // Turn complete — flush transcripts
+        if (event.turnComplete) {
+          if (bufInput) {
+            sendAll(JSON.stringify({ type: "input_transcript", text: bufInput }));
+            console.log(`[${APP_NAME}] ${sessionId} IN: ${bufInput}`);
+            bufInput = "";
+          }
+          if (bufOutput) {
+            sendAll(JSON.stringify({ type: "output_transcript", text: bufOutput }));
+            console.log(`[${APP_NAME}] ${sessionId} OUT: ${bufOutput}`);
+            bufOutput = "";
+          }
+          sendAll(JSON.stringify({ type: "turn_complete" }));
+        }
+
+        // Interrupted
+        if (event.interrupted) {
+          if (bufInput) {
+            sendAll(JSON.stringify({ type: "input_transcript", text: bufInput }));
+            bufInput = "";
+          }
+          if (bufOutput) {
+            sendAll(JSON.stringify({ type: "output_transcript", text: bufOutput }));
+            bufOutput = "";
+          }
+          sendAll(JSON.stringify({ type: "interrupted" }));
+        }
+      }
+    } catch (err) {
+      if (!closed) {
+        console.error(`[${APP_NAME}] Agent stream error:`, err);
+      }
+    }
+  })();
 
   console.log(`[${APP_NAME}] Gemini session ready: ${sessionId}, room: ${roomCode}`);
 
@@ -850,30 +909,28 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           rawMsg instanceof ArrayBuffer
             ? new Uint8Array(rawMsg)
             : rawMsg;
-        session.sendRealtimeInput({
-          audio: {
-            data: Buffer.from(data).toString("base64"),
-            mimeType: "audio/pcm;rate=16000",
-          },
-        });
+        const blob: GenaiBlob = {
+          data: Buffer.from(data).toString("base64"),
+          mimeType: "audio/pcm;rate=16000",
+        };
+        liveQueue.sendRealtime(blob);
       } else if (typeof rawMsg === "string") {
         const msg = JSON.parse(rawMsg);
         const msgType = msg.type;
 
         if (msgType === "video_frame") {
           if (!primaryDevice.roles.camera) continue;
-          const frameBytes = Buffer.from(msg.data, "base64");
-          session.sendRealtimeInput({
-            media: {
-              data: frameBytes.toString("base64"),
-              mimeType: "image/jpeg",
-            },
-          });
+          const blob: GenaiBlob = {
+            data: msg.data,
+            mimeType: "image/jpeg",
+          };
+          liveQueue.sendRealtime(blob);
         } else if (msgType === "text") {
-          session.sendClientContent({
-            turns: [{ role: "user", parts: [{ text: msg.content }] }],
-            turnComplete: true,
-          });
+          const content: Content = {
+            role: "user",
+            parts: [{ text: msg.content as string }],
+          };
+          liveQueue.sendContent(content);
         } else if (msgType === "midi_snapshot") {
           if (!primaryDevice.roles.midi) continue;
           const summary = describeMidiSnapshot(
@@ -883,10 +940,11 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             detectedHandCount
           );
           if (summary) {
-            session.sendClientContent({
-              turns: [{ role: "user", parts: [{ text: summary }] }],
-              turnComplete: true,
-            });
+            const content: Content = {
+              role: "user",
+              parts: [{ text: summary }],
+            };
+            liveQueue.sendContent(content);
           }
         } else if (msgType === "set_mode") {
           // Single agent — mode is always storyteller
@@ -930,7 +988,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   }
 
   closed = true;
-  try { session.close(); } catch {}
+  try { liveQueue.close(); } catch {}
 
   // Cleanup
   const rs = rooms.get(roomCode);
@@ -950,129 +1008,4 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   try { ws.close(); } catch {}
 }
 
-// =========================================================================
-// Process a single Gemini Live message (SDK callback)
-// =========================================================================
-
-interface TranscriptState {
-  bufInput: () => string;
-  setBufInput: (v: string) => void;
-  bufOutput: () => string;
-  setBufOutput: (v: string) => void;
-  turnHasUserSpeech: () => boolean;
-  setTurnHasUserSpeech: (v: boolean) => void;
-  pendingAudioChunks: Buffer[];
-}
-
-function processGeminiMessage(
-  msg: unknown,
-  roomSession: RoomSession,
-  ws: WebSocket,
-  session: Session,
-  state: TranscriptState
-): void {
-  const message = msg as Record<string, unknown>;
-
-  // Log message keys for diagnostics
-  const msgKeys = Object.keys(message);
-  if (!msgKeys.includes("serverContent") || (message.serverContent as any)?.turnComplete || (message.serverContent as any)?.interrupted || (message.serverContent as any)?.inputTranscription) {
-    console.log(`[${APP_NAME}] Gemini msg keys: ${msgKeys.join(",")}`);
-  }
-
-  const sendAll = (data: Buffer | string, binary = false) => {
-    broadcastToRoom(roomSession, data, binary);
-  };
-
-  // serverContent — audio, transcription, turn events
-  const serverContent = message.serverContent as Record<string, unknown> | undefined;
-  if (serverContent) {
-    const modelTurn = serverContent.modelTurn as Record<string, unknown> | undefined;
-    if (modelTurn?.parts) {
-      const parts = modelTurn.parts as Array<Record<string, unknown>>;
-      for (const part of parts) {
-        const inlineData = part.inlineData as Record<string, unknown> | undefined;
-        if (inlineData?.data) {
-          const audioBuffer = Buffer.from(inlineData.data as string, "base64");
-          // Always send audio — client-side echo cancellation handles feedback
-          sendAll(audioBuffer, true);
-          state.setTurnHasUserSpeech(true);
-        }
-      }
-    }
-
-    // Input transcription (user speech)
-    const inputTranscription = serverContent.inputTranscription as Record<string, unknown> | undefined;
-    if (inputTranscription?.text) {
-      const text = (inputTranscription.text as string).trim();
-      if (text) {
-        state.setBufInput(text);
-        state.setTurnHasUserSpeech(true);
-        while (state.pendingAudioChunks.length > 0) {
-          sendAll(state.pendingAudioChunks.shift()!, true);
-        }
-      }
-    }
-
-    // Output transcription
-    const outputTranscription = serverContent.outputTranscription as Record<string, unknown> | undefined;
-    if (outputTranscription?.text) {
-      const text = (outputTranscription.text as string).trim();
-      if (text) state.setBufOutput(text);
-    }
-
-    // Turn complete
-    if (serverContent.turnComplete) {
-      if (state.bufInput()) {
-        sendAll(JSON.stringify({ type: "input_transcript", text: state.bufInput() }));
-        state.setBufInput("");
-      }
-      if (state.bufOutput()) {
-        sendAll(JSON.stringify({ type: "output_transcript", text: state.bufOutput() }));
-        state.setBufOutput("");
-      }
-      sendAll(JSON.stringify({ type: "turn_complete" }));
-      state.setTurnHasUserSpeech(false);
-    }
-
-    // Interrupted
-    if (serverContent.interrupted) {
-      if (state.bufInput()) {
-        sendAll(JSON.stringify({ type: "input_transcript", text: state.bufInput() }));
-        state.setBufInput("");
-      }
-      if (state.bufOutput()) {
-        sendAll(JSON.stringify({ type: "output_transcript", text: state.bufOutput() }));
-        state.setBufOutput("");
-      }
-      sendAll(JSON.stringify({ type: "interrupted" }));
-      state.setTurnHasUserSpeech(false);
-    }
-  }
-
-  // Tool calls — execute and respond
-  const toolCall = message.toolCall as Record<string, unknown> | undefined;
-  if (toolCall?.functionCalls) {
-    const functionCalls = toolCall.functionCalls as Array<Record<string, unknown>>;
-    const toolResponses: Array<{ id: string; name: string; response: Record<string, unknown> }> = [];
-
-    for (const fc of functionCalls) {
-      const name = fc.name as string;
-      const id = fc.id as string;
-      const args = (fc.args as Record<string, unknown>) || {};
-
-      const visualEvent = toolCallToVisualEvent(name, args);
-      if (visualEvent) {
-        sendAll(JSON.stringify(visualEvent));
-      }
-
-      sendAll(JSON.stringify({ type: "tool_call", name, args }));
-
-      const result = executeToolLocally(name, args);
-      sendAll(JSON.stringify({ type: "tool_result", name, result }));
-
-      toolResponses.push({ id, name, response: result });
-    }
-
-    session.sendToolResponse({ functionResponses: toolResponses });
-  }
-}
+// processGeminiMessage removed — ADK agent.runLive() handles all message processing

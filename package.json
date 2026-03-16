@@ -1,6 +1,6 @@
 {
   "name": "pianoquest-live",
-  "version": "1.9.0",
+  "version": "2.0.0",
   "description": "PianoQuest Live — interactive musical storytelling with real-time piano coaching",
   "main": "dist/index.js",
   "scripts": {

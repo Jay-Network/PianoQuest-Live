@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-03-16
+
+### Changed
+- **BREAKING**: Replaced @google/genai SDK `live.connect()` with ADK `agent.runLive()` + `LiveRequestQueue` (same proven pattern as JDialogs Copilot jworks:94)
+- Audio/video/text now sent via `liveQueue.sendRealtime()` and `liveQueue.sendContent()` instead of `session.sendRealtimeInput()`
+- Tool calls handled automatically by ADK (no manual `sendToolResponse`)
+- Transcription events from ADK event stream (`event.inputTranscription`, `event.outputTranscription`, `event.turnComplete`)
+- Removed `processGeminiMessage()` and `TranscriptState` (replaced by ADK event loop)
+
+### Fixed
+- Grand staff viewport: all canvases auto-size to fill browser window (flex 5:2.5:4)
+- Grand staff vertical range: A0 at bottom, C8 at top — no wasted space
+- Active note tails stay bright on finger release (was darkened for pedal-sustained)
+- Removed stems from grand staff notes
+- App fits in viewport: no scrolling
+
+## [1.9.1] - 2026-03-16
+
+### Fixed
+- **CRITICAL**: Gemini not responding — added systemInstruction + speechConfig (voice: Puck) to live.connect config. Without system instruction Gemini had no reason to respond.
+- Grand staff viewport: all 3 canvases (waterfall, keyboard, grand staff) now auto-size to fill browser window height using flex proportions (5:2.5:4)
+- Grand staff vertical range: A0 at canvas bottom, C8 at canvas top — no wasted space
+- Grand staff active note tails stay bright on finger release (was using darkenedColor for pedal-sustained)
+- Removed stems from grand staff notes (no vertical sticks)
+- App fits in viewport: html/body overflow hidden, no scrolling
+
+### Changed
+- Canvas heights derived from container rect.height instead of hardcoded values (560/520/344px)
+
 ## [1.9.0] - 2026-03-15
 
 ### Fixed
