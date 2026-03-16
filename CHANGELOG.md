@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.36] - 2026-03-16
+
+### Changed
+- **Gemini only speaks when asked** — removed "may offer brief observations when player stops." Now Gemini stays completely silent unless the player directly addresses it. No unsolicited velocity analysis, no unprompted commentary after pauses.
+
 ## [3.2.35] - 2026-03-16
 
 ### Fixed
