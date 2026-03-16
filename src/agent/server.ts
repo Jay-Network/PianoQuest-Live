@@ -760,6 +760,13 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             prebuiltVoiceConfig: { voiceName: "Puck" },
           },
         },
+        inputAudioTranscription: {},
+        outputAudioTranscription: {},
+        realtimeInputConfig: {
+          automaticActivityDetection: {
+            disabled: false,
+          },
+        },
         tools: buildToolDeclarations() as any,
       },
       callbacks: {

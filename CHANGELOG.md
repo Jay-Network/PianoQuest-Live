@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.0.3] - 2026-03-16
+
+### Fixed
+- **Transcription**: Added `inputAudioTranscription` and `outputAudioTranscription` to Gemini config (was missing — transcripts never generated)
+- **Speech detection**: Added `realtimeInputConfig.automaticActivityDetection` so Gemini detects end of speech
+- **Grand staff notes dark on release**: Removed pedal-only alpha distinction, matched history tail alpha to active tail alpha (0.6)
+- **Panel layout**: Added `height:100%` to MIDI stack canvases so they fill their containers
+
 ## [2.0.2] - 2026-03-16
 
 ### Fixed

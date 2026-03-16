@@ -245,6 +245,7 @@
   .roll-wrap canvas,
   .keyboard-wrap canvas {
     width: 100%;
+    height: 100%;
     display: block;
   }
   .keyboard-hint {
@@ -452,7 +453,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.0.2</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.0.3</div>
       </div>
     </div>
     <div class="controls">
@@ -2168,7 +2169,6 @@ function drawGrandStaff() {
     var noteY = midiToY(midi);
     // Always bright while sounding (active), regardless of finger/pedal
     var color = dynamicsColor(noteData.velocity);
-    var isPedalOnly = !fingerDownNotes.has(midi) && pedalSustainedNotes.has(midi);
     var holdMs = nowMs - noteData.timestamp;
     var headPx = holdMs * pxPerMs; // head moves left at tempo speed
     var headX = Math.max(marginLeft, playLineX - headPx);
@@ -2177,7 +2177,7 @@ function drawGrandStaff() {
     var tailLen = playLineX - headX;
     if (tailLen > 2) {
       ctx.fillStyle = color;
-      ctx.globalAlpha = isPedalOnly ? 0.4 : 0.6;
+      ctx.globalAlpha = 0.6;
       ctx.beginPath();
       ctx.roundRect(headX, noteY - noteRadius * 0.7, tailLen, noteRadius * 1.4, noteRadius * 0.7);
       ctx.fill();
@@ -2216,7 +2216,7 @@ function drawGrandStaff() {
 
     if (durationPx > 2) {
       ctx.fillStyle = color;
-      ctx.globalAlpha = alpha * 0.5;
+      ctx.globalAlpha = alpha * 0.6;
       ctx.beginPath();
       ctx.roundRect(noteX, noteY - noteRadius * 0.7, tailEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
       ctx.fill();
