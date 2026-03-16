@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.23] - 2026-03-16
+
+### Changed
+- **Drill result text 3x larger** — medal (48px), grade (36px), metrics (30px)
+
 ## [3.2.22] - 2026-03-16
 
 ### Added
