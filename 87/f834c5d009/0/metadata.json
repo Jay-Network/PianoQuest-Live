@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.4.8",
+  "checkpoint_id": "87f834c5d009",
+  "session_id": "5ca40932-83c2-42b5-a897-70a69faf321f",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-16T08:42:02.404424691Z",
+  "branch": "main",
+  "checkpoints_count": 111,
+  "files_touched": [
+    "CHANGELOG.md",
+    "VERSION",
+    "docs/BUGS.md",
+    "package.json",
+    "src/agent/server.ts",
+    "static/index.html",
+    "static/sheets/fur-elise-full.pdf",
+    "static/sheets/fur-elise-reference.png"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "e66bb0b2ff67",
+  "token_usage": {
+    "input_tokens": 1858,
+    "cache_creation_tokens": 811736,
+    "cache_read_tokens": 94803065,
+    "output_tokens": 223111,
+    "api_call_count": 871
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-16T08:41:37.644540405Z",
+    "agent_lines": 675,
+    "human_added": 4,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 679,
+    "agent_percentage": 99.41089837997055
+  }
+}
