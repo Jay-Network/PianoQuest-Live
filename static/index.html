@@ -476,7 +476,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.3</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.4</div>
       </div>
     </div>
     <div class="controls">
@@ -540,7 +540,7 @@
         </div>
       </div>
 
-      <div class="panel" id="techniquePanel" style="display:none;">
+      <div class="panel" id="techniquePanel">
         <div class="panel-header">
           <div class="dot" style="background:#c084fc"></div>FINGER TRACKING
           <span class="camera-badge off" id="cameraBadge">Camera Off</span>
@@ -3209,11 +3209,9 @@ function updateCameraUi() {
   } else if (!bothHandsDetected) {
     badge.className = 'camera-badge warn';
     badge.textContent = '1 Hand';
-    if (panel) panel.style.display = '';
   } else {
     badge.className = 'camera-badge ready';
     badge.textContent = '2 Hands Ready';
-    if (panel) panel.style.display = '';
   }
   var drillCam = document.getElementById('drillCameraStatus');
   if (drillCam) drillCam.style.display = cameraEnabled ? '' : 'none';

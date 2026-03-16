@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.4] - 2026-03-16
+
+### Fixed
+- **FINGER TRACKING panel always visible** — panel no longer starts hidden. Shows "Camera off" placeholder by default, camera feed appears when phone connects.
+
 ## [3.1.3] - 2026-03-16
 
 ### Added
