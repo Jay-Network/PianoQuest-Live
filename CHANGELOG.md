@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.7] - 2026-03-16
+
+### Fixed
+- **Dynamics colors**: Restored distinct per-level colors (pp=steel blue, p=teal, mp=seafoam, mf=gold, f=orange, ff=hot pink, fff=white). Previous commit wrongly replaced entire rainbow with monotone blue gradient — Jay only wanted the ugly pistachio green fixed, not the multi-color scheme removed.
+
 ## [2.1.6] - 2026-03-16
 
 ### Fixed

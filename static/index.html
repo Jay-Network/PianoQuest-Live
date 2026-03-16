@@ -390,7 +390,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.6</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.7</div>
       </div>
     </div>
     <div class="controls">
@@ -582,17 +582,17 @@ const FIRST_MIDI = 21;
 const WHITE_KEYS_COUNT = 52;
 const BLACK_KEY_PATTERN = [false, true, false, true, false, false, true, false, true, false, true, false];
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-// Option B: Cool blue→white temperature ramp (designed by jworks:81, saturated)
+// Distinct colors per dynamic level — cool→warm (quiet=cool, loud=warm)
 const DYNAMICS_COLORS = [
-  { vel: 0,   r: 40,  g: 70,  b: 130 },  // pp  deep blue
-  { vel: 18,  r: 40,  g: 70,  b: 130 },  // pp
-  { vel: 36,  r: 55,  g: 100, b: 170 },  // p   rich blue
-  { vel: 54,  r: 80,  g: 140, b: 200 },  // mp  medium blue
-  { vel: 72,  r: 120, g: 175, b: 220 },  // mf  sky blue
-  { vel: 90,  r: 170, g: 210, b: 240 },  // f   light blue
-  { vel: 100, r: 210, g: 230, b: 248 },  // f+  pale blue
-  { vel: 112, r: 235, g: 245, b: 252 },  // ff  near-white blue
-  { vel: 127, r: 255, g: 255, b: 255 }   // fff pure white
+  { vel: 0,   r: 65,  g: 105, b: 195 },  // pp   steel blue
+  { vel: 18,  r: 65,  g: 105, b: 195 },  // pp
+  { vel: 36,  r: 56,  g: 182, b: 200 },  // p    teal
+  { vel: 54,  r: 100, g: 200, b: 180 },  // mp   seafoam
+  { vel: 72,  r: 240, g: 195, b: 60  },  // mf   warm gold
+  { vel: 90,  r: 245, g: 130, b: 50  },  // f    orange
+  { vel: 100, r: 235, g: 75,  b: 75  },  // f+   red
+  { vel: 112, r: 230, g: 80,  b: 160 },  // ff   hot pink
+  { vel: 127, r: 255, g: 255, b: 255 }   // fff  white
 ];
 const DYNAMICS_LABELS = [
   { vel: 0, label: 'ppp' },
