@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.11] - 2026-03-16
+
+### Fixed
+- **Camera bottom bar reverted to simple flex layout** — back to the working v3.1.2 approach: solid bar as flex child of app, not absolute/fixed. Status text left, Flip and Exit buttons right.
+
 ## [3.1.10] - 2026-03-16
 
 ### Fixed
