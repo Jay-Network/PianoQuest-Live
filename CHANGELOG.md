@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.6] - 2026-03-16
+
+### Fixed
+- **Camera bottom bar always visible on iPhone** — changed to position:fixed overlay at bottom with z-index:100 and safe-area-inset padding. Camera video no longer covers the Flip/Exit buttons.
+
 ## [3.2.5] - 2026-03-16
 
 ### Changed
