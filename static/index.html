@@ -563,7 +563,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.10</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.11</div>
       </div>
     </div>
     <div class="controls">
@@ -3300,15 +3300,12 @@ function updateCameraUi() {
       offMsg.textContent = 'Camera off';
       entries.appendChild(offMsg);
     }
-  } else if (mediapipeActive && bothHandsDetected) {
-    badge.className = 'camera-badge ready';
-    badge.textContent = 'MediaPipe: ON \u00b7 2 Hands';
   } else if (mediapipeActive) {
-    badge.className = 'camera-badge warn';
-    badge.textContent = 'MediaPipe: ON \u00b7 ' + (bothHandsDetected ? '2 Hands' : '1 Hand');
+    badge.className = 'camera-badge ready';
+    badge.textContent = 'MediaPipe: ON';
   } else {
     badge.className = 'camera-badge warn';
-    badge.textContent = 'Camera On \u00b7 MediaPipe: OFF';
+    badge.textContent = 'MediaPipe: OFF';
   }
   var drillCam = document.getElementById('drillCameraStatus');
   if (drillCam) drillCam.style.display = cameraEnabled ? '' : 'none';
