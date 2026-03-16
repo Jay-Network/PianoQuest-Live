@@ -92,24 +92,29 @@
   }
   button:disabled { opacity: 0.4; cursor: default; }
 
-  /* Main grid */
+  /* Main grid: left-col | handle | center | handle | score-col */
   .main {
     display: grid;
-    grid-template-columns: 260px 1fr 560px;
-    gap: 12px;
+    grid-template-columns: 260px 6px 1fr 6px 560px;
+    gap: 0;
     flex: 1;
     min-height: 0;
+    column-gap: 6px;
+  }
+
+  /* Resize handles as grid columns */
+  .grid-resize-handle {
+    cursor: col-resize; z-index: 10;
+    background: transparent;
+    transition: background 0.15s;
+  }
+  .grid-resize-handle:hover, .grid-resize-handle.dragging {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
   }
 
   /* Left column */
-  .left-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; position: relative; }
-  .left-resize-handle {
-    position: absolute; right: -4px; top: 0; bottom: 0; width: 8px;
-    cursor: col-resize; z-index: 10;
-  }
-  .left-resize-handle:hover, .left-resize-handle.dragging {
-    background: rgba(255,255,255,0.08);
-  }
+  .left-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
 
   .panel {
     border-radius: 12px; border: 1px solid var(--border);
@@ -223,7 +228,8 @@
 
 
   @media (max-width: 900px) {
-    .main { grid-template-columns: 1fr; }
+    .main { grid-template-columns: 1fr !important; }
+    .grid-resize-handle { display: none; }
     .score-col { display: none; }
     .quest-map { overflow-x: auto; }
     .midi-header-tools {
@@ -300,14 +306,7 @@
   .secondary-role-card .role-status { font-size: 9px; color: var(--text3); margin-top: 4px; }
   .secondary-role-card.active .role-status { color: var(--green); }
   /* Score panel (right column) */
-  .score-col { display: flex; flex-direction: column; gap: 12px; position: relative; min-height: 0; overflow: hidden; }
-  .score-resize-handle {
-    position: absolute; left: -4px; top: 0; bottom: 0; width: 8px;
-    cursor: col-resize; z-index: 10;
-  }
-  .score-resize-handle:hover, .score-resize-handle.dragging {
-    background: rgba(255,255,255,0.08);
-  }
+  .score-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
   .score-browser {
     display: flex; flex-direction: column; height: 100%;
   }
@@ -415,7 +414,6 @@
 
     <!-- Left column: Camera + Coaching + Badges -->
     <div class="left-col" id="leftCol">
-      <div class="left-resize-handle" id="leftResizeHandle"></div>
       <div class="panel" id="deviceManagerPanel" style="display:none">
         <div class="panel-header">
           <div class="dot" style="background:var(--green)"></div>DEVICES
@@ -456,6 +454,9 @@
       </div>
 
     </div>
+
+    <!-- Resize handle: left ↔ center -->
+    <div class="grid-resize-handle" id="leftResizeHandle"></div>
 
     <!-- Center column: Scene + MIDI UI -->
     <div class="right-col">
@@ -507,9 +508,11 @@
       </div>
     </div>
 
+    <!-- Resize handle: center ↔ score -->
+    <div class="grid-resize-handle" id="scoreResizeHandle"></div>
+
     <!-- Right column: Score Browser -->
     <div class="score-col" id="scoreCol">
-      <div class="score-resize-handle" id="scoreResizeHandle"></div>
       <div class="panel" style="flex:1;display:flex;flex-direction:column;">
         <div class="panel-header">
           <div class="dot" style="background:var(--accent)"></div>SCORE
@@ -2348,66 +2351,56 @@ function toggleScoreColorMode() {
 // Load score tree on init
 setTimeout(loadScoreTree, 500);
 
-// Score panel resize handle
+// ============================================================================
+// Panel resize handles (grid columns: leftCol | handle | center | handle | scoreCol)
+// ============================================================================
 (function() {
-  var handle = document.getElementById('scoreResizeHandle');
-  var col = document.getElementById('scoreCol');
   var main = document.querySelector('.main');
-  if (!handle || !col || !main) return;
-  var dragging = false;
-  handle.addEventListener('mousedown', function(e) {
-    e.preventDefault();
-    dragging = true;
-    handle.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  });
-  document.addEventListener('mousemove', function(e) {
-    if (!dragging) return;
-    var mainRect = main.getBoundingClientRect();
-    var newW = mainRect.right - e.clientX;
-    newW = Math.max(200, Math.min(newW, mainRect.width * 0.6));
-    main.style.gridTemplateColumns = '260px 1fr ' + Math.round(newW) + 'px';
-  });
-  document.addEventListener('mouseup', function() {
-    if (!dragging) return;
-    dragging = false;
-    handle.classList.remove('dragging');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  });
-})();
+  var leftCol = document.getElementById('leftCol');
+  var scoreCol = document.getElementById('scoreCol');
+  var leftHandle = document.getElementById('leftResizeHandle');
+  var scoreHandle = document.getElementById('scoreResizeHandle');
+  if (!main) return;
 
-// ============================================================================
-// Left column resize handle
-// ============================================================================
-(function() {
-  var handle = document.getElementById('leftResizeHandle');
-  var col = document.getElementById('leftCol');
-  var main = document.querySelector('.main');
-  if (!handle || !col || !main) return;
-  var dragging = false;
-  handle.addEventListener('mousedown', function(e) {
-    e.preventDefault();
-    dragging = true;
-    handle.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  });
+  var activeHandle = null;
+  var handleSide = null; // 'left' or 'right'
+
+  function startDrag(handle, side) {
+    return function(e) {
+      e.preventDefault();
+      activeHandle = handle;
+      handleSide = side;
+      handle.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    };
+  }
+
+  if (leftHandle) leftHandle.addEventListener('mousedown', startDrag(leftHandle, 'left'));
+  if (scoreHandle) scoreHandle.addEventListener('mousedown', startDrag(scoreHandle, 'right'));
+
   document.addEventListener('mousemove', function(e) {
-    if (!dragging) return;
+    if (!activeHandle) return;
     var mainRect = main.getBoundingClientRect();
-    var newW = e.clientX - mainRect.left;
-    newW = Math.max(160, Math.min(newW, mainRect.width * 0.4));
-    // Preserve score column width from current grid
-    var scoreCol = document.getElementById('scoreCol');
+    var leftW = leftCol ? leftCol.getBoundingClientRect().width : 260;
     var scoreW = scoreCol ? scoreCol.getBoundingClientRect().width : 560;
-    main.style.gridTemplateColumns = Math.round(newW) + 'px 1fr ' + Math.round(scoreW) + 'px';
+
+    if (handleSide === 'left') {
+      leftW = e.clientX - mainRect.left;
+      leftW = Math.max(140, Math.min(leftW, mainRect.width * 0.4));
+    } else {
+      scoreW = mainRect.right - e.clientX;
+      scoreW = Math.max(200, Math.min(scoreW, mainRect.width * 0.5));
+    }
+
+    main.style.gridTemplateColumns = Math.round(leftW) + 'px 6px 1fr 6px ' + Math.round(scoreW) + 'px';
   });
+
   document.addEventListener('mouseup', function() {
-    if (!dragging) return;
-    dragging = false;
-    handle.classList.remove('dragging');
+    if (!activeHandle) return;
+    activeHandle.classList.remove('dragging');
+    activeHandle = null;
+    handleSide = null;
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
   });
