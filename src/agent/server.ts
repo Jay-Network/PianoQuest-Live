@@ -447,7 +447,7 @@ export function createApp() {
     if (summary) {
       roomSession.sendClientContent({
         turns: [{ role: "user", parts: [{ text: summary }] }],
-        turnComplete: true,
+        turnComplete: false,
       });
     }
 
@@ -628,7 +628,7 @@ async function handleSecondaryWebSocket(
           if (summary) {
             room.sendClientContent({
               turns: [{ role: "user", parts: [{ text: summary }] }],
-              turnComplete: true,
+              turnComplete: false,
             });
           }
         } else if (msgType === "midi_event" && device.roles.midi) {
@@ -921,12 +921,12 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             turnComplete: true,
           });
         } else if (msgType === "midi_snapshot") {
-          // Send MIDI snapshot to Gemini as text so it can analyze playing
+          // Send MIDI snapshot to Gemini as context (turnComplete=false so it doesn't trigger a response)
           const summary = describeMidiSnapshot(msg);
           if (summary) {
             session.sendClientContent({
               turns: [{ role: "user", parts: [{ text: summary }] }],
-              turnComplete: true,
+              turnComplete: false,
             });
           }
         } else if (msgType === "user_speech_transcript") {

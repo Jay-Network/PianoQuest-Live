@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.34] - 2026-03-16
+
+### Fixed
+- **Gemini stops repeating "I'm ready" during play** — MIDI snapshots sent with turnComplete=false so Gemini receives the data as context without being prompted to respond. Previously each 1.2s snapshot triggered a Gemini response. Fixed on all three MIDI paths (primary, secondary, bridge).
+
 ## [3.2.33] - 2026-03-16
 
 ### Fixed
