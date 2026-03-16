@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.34</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.35</div>
       </div>
     </div>
     <div class="controls">
@@ -3819,16 +3819,23 @@ setTimeout(loadScoreTree, 500);
 
   document.addEventListener('mousemove', function(e) {
     if (!activeHandle) return;
+    // Account for CSS zoom on .main
+    var zoom = parseFloat(main.style.zoom) || 1;
     var mainRect = main.getBoundingClientRect();
-    var leftW = leftCol ? leftCol.getBoundingClientRect().width : 260;
-    var scoreW = scoreCol ? scoreCol.getBoundingClientRect().width : 560;
+    // getBoundingClientRect returns zoomed coords, so divide by zoom to get CSS px
+    var leftW = leftCol ? leftCol.getBoundingClientRect().width / zoom : 260;
+    var scoreW = scoreCol ? scoreCol.getBoundingClientRect().width / zoom : 560;
+    var mainLeft = mainRect.left / zoom;
+    var mainRight = mainRect.right / zoom;
+    var mainWidth = mainRect.width / zoom;
+    var mouseX = e.clientX / zoom;
 
     if (handleSide === 'left') {
-      leftW = e.clientX - mainRect.left;
-      leftW = Math.max(140, Math.min(leftW, mainRect.width * 0.4));
+      leftW = mouseX - mainLeft;
+      leftW = Math.max(140, Math.min(leftW, mainWidth * 0.4));
     } else {
-      scoreW = mainRect.right - e.clientX;
-      scoreW = Math.max(200, Math.min(scoreW, mainRect.width * 0.5));
+      scoreW = mainRight - mouseX;
+      scoreW = Math.max(200, Math.min(scoreW, mainWidth * 0.5));
     }
 
     main.style.gridTemplateColumns = Math.round(leftW) + 'px 6px 1fr 6px ' + Math.round(scoreW) + 'px';

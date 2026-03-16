@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.35] - 2026-03-16
+
+### Fixed
+- **Partition drag broken by CSS zoom** — dragging the right resize handle caused panels to collapse because getBoundingClientRect returns zoomed coordinates but mouse events use viewport coordinates. Now divides all measurements by the current CSS zoom factor.
+
 ## [3.2.34] - 2026-03-16
 
 ### Fixed
