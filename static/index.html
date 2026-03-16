@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.14</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.15</div>
       </div>
     </div>
     <div class="controls">
@@ -583,14 +583,14 @@ const BLACK_KEY_PATTERN = [false, true, false, true, false, false, true, false, 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 // Distinct colors per dynamic level — cool→warm (quiet=cool, loud=warm)
 const DYNAMICS_COLORS = [
-  { vel: 0,   r: 65,  g: 105, b: 195 },  // pp   steel blue
-  { vel: 18,  r: 65,  g: 105, b: 195 },  // pp
-  { vel: 36,  r: 56,  g: 182, b: 200 },  // p    teal
-  { vel: 54,  r: 100, g: 200, b: 180 },  // mp   seafoam
-  { vel: 72,  r: 240, g: 195, b: 60  },  // mf   warm gold
-  { vel: 90,  r: 245, g: 130, b: 50  },  // f    orange
-  { vel: 100, r: 235, g: 75,  b: 75  },  // f+   red
-  { vel: 112, r: 230, g: 80,  b: 160 },  // ff   hot pink
+  { vel: 0,   r: 70,  g: 110, b: 210 },  // pp   cobalt blue
+  { vel: 18,  r: 70,  g: 110, b: 210 },  // pp
+  { vel: 36,  r: 50,  g: 190, b: 215 },  // p    cyan
+  { vel: 54,  r: 60,  g: 210, b: 170 },  // mp   emerald
+  { vel: 72,  r: 235, g: 190, b: 50  },  // mf   warm gold
+  { vel: 90,  r: 250, g: 120, b: 40  },  // f    amber-orange
+  { vel: 100, r: 240, g: 60,  b: 60  },  // f+   pure red
+  { vel: 112, r: 235, g: 65,  b: 150 },  // ff   electric magenta
   { vel: 127, r: 255, g: 255, b: 255 }   // fff  white
 ];
 const DYNAMICS_LABELS = [
@@ -1844,13 +1844,30 @@ function drawGrandStaff() {
           ctx.roundRect(headX, noteY - noteRadius * 0.7, fingerEndX - headX, noteRadius * 1.4, noteRadius * 0.7);
           ctx.fill();
         }
-        // Pedal-sustained segment: dimmer (match waterfall brightness)
+        // Pedal-sustained segment: hollow glassy bar with glowing animated rim
         if (playLineX > fingerEndX) {
-          ctx.fillStyle = darkenedColor(noteData.velocity, 0.5);
-          ctx.globalAlpha = 0.55;
+          var pedalW = playLineX - fingerEndX;
+          var pedalH = noteRadius * 1.4;
+          var pedalY = noteY - noteRadius * 0.7;
+          var pedalR = noteRadius * 0.7;
+          // Animated glow pulse (subtle breathing effect)
+          var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + midi * 0.5);
+          // Glassy fill — very faint interior
+          ctx.fillStyle = darkenedColor(noteData.velocity, 0.3);
+          ctx.globalAlpha = 0.12;
           ctx.beginPath();
-          ctx.roundRect(fingerEndX, noteY - noteRadius * 0.7, playLineX - fingerEndX, noteRadius * 1.4, noteRadius * 0.7);
+          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
           ctx.fill();
+          // Glowing rim
+          ctx.strokeStyle = color;
+          ctx.globalAlpha = 0.5 * pulse;
+          ctx.lineWidth = 1.5;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 6 * pulse;
+          ctx.beginPath();
+          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
         }
         ctx.globalAlpha = 1.0;
       } else {
@@ -1905,13 +1922,30 @@ function drawGrandStaff() {
           ctx.roundRect(noteX, noteY - noteRadius * 0.7, fingerEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
           ctx.fill();
         }
-        // Pedal-sustained segment: dimmer (match waterfall brightness)
+        // Pedal-sustained segment: hollow glassy bar with glowing rim (fades with distance)
         if (tailEndX > fingerEndX) {
-          ctx.fillStyle = darkenedColor(entry.velocity, 0.5);
-          ctx.globalAlpha = alpha * 0.55;
+          var pedalW = tailEndX - fingerEndX;
+          var pedalH = noteRadius * 0.7 * 2;
+          var pedalY = noteY - noteRadius * 0.7;
+          var pedalR = noteRadius * 0.7;
+          var histColor = dynamicsColor(entry.velocity);
+          var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + entry.note * 0.5);
+          // Glassy fill — very faint interior (fades with distance)
+          ctx.fillStyle = darkenedColor(entry.velocity, 0.3);
+          ctx.globalAlpha = 0.12 * alpha;
           ctx.beginPath();
-          ctx.roundRect(fingerEndX, noteY - noteRadius * 0.7, tailEndX - fingerEndX, noteRadius * 1.4, noteRadius * 0.7);
+          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
           ctx.fill();
+          // Glowing rim (fades with distance)
+          ctx.strokeStyle = histColor;
+          ctx.globalAlpha = 0.5 * pulse * alpha;
+          ctx.lineWidth = 1.5;
+          ctx.shadowColor = histColor;
+          ctx.shadowBlur = 6 * pulse * alpha;
+          ctx.beginPath();
+          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
         }
         ctx.globalAlpha = 1.0;
       } else {

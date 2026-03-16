@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.15] - 2026-03-16
+
+### Changed
+- **Glassy pedal sustain bars**: Pedal-sustained segments now render as hollow transparent bars with animated glowing rim (pulsing at ~2.5Hz). Finger-held segments remain solid filled.
+- **Refined dynamics color palette**: Each color professionally optimized by design team — cobalt blue (pp), cyan (p), emerald (mp), warm gold (mf), amber-orange (f), pure red (f+), electric magenta (ff), white (fff). Fixes pistachio green mp and pink-cast red.
+
 ## [2.1.14] - 2026-03-16
 
 ### Fixed
