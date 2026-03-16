@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-03-16
+
+### Fixed
+- **CRITICAL**: Reverted from broken ADK `agent.runLive()` back to SDK `client.live.connect()` — ADK TS v0.5.0 `runLive()` throws "Live mode is not implemented yet"
+- Fixed all remaining `liveQueue` references in secondary device handler, MIDI flush, and camera handler to use SDK `sendRealtimeInput()`/`sendClientContent()`
+- Added greeting message ("Hi! I just sat down at the piano") sent 1s after Gemini connects so Gemini speaks first
+- Added debug logging: setupComplete, audio chunk count, transcription, turnComplete events
+- Removed audio gating — audio sent to Gemini immediately without waiting for speech detection
+
 ## [2.0.1] - 2026-03-16
 
 ### Fixed
