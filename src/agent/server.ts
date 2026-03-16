@@ -959,6 +959,9 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             rs.bothHandsDetected = Boolean(msg.bothHands);
             broadcastToRoom(rs, JSON.stringify({ type: "hand_state", hands: msg.hands, bothHands: msg.bothHands }));
           }
+        } else if (msgType === "refresh_camera") {
+          // Broadcast to secondary devices to restart camera
+          if (roomSession) broadcastToRoom(roomSession, JSON.stringify({ type: "refresh_camera" }));
         } else if (msgType === "set_device_role") {
           const { deviceId, role, enabled } = msg;
           if (roomSession && (role === "mic" || role === "midi" || role === "camera")) {

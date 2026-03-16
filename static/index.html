@@ -355,8 +355,8 @@
   .right-tab-content.active { display: flex; flex-direction: column; }
   /* Drills panel */
   .drill-stage-header {
-    padding: 6px 8px; font-size: 10px; font-weight: 700; color: var(--text3);
-    letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    padding: 8px 10px; font-size: 15px; font-weight: 700; color: var(--text3);
+    letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 6px;
     user-select: none; border-bottom: 1px solid var(--border);
   }
   .drill-stage-header:hover { color: var(--text2); }
@@ -370,22 +370,22 @@
   }
   .drill-card:hover { border-color: var(--accent); }
   .drill-card.active { border-color: var(--green); background: rgba(134,239,172,0.06); }
-  .drill-card .drill-id { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.05em; }
-  .drill-card .drill-name { font-size: 13px; font-weight: 700; color: var(--text1); margin: 2px 0; }
-  .drill-card .drill-desc { font-size: 10px; color: var(--text3); line-height: 1.4; }
-  .drill-result-bar { display: flex; gap: 10px; align-items: center; padding: 10px 0; }
-  .drill-medal { font-size: 48px; }
-  .drill-score { font-size: 36px; font-weight: 700; color: var(--text1); }
-  .drill-metrics { font-size: 30px; color: var(--text3); line-height: 1.5; }
-  .drill-settings { padding: 8px 12px; font-size: 11px; }
-  .drill-settings label { display: block; color: var(--text2); margin: 6px 0 2px; font-weight: 600; }
+  .drill-card .drill-id { font-size: 15px; font-weight: 700; color: var(--text3); letter-spacing: 0.05em; }
+  .drill-card .drill-name { font-size: 20px; font-weight: 700; color: var(--text1); margin: 2px 0; }
+  .drill-card .drill-desc { font-size: 15px; color: var(--text3); line-height: 1.4; }
+  .drill-result-bar { display: flex; gap: 8px; align-items: center; padding: 8px 0; }
+  .drill-medal { font-size: 24px; }
+  .drill-score { font-size: 18px; font-weight: 700; color: var(--text1); }
+  .drill-metrics { font-size: 15px; color: var(--text3); line-height: 1.5; }
+  .drill-settings { padding: 10px 14px; font-size: 16px; }
+  .drill-settings label { display: block; color: var(--text2); margin: 8px 0 3px; font-weight: 600; }
   .drill-settings select, .drill-settings input {
-    width: 100%; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border);
-    background: var(--bg1); color: var(--text1); font-size: 11px;
+    width: 100%; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--border);
+    background: var(--bg1); color: var(--text1); font-size: 16px;
   }
   .drill-start-btn {
-    margin: 8px; padding: 8px; border-radius: 6px; border: 1px solid var(--green);
-    background: rgba(134,239,172,0.08); color: var(--green); font-size: 12px; font-weight: 700;
+    margin: 10px; padding: 10px; border-radius: 6px; border: 1px solid var(--green);
+    background: rgba(134,239,172,0.08); color: var(--green); font-size: 18px; font-weight: 700;
     cursor: pointer; text-align: center; transition: all 0.2s;
   }
   .drill-start-btn:hover { background: rgba(134,239,172,0.15); }
@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.26</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.27</div>
       </div>
     </div>
     <div class="controls">
@@ -657,6 +657,7 @@
         <div class="panel-header">
           <div class="dot" style="background:#c084fc"></div>FINGER TRACKING
           <span class="camera-badge off" id="cameraBadge">Camera Off</span>
+          <button id="refreshCameraBtn" onclick="refreshCamera()" style="display:none;padding:2px 8px;border-radius:4px;border:1px solid var(--amber, #fbbf24);background:rgba(251,191,36,0.1);color:var(--amber, #fbbf24);font-size:9px;font-weight:700;cursor:pointer;margin-left:4px;">Refresh</button>
         </div>
         <div id="remoteCameraWrap" style="display:none;background:#000;border-bottom:1px solid var(--border);position:relative;">
           <img id="remoteCameraImg" style="width:100%;display:block;" alt="Camera">
@@ -1580,8 +1581,13 @@ async function startSession() {
                   mpBadge('Camera: FROZEN');
                   var badge = document.getElementById('cameraBadge');
                   if (badge) { badge.className = 'camera-badge warn'; }
+                  var refreshBtn = document.getElementById('refreshCameraBtn');
+                  if (refreshBtn) refreshBtn.style.display = '';
                 }
               }, 3000);
+              // Hide refresh button when frames are flowing
+              var refreshBtn = document.getElementById('refreshCameraBtn');
+              if (refreshBtn) refreshBtn.style.display = 'none';
             }
           } else if (msg.type === 'camera_state') {
             cameraEnabled = Boolean(msg.enabled);
@@ -3853,6 +3859,20 @@ function updateCameraUi() {
 }
 updateCameraUi();
 
+function refreshCamera() {
+  // Send a message to the phone to restart its camera
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    // Tell the phone to toggle camera off then on
+    ws.send(JSON.stringify({ type: 'refresh_camera' }));
+  }
+  // Reset stale state on desktop
+  lastFrameTime = Date.now();
+  var badge = document.getElementById('cameraBadge');
+  if (badge) { badge.className = 'camera-badge warn'; badge.textContent = 'Refreshing...'; }
+  var refreshBtn = document.getElementById('refreshCameraBtn');
+  if (refreshBtn) refreshBtn.style.display = 'none';
+}
+
 // ============================================================================
 // Desktop MediaPipe — runs hand detection on received camera frames
 // ============================================================================
@@ -4925,6 +4945,12 @@ function buildSecondaryUI(room, params) {
           updateSecondaryRoles();
           break;
         }
+      }
+    } else if (msg.type === 'refresh_camera') {
+      // Desktop requested camera refresh — restart camera
+      if (myRoles.camera) {
+        stopSecondaryCamera();
+        setTimeout(startSecondaryCamera, 500);
       }
     } else if (msg.type === 'room_closed' || msg.type === 'error') {
       statusEl.textContent = msg.message || 'Room closed';

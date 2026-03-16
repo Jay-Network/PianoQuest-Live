@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.27] - 2026-03-16
+
+### Added
+- **Camera Refresh button** — appears when camera freezes, sends restart command to phone
+
+### Changed
+- **Drill text 1.5x larger** — stage headers 15px, card names 20px, descriptions 15px, settings 16px, start button 18px
+- **Drill result text halved** — medal 24px, grade 18px, metrics 15px
+
 ## [3.2.26] - 2026-03-16
 
 ### Changed
