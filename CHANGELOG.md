@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.50] - 2026-03-16
+
+### Fixed
+- **MIDI broadcast debug logging** — added recv logging for midi_event and midi_snapshot at primary WS handler to diagnose why spectators receive zero MIDI frames
+
 ## [2.1.49] - 2026-03-16
 
 ### Fixed

@@ -842,6 +842,10 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         const msg = JSON.parse(rawMsg);
         const msgType = msg.type;
 
+        if (msgType === "midi_event" || msgType === "midi_snapshot") {
+          console.log(`[${APP_NAME}] WS recv: ${msgType} from primary (spectators=${spectators.size}, room=${roomSession ? roomCode : 'none'})`);
+        }
+
         if (msgType === "text") {
           session.sendClientContent({
             turns: [{ role: "user", parts: [{ text: msg.content }] }],
