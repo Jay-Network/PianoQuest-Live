@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.24] - 2026-03-16
+
+### Changed
+- **System instruction: explicit "hey Gemini" trigger** — Gemini now clearly responds when addressed by name, less aggressively silent
+
 ## [3.2.23] - 2026-03-16
 
 ### Changed
