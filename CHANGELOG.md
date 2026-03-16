@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.6] - 2026-03-16
+
+### Improved
+- **MediaPipe status feedback** — camera bottom bar shows "Loading hand tracker...", "Hand tracking active", or error message so you can see if MediaPipe loaded
+- **Side-view finger height analysis** — compares fingertip Y to knuckle Y to measure finger lift. Sends fingerHeights data in hand_state messages
+- **Gemini vision instruction** — updated to mention side-view camera, finger lift height, curved vs flat fingers, wrist position
+
 ## [3.1.5] - 2026-03-16
 
 ### Added

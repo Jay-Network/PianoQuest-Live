@@ -477,7 +477,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.5</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.6</div>
       </div>
     </div>
     <div class="controls">
@@ -3678,10 +3678,13 @@ function updateQr(roomCode) {
   }
 
   function initHandLandmarker(video, overlayCanvas) {
+    var camStatus = document.getElementById('camStatusText');
     if (typeof FilesetResolver === 'undefined' || typeof HandLandmarker === 'undefined') {
       console.log('MediaPipe tasks-vision not loaded — hand detection disabled');
+      if (camStatus) camStatus.textContent = 'Camera only (no hand tracking)';
       return;
     }
+    if (camStatus) camStatus.textContent = 'Loading hand tracker...';
     FilesetResolver.forVisionTasks(
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
     ).then(function(fileset) {
@@ -3695,10 +3698,30 @@ function updateQr(roomCode) {
       });
     }).then(function(landmarker) {
       secHandLandmarker = landmarker;
+      if (camStatus) camStatus.textContent = 'Hand tracking active';
       processHands(video, overlayCanvas);
     }).catch(function(err) {
       console.log('HandLandmarker init failed:', err);
+      if (camStatus) camStatus.textContent = 'Hand tracking failed: ' + err.message;
     });
+  }
+
+  // Finger names for side-view analysis
+  var FINGER_NAMES = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+  // MCP (knuckle) indices and fingertip indices for each finger
+  var FINGER_MCP = [2, 5, 9, 13, 17];
+
+  function analyzeFingerHeights(landmarks) {
+    // From side view, Y coordinate shows vertical position (0=top, 1=bottom)
+    // Compare fingertip Y to knuckle Y: negative = finger lifted above knuckle
+    var fingers = [];
+    for (var i = 0; i < 5; i++) {
+      var tip = landmarks[FINGERTIP_INDICES[i]];
+      var mcp = landmarks[FINGER_MCP[i]];
+      var lift = mcp.y - tip.y; // positive = finger raised, negative = finger curled
+      fingers.push({ name: FINGER_NAMES[i], lift: Math.round(lift * 1000) / 1000 });
+    }
+    return fingers;
   }
 
   function processHands(video, overlayCanvas) {
@@ -3713,11 +3736,20 @@ function updateQr(roomCode) {
         if (handCount !== secLastHandCount) {
           secLastHandCount = handCount;
           var bothHands = handCount >= 2;
+          // Include finger height analysis when hands detected
+          var fingerData = [];
+          if (results.landmarks) {
+            for (var hi = 0; hi < results.landmarks.length; hi++) {
+              fingerData.push(analyzeFingerHeights(results.landmarks[hi]));
+            }
+          }
           if (secWs && secWs.readyState === WebSocket.OPEN) {
-            secWs.send(JSON.stringify({ type: 'hand_state', hands: handCount, bothHands: bothHands }));
+            secWs.send(JSON.stringify({ type: 'hand_state', hands: handCount, bothHands: bothHands, fingerHeights: fingerData }));
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.log('Hand detection error:', e);
+      }
     }
     secHandAnimFrame = requestAnimationFrame(function() { processHands(video, overlayCanvas); });
   }

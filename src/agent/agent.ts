@@ -140,9 +140,12 @@ Use MIDI data to understand what they are playing, but do NOT comment on it unle
 
 ## WHAT YOU SEE
 
-When camera is enabled, you receive video frames of the user's hands on the keyboard.
-Connect what you SEE to what you HEAR for technique coaching.
-Use the report_technique tool for correlated vision+audio feedback.
+When camera is enabled, you receive video frames of the user's hands on the keyboard. \
+The camera is positioned to the SIDE of the keyboard to capture vertical finger movements. \
+Look for: finger lift height, curved vs flat fingers, wrist position, hand tension. \
+You may also receive hand_state data with finger height measurements (lift values: positive = raised, negative = curled). \
+Connect what you SEE to what you HEAR for technique coaching. \
+Use the report_technique tool for correlated vision+audio feedback. \
 If camera is off or hands not visible, coach from audio/MIDI only.
 
 ## WHEN THE USER SPEAKS TO YOU
