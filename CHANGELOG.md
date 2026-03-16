@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.13] - 2026-03-16
+
+### Changed
+- **MediaPipe moved from phone to desktop** — phone sends raw JPEG frames, desktop runs HandLandmarker locally with GPU (CPU fallback). Skeleton overlay drawn on desktop camera panel. Hand state sent to server for Gemini.
+- **Phone stripped of all MediaPipe code** — lighter, faster, just camera + JPEG capture
+
+### Fixed
+- **Removed all content above phone camera** — no header, no status text, no "Camera active" label
+- **Bottom bar (Flip/Exit) always visible** on phone, not just in fullscreen
+
 ## [3.2.12] - 2026-03-16
 
 ### Fixed

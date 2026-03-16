@@ -567,7 +567,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.12</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.13</div>
       </div>
     </div>
     <div class="controls">
@@ -634,8 +634,9 @@
           <div class="dot" style="background:#c084fc"></div>FINGER TRACKING
           <span class="camera-badge off" id="cameraBadge">Camera Off</span>
         </div>
-        <div id="remoteCameraWrap" style="display:none;background:#000;border-bottom:1px solid var(--border);">
+        <div id="remoteCameraWrap" style="display:none;background:#000;border-bottom:1px solid var(--border);position:relative;">
           <img id="remoteCameraImg" style="width:100%;display:block;" alt="Camera">
+          <canvas id="desktopHandOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></canvas>
         </div>
         <div id="techniqueEntries" style="padding:8px;max-height:200px;overflow-y:auto;">
           <div style="font-size:11px;color:var(--text3);">Camera off</div>
@@ -1521,15 +1522,12 @@ async function startSession() {
             var camImg = document.getElementById('remoteCameraImg');
             var camWrap = document.getElementById('remoteCameraWrap');
             if (camImg && msg.data) {
+              camImg.onload = function() { runDesktopHandDetection(camImg); };
               camImg.src = 'data:image/jpeg;base64,' + msg.data;
               if (camWrap) camWrap.style.display = '';
             }
           } else if (msg.type === 'camera_state') {
             cameraEnabled = Boolean(msg.enabled);
-            updateCameraUi();
-          } else if (msg.type === 'hand_state') {
-            bothHandsDetected = Boolean(msg.bothHands);
-            mediapipeActive = true;
             updateCameraUi();
           } else if (msg.type === 'you_are_primary') {
             isPrimaryDevice = true;
@@ -3317,6 +3315,143 @@ function updateCameraUi() {
 updateCameraUi();
 
 // ============================================================================
+// Desktop MediaPipe — runs hand detection on received camera frames
+// ============================================================================
+var desktopHandLandmarker = null;
+var desktopLastHandCount = -1;
+var HAND_CONNECTIONS = [
+  [0,1],[1,2],[2,3],[3,4],
+  [0,5],[5,6],[6,7],[7,8],
+  [5,9],[9,10],[10,11],[11,12],
+  [9,13],[13,14],[14,15],[15,16],
+  [13,17],[17,18],[18,19],[19,20],
+  [0,17]
+];
+var FINGERTIP_INDICES = [4,8,12,16,20];
+var FINGER_NAMES = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+var FINGER_MCP = [2, 5, 9, 13, 17];
+
+function initDesktopMediaPipe() {
+  if (typeof FilesetResolver === 'undefined' || typeof HandLandmarker === 'undefined') {
+    console.log('MediaPipe not loaded on desktop');
+    return;
+  }
+  FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+  ).then(function(fileset) {
+    return HandLandmarker.createFromOptions(fileset, {
+      baseOptions: {
+        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+        delegate: 'GPU'
+      },
+      runningMode: 'IMAGE',
+      numHands: 2
+    });
+  }).then(function(landmarker) {
+    desktopHandLandmarker = landmarker;
+    mediapipeActive = true;
+    updateCameraUi();
+    console.log('Desktop HandLandmarker ready (GPU)');
+  }).catch(function(err) {
+    console.log('Desktop HandLandmarker GPU failed, trying CPU:', err);
+    FilesetResolver.forVisionTasks(
+      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+    ).then(function(fileset) {
+      return HandLandmarker.createFromOptions(fileset, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+          delegate: 'CPU'
+        },
+        runningMode: 'IMAGE',
+        numHands: 2
+      });
+    }).then(function(landmarker) {
+      desktopHandLandmarker = landmarker;
+      mediapipeActive = true;
+      updateCameraUi();
+      console.log('Desktop HandLandmarker ready (CPU)');
+    }).catch(function(err2) {
+      console.log('Desktop HandLandmarker failed completely:', err2);
+    });
+  });
+}
+initDesktopMediaPipe();
+
+function analyzeFingerHeights(landmarks) {
+  var fingers = [];
+  for (var i = 0; i < 5; i++) {
+    var tip = landmarks[FINGERTIP_INDICES[i]];
+    var mcp = landmarks[FINGER_MCP[i]];
+    var lift = mcp.y - tip.y;
+    fingers.push({ name: FINGER_NAMES[i], lift: Math.round(lift * 1000) / 1000 });
+  }
+  return fingers;
+}
+
+function runDesktopHandDetection(imgElement) {
+  if (!desktopHandLandmarker || !imgElement || !imgElement.naturalWidth) return;
+  var overlay = document.getElementById('desktopHandOverlay');
+  if (!overlay) return;
+
+  var results = desktopHandLandmarker.detect(imgElement);
+
+  // Draw skeleton overlay
+  overlay.width = imgElement.naturalWidth;
+  overlay.height = imgElement.naturalHeight;
+  var ctx = overlay.getContext('2d');
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+  if (!results.landmarks || results.landmarks.length === 0) {
+    var handCount = 0;
+    if (handCount !== desktopLastHandCount) {
+      desktopLastHandCount = handCount;
+      bothHandsDetected = false;
+    }
+    return;
+  }
+
+  var w = overlay.width;
+  var h = overlay.height;
+  for (var hi = 0; hi < results.landmarks.length; hi++) {
+    var lm = results.landmarks[hi];
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.lineWidth = 2;
+    for (var ci = 0; ci < HAND_CONNECTIONS.length; ci++) {
+      var a = lm[HAND_CONNECTIONS[ci][0]];
+      var b = lm[HAND_CONNECTIONS[ci][1]];
+      ctx.beginPath();
+      ctx.moveTo(a.x * w, a.y * h);
+      ctx.lineTo(b.x * w, b.y * h);
+      ctx.stroke();
+    }
+    for (var ki = 0; ki < lm.length; ki++) {
+      var isFingertip = FINGERTIP_INDICES.indexOf(ki) >= 0;
+      var radius = isFingertip ? 5 : 3;
+      var color = isFingertip ? '#86efac' : '#60a5fa';
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(lm[ki].x * w, lm[ki].y * h, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Update hand state
+  var handCount = results.landmarks.length;
+  if (handCount !== desktopLastHandCount) {
+    desktopLastHandCount = handCount;
+    bothHandsDetected = handCount >= 2;
+    // Send hand_state to server for Gemini
+    var fingerData = [];
+    for (var fi = 0; fi < results.landmarks.length; fi++) {
+      fingerData.push(analyzeFingerHeights(results.landmarks[fi]));
+    }
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'hand_state', hands: handCount, bothHands: bothHandsDetected, fingerHeights: fingerData }));
+    }
+  }
+}
+
+// ============================================================================
 // Device Manager (primary device)
 // ============================================================================
 function renderDeviceList() {
@@ -4327,10 +4462,6 @@ function buildSecondaryUI(room, params) {
   // Camera state for secondary
   var secCameraStream = null;
   var secCameraInterval = null;
-  var secHandLandmarker = null;
-  var secHandAnimFrame = null;
-  var secLastHandCount = -1;
-  var secLastHandProcessTime = 0;
   var secCameraFacing = 'environment';
 
   function startSecondaryCamera() {
@@ -4350,37 +4481,24 @@ function buildSecondaryUI(room, params) {
       video.srcObject = stream;
       wrap.appendChild(video);
 
-      var canvas = document.createElement('canvas');
-      canvas.className = 'hand-overlay';
-      canvas.id = 'handOverlayCanvas';
-      wrap.appendChild(canvas);
-
+      // Send raw JPEG frames to server at 4fps — MediaPipe runs on desktop
       var offCanvas = document.createElement('canvas');
       offCanvas.width = 640;
       offCanvas.height = 480;
       var offCtx = offCanvas.getContext('2d');
 
-      // Send JPEG frames to server at 4fps (250ms) for desktop preview + Gemini vision
-      // Composites hand skeleton overlay onto the frame so desktop sees bones too
       secCameraInterval = setInterval(function() {
         if (!secWs || secWs.readyState !== WebSocket.OPEN || !myRoles.camera) return;
         if (video.videoWidth === 0) return;
         offCanvas.width = video.videoWidth;
         offCanvas.height = video.videoHeight;
         offCtx.drawImage(video, 0, 0);
-        // Draw hand overlay on top if available
-        if (canvas.width > 0 && canvas.height > 0) {
-          offCtx.drawImage(canvas, 0, 0, offCanvas.width, offCanvas.height);
-        }
         var dataUrl = offCanvas.toDataURL('image/jpeg', 0.6);
         var base64 = dataUrl.split(',')[1];
         secWs.send(JSON.stringify({ type: 'video_frame', data: base64 }));
       }, 250);
 
       secWs.send(JSON.stringify({ type: 'camera_state', enabled: true }));
-
-      // Initialize MediaPipe HandLandmarker
-      initHandLandmarker(video, canvas);
     }).catch(function(err) {
       statusEl.textContent = 'Camera error: ' + err.message;
     });
@@ -4388,7 +4506,6 @@ function buildSecondaryUI(room, params) {
 
   function stopSecondaryCamera() {
     if (secCameraInterval) { clearInterval(secCameraInterval); secCameraInterval = null; }
-    if (secHandAnimFrame) { cancelAnimationFrame(secHandAnimFrame); secHandAnimFrame = null; }
     if (secCameraStream) {
       secCameraStream.getTracks().forEach(function(t) { t.stop(); });
       secCameraStream = null;
@@ -4398,174 +4515,21 @@ function buildSecondaryUI(room, params) {
     if (secWs && secWs.readyState === WebSocket.OPEN) {
       secWs.send(JSON.stringify({ type: 'camera_state', enabled: false }));
     }
-    secLastHandCount = -1;
   }
 
   function switchCamera() {
     secCameraFacing = secCameraFacing === 'environment' ? 'user' : 'environment';
-    // Stop current stream but keep camera role active
     if (secCameraInterval) { clearInterval(secCameraInterval); secCameraInterval = null; }
-    if (secHandAnimFrame) { cancelAnimationFrame(secHandAnimFrame); secHandAnimFrame = null; }
     if (secCameraStream) {
       secCameraStream.getTracks().forEach(function(t) { t.stop(); });
       secCameraStream = null;
     }
-    secHandLandmarker = null;
-    secLastHandCount = -1;
     var wrap = document.getElementById('cameraPreviewWrap');
     if (wrap) wrap.textContent = '';
-    // Restart with new facing mode
     startSecondaryCamera();
   }
 
-  function initHandLandmarker(video, overlayCanvas) {
-    var camStatus = document.getElementById('camStatusText');
-    if (typeof FilesetResolver === 'undefined' || typeof HandLandmarker === 'undefined') {
-      console.log('MediaPipe tasks-vision not loaded — hand detection disabled');
-      if (camStatus) camStatus.textContent = 'Camera only (no hand tracking)';
-      return;
-    }
-    if (camStatus) camStatus.textContent = 'Loading hand tracker...';
-    var savedFileset = null;
-    FilesetResolver.forVisionTasks(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
-    ).then(function(fileset) {
-      savedFileset = fileset;
-      return HandLandmarker.createFromOptions(fileset, {
-        baseOptions: {
-          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-          delegate: 'GPU'
-        },
-        runningMode: 'VIDEO',
-        numHands: 2
-      });
-    }).then(function(landmarker) {
-      secHandLandmarker = landmarker;
-      console.log('HandLandmarker ready (GPU)');
-      // Notify desktop that MediaPipe is active
-      if (secWs && secWs.readyState === WebSocket.OPEN) {
-        secWs.send(JSON.stringify({ type: 'hand_state', hands: 0, bothHands: false, mediapipeReady: true, fingerHeights: [] }));
-      }
-      processHands(video, overlayCanvas);
-    }).catch(function(err) {
-      console.log('HandLandmarker GPU failed, trying CPU:', err);
-      if (!savedFileset) {
-        console.log('No fileset — hand tracking failed completely');
-        return;
-      }
-      HandLandmarker.createFromOptions(savedFileset, {
-        baseOptions: {
-          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-          delegate: 'CPU'
-        },
-        runningMode: 'VIDEO',
-        numHands: 2
-      }).then(function(landmarker) {
-        secHandLandmarker = landmarker;
-        console.log('HandLandmarker ready (CPU fallback)');
-        if (secWs && secWs.readyState === WebSocket.OPEN) {
-          secWs.send(JSON.stringify({ type: 'hand_state', hands: 0, bothHands: false, mediapipeReady: true, fingerHeights: [] }));
-        }
-        processHands(video, overlayCanvas);
-      }).catch(function(err2) {
-        console.log('HandLandmarker CPU also failed:', err2);
-      });
-    });
-  }
-
-  // Finger names for side-view analysis
-  var FINGER_NAMES = ['thumb', 'index', 'middle', 'ring', 'pinky'];
-  // MCP (knuckle) indices and fingertip indices for each finger
-  var FINGER_MCP = [2, 5, 9, 13, 17];
-
-  function analyzeFingerHeights(landmarks) {
-    // From side view, Y coordinate shows vertical position (0=top, 1=bottom)
-    // Compare fingertip Y to knuckle Y: negative = finger lifted above knuckle
-    var fingers = [];
-    for (var i = 0; i < 5; i++) {
-      var tip = landmarks[FINGERTIP_INDICES[i]];
-      var mcp = landmarks[FINGER_MCP[i]];
-      var lift = mcp.y - tip.y; // positive = finger raised, negative = finger curled
-      fingers.push({ name: FINGER_NAMES[i], lift: Math.round(lift * 1000) / 1000 });
-    }
-    return fingers;
-  }
-
-  function processHands(video, overlayCanvas) {
-    if (!secHandLandmarker || !myRoles.camera) return;
-    var now = performance.now();
-    if (now - secLastHandProcessTime > 66 && video.videoWidth > 0) {
-      secLastHandProcessTime = now;
-      try {
-        var results = secHandLandmarker.detectForVideo(video, now);
-        drawHandOverlay(overlayCanvas, video, results);
-        var handCount = results.landmarks ? results.landmarks.length : 0;
-        if (handCount !== secLastHandCount) {
-          secLastHandCount = handCount;
-          var bothHands = handCount >= 2;
-          // Include finger height analysis when hands detected
-          var fingerData = [];
-          if (results.landmarks) {
-            for (var hi = 0; hi < results.landmarks.length; hi++) {
-              fingerData.push(analyzeFingerHeights(results.landmarks[hi]));
-            }
-          }
-          if (secWs && secWs.readyState === WebSocket.OPEN) {
-            secWs.send(JSON.stringify({ type: 'hand_state', hands: handCount, bothHands: bothHands, fingerHeights: fingerData }));
-          }
-        }
-      } catch (e) {
-        console.log('Hand detection error:', e);
-      }
-    }
-    secHandAnimFrame = requestAnimationFrame(function() { processHands(video, overlayCanvas); });
-  }
-
-  var HAND_CONNECTIONS = [
-    [0,1],[1,2],[2,3],[3,4],
-    [0,5],[5,6],[6,7],[7,8],
-    [5,9],[9,10],[10,11],[11,12],
-    [9,13],[13,14],[14,15],[15,16],
-    [13,17],[17,18],[18,19],[19,20],
-    [0,17]
-  ];
-  var FINGERTIP_INDICES = [4,8,12,16,20];
-
-  function drawHandOverlay(canvas, video, results) {
-    if (!canvas || !video) return;
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (!results.landmarks) return;
-
-    var w = canvas.width;
-    var h = canvas.height;
-    for (var hi = 0; hi < results.landmarks.length; hi++) {
-      var lm = results.landmarks[hi];
-      // Draw connections
-      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-      ctx.lineWidth = 2;
-      for (var ci = 0; ci < HAND_CONNECTIONS.length; ci++) {
-        var a = lm[HAND_CONNECTIONS[ci][0]];
-        var b = lm[HAND_CONNECTIONS[ci][1]];
-        ctx.beginPath();
-        ctx.moveTo(a.x * w, a.y * h);
-        ctx.lineTo(b.x * w, b.y * h);
-        ctx.stroke();
-      }
-      // Draw keypoints
-      for (var ki = 0; ki < lm.length; ki++) {
-        var isFingertip = FINGERTIP_INDICES.indexOf(ki) >= 0;
-        var radius = isFingertip ? 5 : 3;
-        var color = isFingertip ? '#86efac' : '#60a5fa';
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(lm[ki].x * w, lm[ki].y * h, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
+  // Phone no longer runs MediaPipe — desktop handles hand detection
 
   var secSpeechRec = null;
 
