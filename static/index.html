@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.11</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.12</div>
       </div>
     </div>
     <div class="controls">
@@ -1572,11 +1572,10 @@ function drawGrandStaff() {
   }
 
   // Layout zones
+  // Initial estimate for staff line start (clefs drawn over this area)
   var clefW = 44;
   var timeSigW = 22;
   var keySigW = Math.abs(keySigNum) * 10 + 4;
-  var marginLeft = clefW + timeSigW + keySigW + 4;
-  var playLineX = marginLeft + (W - marginLeft) * 0.5; // center of staff
   var nowMs = Date.now();
 
   // Draw staff lines
@@ -1610,20 +1609,27 @@ function drawGrandStaff() {
   var trebleClefSize = Math.round(staffH * 0.924);
   ctx.font = trebleClefSize + 'px serif';
   ctx.textBaseline = 'middle';
-  ctx.fillText('\uD834\uDD1E', 4, trebleG4Y);
-  // Bass clef — Unicode 𝄢, dots straddle F3 line (4th line from bottom)
-  // Move one note below previous position so dot sits on F3
+  var trebleClefX = 4;
+  ctx.fillText('\uD834\uDD1E', trebleClefX, trebleG4Y);
+  var trebleClefW = ctx.measureText('\uD834\uDD1E').width;
+  // Bass clef — Unicode 𝄢, dots straddle F3 line
   var bassClefSize = Math.round(staffH * 1.008);
   ctx.font = bassClefSize + 'px serif';
   var bassLineSpacing = (bassBottom - bassTop) / 4;
-  // Position so the two dots of 𝄢 straddle the F3 line (3rd line = index 3)
   var bassF3LineY = midiToY(53); // F3 = 4th line from bottom
-  var bassClefY = bassF3LineY + bassLineSpacing; // shift down one note
-  ctx.fillText('\uD834\uDD22', 6, bassClefY);
+  var bassClefY = bassF3LineY + bassLineSpacing; // shift down so dots straddle F3
+  var bassClefX = 6;
+  ctx.fillText('\uD834\uDD22', bassClefX, bassClefY);
+  var bassClefW = ctx.measureText('\uD834\uDD22').width;
   ctx.textBaseline = 'alphabetic';
 
-  // Time signature — well to the RIGHT of clefs
-  var tsX = clefW + 4;
+  // Dynamic clefW based on actual rendered glyph widths
+  var actualClefW = Math.max(trebleClefX + trebleClefW, bassClefX + bassClefW) + 6;
+  // Recompute margin with actual clef width
+  var marginLeft = actualClefW + timeSigW + keySigW + 4;
+  var playLineX = marginLeft + (W - marginLeft) * 0.5;
+  // Time signature — to the RIGHT of clefs, using measured width
+  var tsX = actualClefW;
   var tsFontSize = Math.round(staffH * 0.48);
   ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
@@ -1641,7 +1647,7 @@ function drawGrandStaff() {
   ctx.textBaseline = 'alphabetic';
 
   // Key signature accidentals
-  var ksX = clefW + timeSigW;
+  var ksX = actualClefW + timeSigW;
   var absKeySig = Math.abs(keySigNum);
   if (absKeySig > 0) {
     var symbol = useFlats ? '\u266D' : '\u266F';

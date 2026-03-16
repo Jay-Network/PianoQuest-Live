@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.12] - 2026-03-16
+
+### Fixed
+- **Grand staff clef/time sig overlap (final fix)**: Use `ctx.measureText()` to dynamically compute actual clef glyph widths instead of hardcoded clefW. Time signature and key signature now positioned based on measured pixel widths, guaranteed no overlap regardless of font rendering.
+
 ## [2.1.11] - 2026-03-16
 
 ### Fixed
