@@ -648,6 +648,13 @@ async function handleSecondaryWebSocket(
           if (text) {
             broadcastToRoom(room, JSON.stringify({ type: "input_transcript", text }));
           }
+        } else if (msgType === "request_role") {
+          // Secondary device self-assigns a role
+          const role = msg.role as string;
+          if (role === "mic" || role === "midi" || role === "camera") {
+            setDeviceRole(room, deviceId, role, Boolean(msg.enabled));
+            console.log(`[${APP_NAME}] Secondary ${deviceId} self-assigned ${role}=${msg.enabled}`);
+          }
         } else if (msgType === "device_info") {
           // Device sends its name
           if (msg.name) device.name = String(msg.name).slice(0, 32);

@@ -452,7 +452,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.1</div>
       </div>
     </div>
     <div class="controls">
@@ -3309,9 +3309,18 @@ function updateQr(roomCode) {
     card.appendChild(nameEl);
     var statusLine = document.createElement('div');
     statusLine.className = 'role-status';
-    statusLine.textContent = 'Inactive';
+    statusLine.textContent = 'Tap to activate';
     statusLine.id = 'secRoleStatus_' + rc.key;
     card.appendChild(statusLine);
+    card.style.cursor = 'pointer';
+    (function(roleKey) {
+      card.onclick = function() {
+        if (secWs && secWs.readyState === WebSocket.OPEN) {
+          var enabling = !myRoles[roleKey];
+          secWs.send(JSON.stringify({ type: 'request_role', role: roleKey, enabled: enabling }));
+        }
+      };
+    })(rc.key);
     rolesContainer.appendChild(card);
   });
   app.appendChild(rolesContainer);

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-03-16
+
+### Fixed
+- **Secondary device role cards now tappable** — phone users can tap MIC/CAMERA/MIDI cards to self-assign roles instead of needing primary device to assign. Server handles `request_role` messages from secondary devices.
+
 ## [3.1.0] - 2026-03-16
 
 ### Added
