@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.17] - 2026-03-16
+
+### Changed
+- **Waterfall note bars**: Finger-held segments now have inner gradient (bright edges, darker center) instead of flat fill. Pedal-sustained segments render as glassy hollow bars with animated glowing rim (matching grand staff).
+- **Grand staff square edges**: All note bars use square edges instead of rounded corners for clear timing indication. Thin start bars (2px) mark note onset.
+- **Grand staff inner gradient**: Finger-held segments use vertical gradient (bright edges, darker center) for premium look.
+
 ## [2.1.16] - 2026-03-16
 
 ### Fixed

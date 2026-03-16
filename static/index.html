@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.16</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.17</div>
       </div>
     </div>
     <div class="controls">
@@ -1480,13 +1480,41 @@ function drawPianoRoll() {
         var noteH = clampedBottom - clampedTop;
         if (noteH < 1) return;
 
-        ctx.fillStyle = color;
-        ctx.fillRect(bodyX, clampedTop, bodyW, noteH);
+        var c = dynamicsRgb(entry.velocity);
+
+        if (isHead) {
+          // Finger-held: inner gradient fill (bright edge → slightly darker center)
+          var innerGrad = ctx.createLinearGradient(bodyX, 0, bodyX + bodyW, 0);
+          innerGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.9)');
+          innerGrad.addColorStop(0.3, 'rgba(' + Math.round(c.r * 0.7) + ',' + Math.round(c.g * 0.7) + ',' + Math.round(c.b * 0.7) + ',0.7)');
+          innerGrad.addColorStop(0.7, 'rgba(' + Math.round(c.r * 0.7) + ',' + Math.round(c.g * 0.7) + ',' + Math.round(c.b * 0.7) + ',0.7)');
+          innerGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.9)');
+          ctx.fillStyle = innerGrad;
+          ctx.fillRect(bodyX, clampedTop, bodyW, noteH);
+          // Bright edge highlight
+          ctx.fillStyle = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.6)';
+          ctx.fillRect(bodyX, clampedTop, 1, noteH);
+          ctx.fillRect(bodyX + bodyW - 1, clampedTop, 1, noteH);
+        } else {
+          // Pedal-sustained: glassy hollow bar with glowing rim (match grand staff)
+          var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + entry.note * 0.5);
+          // Faint glassy interior
+          ctx.fillStyle = 'rgba(' + Math.round(c.r * 0.3) + ',' + Math.round(c.g * 0.3) + ',' + Math.round(c.b * 0.3) + ',0.12)';
+          ctx.fillRect(bodyX, clampedTop, bodyW, noteH);
+          // Glowing rim
+          ctx.strokeStyle = color;
+          ctx.globalAlpha = 0.5 * pulse;
+          ctx.lineWidth = 1.5;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 6 * pulse;
+          ctx.strokeRect(bodyX, clampedTop, bodyW, noteH);
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = 1.0;
+        }
 
         // VFX: Gradient tail below note bar (comet trail)
         if (isHead && clampedBottom < waterfallH) {
           var tailH = 12;
-          var c = dynamicsRgb(entry.velocity);
           var tailGrad = ctx.createLinearGradient(0, clampedBottom, 0, clampedBottom + tailH);
           tailGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.35)');
           tailGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
@@ -1959,53 +1987,58 @@ function drawGrandStaff() {
           histEntry = noteHistory[hi]; break;
         }
       }
+      var barH = noteRadius * 1.4;
+      var barY = noteY - noteRadius * 0.7;
+      var c = dynamicsRgb(noteData.velocity);
       if (histEntry && histEntry.fingerDurationMs > 0) {
         // Finger released, pedal sustaining — draw two segments
         var fingerMs = histEntry.fingerDurationMs;
-        // fingerEndX = screen position where finger was released
-        // Age of finger-release moment = holdMs - fingerMs
         var fingerEndX = Math.max(headX, playLineX - (holdMs - fingerMs) * pxPerMs);
-        // Finger-held segment: bright
+        // Finger-held segment: inner gradient (bright edges, darker center)
         if (fingerEndX > headX) {
+          var fW = fingerEndX - headX;
+          var fGrad = ctx.createLinearGradient(0, barY, 0, barY + barH);
+          fGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.8)');
+          fGrad.addColorStop(0.3, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',0.5)');
+          fGrad.addColorStop(0.7, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',0.5)');
+          fGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.8)');
+          ctx.fillStyle = fGrad;
+          ctx.fillRect(headX, barY, fW, barH);
+          // Thin start bar
           ctx.fillStyle = color;
-          ctx.globalAlpha = 0.6;
-          ctx.beginPath();
-          ctx.roundRect(headX, noteY - noteRadius * 0.7, fingerEndX - headX, noteRadius * 1.4, noteRadius * 0.7);
-          ctx.fill();
+          ctx.globalAlpha = 0.9;
+          ctx.fillRect(headX, barY, 2, barH);
+          ctx.globalAlpha = 1.0;
         }
-        // Pedal-sustained segment: hollow glassy bar with glowing animated rim
+        // Pedal-sustained segment: glassy hollow bar with glowing animated rim
         if (playLineX > fingerEndX) {
           var pedalW = playLineX - fingerEndX;
-          var pedalH = noteRadius * 1.4;
-          var pedalY = noteY - noteRadius * 0.7;
-          var pedalR = noteRadius * 0.7;
-          // Animated glow pulse (subtle breathing effect)
           var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + midi * 0.5);
-          // Glassy fill — very faint interior
           ctx.fillStyle = darkenedColor(noteData.velocity, 0.3);
           ctx.globalAlpha = 0.12;
-          ctx.beginPath();
-          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
-          ctx.fill();
-          // Glowing rim
+          ctx.fillRect(fingerEndX, barY, pedalW, barH);
           ctx.strokeStyle = color;
           ctx.globalAlpha = 0.5 * pulse;
           ctx.lineWidth = 1.5;
           ctx.shadowColor = color;
           ctx.shadowBlur = 6 * pulse;
-          ctx.beginPath();
-          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
-          ctx.stroke();
+          ctx.strokeRect(fingerEndX, barY, pedalW, barH);
           ctx.shadowBlur = 0;
         }
         ctx.globalAlpha = 1.0;
       } else {
-        // Finger still held — all bright
+        // Finger still held — inner gradient fill
+        var fGrad = ctx.createLinearGradient(0, barY, 0, barY + barH);
+        fGrad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.8)');
+        fGrad.addColorStop(0.3, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',0.5)');
+        fGrad.addColorStop(0.7, 'rgba(' + Math.round(c.r * 0.6) + ',' + Math.round(c.g * 0.6) + ',' + Math.round(c.b * 0.6) + ',0.5)');
+        fGrad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.8)');
+        ctx.fillStyle = fGrad;
+        ctx.fillRect(headX, barY, tailLen, barH);
+        // Thin start bar
         ctx.fillStyle = color;
-        ctx.globalAlpha = 0.6;
-        ctx.beginPath();
-        ctx.roundRect(headX, noteY - noteRadius * 0.7, tailLen, noteRadius * 1.4, noteRadius * 0.7);
-        ctx.fill();
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(headX, barY, 2, barH);
         ctx.globalAlpha = 1.0;
       }
     }
@@ -2038,52 +2071,59 @@ function drawGrandStaff() {
     var headColor = dynamicsColor(entry.velocity, alpha);
     var pedalAlpha = alpha * 0.5;
 
+    var histBarH = noteRadius * 1.4;
+    var histBarY = noteY - noteRadius * 0.7;
+    var hc = dynamicsRgb(entry.velocity);
     if (durationPx > 2) {
       var fingerEndMs = (entry.fingerDurationMs > 0) ? entry.startMs + entry.fingerDurationMs : null;
       if (fingerEndMs && fingerEndMs < entry.endMs) {
-        // Finger-held segment: stays bright (no distance fade on tail)
+        // Finger-held segment: inner gradient, square edges, thin start bar
         var fingerEndAge = nowMs - fingerEndMs;
         var fingerEndX = Math.min(playLineX, playLineX - fingerEndAge * pxPerMs);
         if (fingerEndX > noteX) {
+          var fGrad = ctx.createLinearGradient(0, histBarY, 0, histBarY + histBarH);
+          fGrad.addColorStop(0, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
+          fGrad.addColorStop(0.3, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
+          fGrad.addColorStop(0.7, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
+          fGrad.addColorStop(1, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
+          ctx.fillStyle = fGrad;
+          ctx.fillRect(noteX, histBarY, fingerEndX - noteX, histBarH);
+          // Thin start bar
           ctx.fillStyle = dynamicsColor(entry.velocity);
-          ctx.globalAlpha = 0.6;
-          ctx.beginPath();
-          ctx.roundRect(noteX, noteY - noteRadius * 0.7, fingerEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
-          ctx.fill();
+          ctx.globalAlpha = 0.9;
+          ctx.fillRect(noteX, histBarY, 2, histBarH);
+          ctx.globalAlpha = 1.0;
         }
-        // Pedal-sustained segment: hollow glassy bar with glowing rim (fades with distance)
+        // Pedal-sustained segment: glassy with glowing rim, square edges
         if (tailEndX > fingerEndX) {
           var pedalW = tailEndX - fingerEndX;
-          var pedalH = noteRadius * 0.7 * 2;
-          var pedalY = noteY - noteRadius * 0.7;
-          var pedalR = noteRadius * 0.7;
           var histColor = dynamicsColor(entry.velocity);
           var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + entry.note * 0.5);
-          // Glassy fill — very faint interior (fades with distance)
           ctx.fillStyle = darkenedColor(entry.velocity, 0.3);
           ctx.globalAlpha = 0.12 * alpha;
-          ctx.beginPath();
-          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
-          ctx.fill();
-          // Glowing rim (fades with distance)
+          ctx.fillRect(fingerEndX, histBarY, pedalW, histBarH);
           ctx.strokeStyle = histColor;
           ctx.globalAlpha = 0.5 * pulse * alpha;
           ctx.lineWidth = 1.5;
           ctx.shadowColor = histColor;
           ctx.shadowBlur = 6 * pulse * alpha;
-          ctx.beginPath();
-          ctx.roundRect(fingerEndX, pedalY, pedalW, pedalH, pedalR);
-          ctx.stroke();
+          ctx.strokeRect(fingerEndX, histBarY, pedalW, histBarH);
           ctx.shadowBlur = 0;
         }
         ctx.globalAlpha = 1.0;
       } else {
-        // No pedal sustain — stays bright (no distance fade on tail)
+        // No pedal sustain — inner gradient fill, square edges, thin start bar
+        var fGrad = ctx.createLinearGradient(0, histBarY, 0, histBarY + histBarH);
+        fGrad.addColorStop(0, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
+        fGrad.addColorStop(0.3, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
+        fGrad.addColorStop(0.7, 'rgba(' + Math.round(hc.r * 0.6) + ',' + Math.round(hc.g * 0.6) + ',' + Math.round(hc.b * 0.6) + ',0.5)');
+        fGrad.addColorStop(1, 'rgba(' + hc.r + ',' + hc.g + ',' + hc.b + ',0.8)');
+        ctx.fillStyle = fGrad;
+        ctx.fillRect(noteX, histBarY, tailEndX - noteX, histBarH);
+        // Thin start bar
         ctx.fillStyle = dynamicsColor(entry.velocity);
-        ctx.globalAlpha = 0.6;
-        ctx.beginPath();
-        ctx.roundRect(noteX, noteY - noteRadius * 0.7, tailEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
-        ctx.fill();
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(noteX, histBarY, 2, histBarH);
         ctx.globalAlpha = 1.0;
       }
     }
