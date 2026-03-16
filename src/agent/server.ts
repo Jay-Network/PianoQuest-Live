@@ -85,9 +85,8 @@ function describeMidiSnapshot(
   if (details.length === 0) return null;
 
   return (
-    "MIDI performance update from the digital piano. " +
-    details.join(". ") +
-    ". Use this instead of piano microphone audio for note, timing, and dynamics analysis."
+    "[MIDI snapshot] " +
+    details.join(". ")
   );
 }
 
@@ -137,6 +136,8 @@ interface RoomSession {
   cameraEnabled: boolean;
   bothHandsDetected: boolean;
   _lastGeminiFrame: number;
+  /** Latest MIDI summary — injected when user speaks, not sent independently */
+  lastMidiSummary: string | null;
 }
 
 const rooms = new Map<string, RoomSession>();
@@ -445,9 +446,10 @@ export function createApp() {
     );
 
     if (summary) {
+      roomSession.lastMidiSummary = summary;
       roomSession.sendClientContent({
         turns: [{ role: "user", parts: [{ text: summary }] }],
-        turnComplete: true,
+        turnComplete: false,
       });
     }
 
@@ -626,9 +628,10 @@ async function handleSecondaryWebSocket(
         if (msgType === "midi_snapshot" && device.roles.midi) {
           const summary = describeMidiSnapshot(msg);
           if (summary) {
+            room.lastMidiSummary = summary;
             room.sendClientContent({
               turns: [{ role: "user", parts: [{ text: summary }] }],
-              turnComplete: true,
+              turnComplete: false,
             });
           }
         } else if (msgType === "midi_event" && device.roles.midi) {
@@ -776,6 +779,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             cameraEnabled: false,
             bothHandsDetected: false,
             _lastGeminiFrame: 0,
+            lastMidiSummary: null,
           };
           roomSession.devices.set(primaryDeviceId, primaryDevice);
           rooms.set(roomCode, roomSession);
@@ -922,12 +926,14 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             turnComplete: true,
           });
         } else if (msgType === "midi_snapshot") {
-          // Send MIDI snapshot to Gemini as text so it can analyze playing
+          // Send MIDI as background context (turnComplete=false = won't trigger response)
+          // Also store for when user explicitly asks for analysis
           const summary = describeMidiSnapshot(msg);
-          if (summary) {
+          if (summary && roomSession) {
+            (roomSession as RoomSession).lastMidiSummary = summary;
             session.sendClientContent({
               turns: [{ role: "user", parts: [{ text: summary }] }],
-              turnComplete: true,
+              turnComplete: false,
             });
           }
         } else if (msgType === "user_speech_transcript") {

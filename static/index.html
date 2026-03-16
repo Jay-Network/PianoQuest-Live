@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.39</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.40</div>
       </div>
     </div>
     <div class="controls">
@@ -1486,7 +1486,7 @@ function sendMidiSnapshot(force) {
 
   var hasPerformanceSignal = activePayload.length > 0 || recentPayload.length > 0 || pedalDown;
   if (!hasPerformanceSignal) return;
-  if (!force && nowMs - lastMidiSnapshotAt < 5000) return;
+  if (!force && nowMs - lastMidiSnapshotAt < 10000) return;
   lastMidiSnapshotAt = nowMs;
 
   ws.send(JSON.stringify({

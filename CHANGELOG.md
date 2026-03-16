@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.40] - 2026-03-16
+
+### Changed
+- **MIDI as background context** — MIDI snapshots now sent with turnComplete=false (background context that doesn't trigger responses) plus stored on the room session for when the user explicitly asks. This lets Gemini see MIDI data without interrupting the audio conversation pipeline. Snapshot interval 10s.
+
 ## [3.2.39] - 2026-03-16
 
 ### Fixed
