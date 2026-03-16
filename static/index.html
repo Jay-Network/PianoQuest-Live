@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.32</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.33</div>
       </div>
     </div>
     <div class="controls">
@@ -1631,6 +1631,13 @@ async function startSession() {
             renderDeviceList();
           } else if (msg.type === 'role_assigned') {
             myRoles = msg.roles;
+          } else if (msg.type === 'turn_complete' || msg.type === 'interrupted') {
+            // Gemini finished speaking — re-enable mic
+            isBotSpeaking = false;
+            var labelEl = document.getElementById('geminiSpeakLabel');
+            var fillEl = document.getElementById('geminiVolFill');
+            if (labelEl) labelEl.textContent = 'Silent';
+            if (fillEl) fillEl.style.width = '0%';
           } else if (msg.type === 'input_transcript') {
             if (msg.text) addMessage(msg.text, 'input');
           } else if (msg.type === 'output_transcript') {
@@ -1775,10 +1782,9 @@ function queueAudio(arrayBuf) {
   src.start(startTime);
   nextPlayTime = startTime + buffer.duration;
   playbackActiveUntil = nextPlayTime + 0.2;
-  // Reset indicator when playback ends
+  // Reset visual indicator when playback ends (isBotSpeaking reset by turn_complete/interrupted)
   src.onended = function() {
     if (playbackCtx && playbackCtx.currentTime >= playbackActiveUntil - 0.25) {
-      isBotSpeaking = false;
       if (labelEl) labelEl.textContent = 'Silent';
       if (fillEl) fillEl.style.width = '0%';
     }
@@ -4672,7 +4678,7 @@ function updateQr(roomCode) {
 
       src.onended = function() {
         if (tabletPlaybackCtx.currentTime >= startAt + buf.duration - 0.1) {
-          isBotSpeaking = false;
+          // Visual reset only — isBotSpeaking reset by turn_complete/interrupted
           speakingIndicator.textContent = '';
           if (fillEl) fillEl.style.width = '0%';
           if (labelEl) labelEl.textContent = 'Silent';
@@ -4730,6 +4736,13 @@ function updateQr(roomCode) {
       }
     } else if (msg.type === 'hand_state') {
       bothHandsDetected = Boolean(msg.bothHands);
+    } else if (msg.type === 'turn_complete' || msg.type === 'interrupted') {
+      isBotSpeaking = false;
+      speakingIndicator.textContent = '';
+      var fillEl2 = document.getElementById('geminiVolFill');
+      var labelEl2 = document.getElementById('geminiSpeakLabel');
+      if (fillEl2) fillEl2.style.width = '0%';
+      if (labelEl2) labelEl2.textContent = 'Silent';
     } else if (msg.type === 'room_closed' || msg.type === 'error') {
       statusSpan.textContent = msg.message || 'Disconnected';
       statusSpan.style.color = 'var(--rose)';
@@ -4936,6 +4949,7 @@ function buildSecondaryUI(room, params) {
   secWs.onmessage = function(event) {
     if (event.data instanceof ArrayBuffer) {
       if (!secPlaybackCtx) secPlaybackCtx = new AudioContext({ sampleRate: 24000 });
+      isBotSpeaking = true;
       var i16 = new Int16Array(event.data);
       var f32 = new Float32Array(i16.length);
       for (var i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
@@ -4968,6 +4982,8 @@ function buildSecondaryUI(room, params) {
           break;
         }
       }
+    } else if (msg.type === 'turn_complete' || msg.type === 'interrupted') {
+      isBotSpeaking = false;
     } else if (msg.type === 'refresh_camera') {
       // Desktop requested camera refresh — restart camera
       if (myRoles.camera) {
@@ -5056,6 +5072,7 @@ function buildSecondaryUI(room, params) {
       var ratio = nativeRate / 16000;
       secProcessor.onaudioprocess = function(e) {
         if (!secWs || secWs.readyState !== WebSocket.OPEN || !myRoles.mic) return;
+        if (isBotSpeaking) return;
         var f32arr = e.inputBuffer.getChannelData(0);
         var sum2 = 0;
         for (var j = 0; j < f32arr.length; j++) sum2 += f32arr[j] * f32arr[j];

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.33] - 2026-03-16
+
+### Fixed
+- **Echo/feedback loop fix** — isBotSpeaking gate now only resets on turn_complete/interrupted signals, not on individual audio buffer onended. Previously mic would leak audio between chunks, causing Gemini to hear its own voice and create a feedback loop. Fixed on primary, secondary, and tablet audio paths.
+
 ## [3.2.32] - 2026-03-16
 
 ### Fixed
