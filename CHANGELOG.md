@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.10] - 2026-03-16
+
+### Changed
+- **Edge-to-edge layout**: Side panels flush to browser window edges, center panel gets maximum width. Removed app horizontal padding (0px sides). Header retains 12px padding.
+
 ## [2.1.9] - 2026-03-16
 
 ### Fixed
