@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.19</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.20</div>
       </div>
     </div>
     <div class="controls">
@@ -1496,17 +1496,17 @@ function drawPianoRoll() {
           ctx.fillRect(bodyX, clampedTop, 1, noteH);
           ctx.fillRect(bodyX + bodyW - 1, clampedTop, 1, noteH);
         } else {
-          // Pedal-sustained: glassy hollow bar with glowing rim (match grand staff)
-          var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + entry.note * 0.5);
-          // Faint glassy interior
-          ctx.fillStyle = 'rgba(' + Math.round(c.r * 0.3) + ',' + Math.round(c.g * 0.3) + ',' + Math.round(c.b * 0.3) + ',0.12)';
+          // Pedal-sustained: filled bar with glowing rim
+          var pulse = 0.8 + 0.2 * Math.sin(nowMs / 400 + entry.note * 0.5);
+          // Interior fill — visible but dimmer than finger-held
+          ctx.fillStyle = 'rgba(' + Math.round(c.r * 0.4) + ',' + Math.round(c.g * 0.4) + ',' + Math.round(c.b * 0.4) + ',0.4)';
           ctx.fillRect(bodyX, clampedTop, bodyW, noteH);
-          // Glowing rim
+          // Thick glowing rim
           ctx.strokeStyle = color;
-          ctx.globalAlpha = 0.5 * pulse;
-          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = 0.7 * pulse;
+          ctx.lineWidth = 2.5;
           ctx.shadowColor = color;
-          ctx.shadowBlur = 6 * pulse;
+          ctx.shadowBlur = 8 * pulse;
           ctx.strokeRect(bodyX, clampedTop, bodyW, noteH);
           ctx.shadowBlur = 0;
           ctx.globalAlpha = 1.0;
@@ -2016,18 +2016,19 @@ function drawGrandStaff() {
           ctx.fillRect(headX, barY, 3, barH);
           ctx.globalAlpha = 1.0;
         }
-        // Pedal-sustained segment: glassy hollow bar with glowing animated rim
+        // Pedal-sustained segment: filled bar with glowing rim
         if (playLineX > fingerEndX) {
           var pedalW = playLineX - fingerEndX;
-          var pulse = 0.8 + 0.2 * Math.sin(nowMs / 400 + midi * 0.5);
+          // Interior fill — visible but dimmer than finger-held
           ctx.fillStyle = darkenedColor(noteData.velocity, 0.4);
-          ctx.globalAlpha = 0.2;
+          ctx.globalAlpha = 0.4;
           ctx.fillRect(fingerEndX, barY, pedalW, barH);
+          // Thick glowing rim synced with finger breathing
           ctx.strokeStyle = color;
-          ctx.globalAlpha = 0.6 * pulse;
-          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = 0.7 * breathe;
+          ctx.lineWidth = 2.5;
           ctx.shadowColor = color;
-          ctx.shadowBlur = 8 * pulse;
+          ctx.shadowBlur = 8 * breathe;
           ctx.strokeRect(fingerEndX, barY, pedalW, barH);
           ctx.shadowBlur = 0;
         }
@@ -2102,17 +2103,19 @@ function drawGrandStaff() {
           ctx.fillRect(noteX, histBarY, 2, histBarH);
           ctx.globalAlpha = 1.0;
         }
-        // Pedal-sustained segment: glassy with glowing rim, square edges
+        // Pedal-sustained segment: filled bar with glowing rim, square edges
         if (tailEndX > fingerEndX) {
           var pedalW = tailEndX - fingerEndX;
           var histColor = dynamicsColor(entry.velocity);
           var pulse = 0.8 + 0.2 * Math.sin(nowMs / 400 + entry.note * 0.5);
+          // Interior fill
           ctx.fillStyle = darkenedColor(entry.velocity, 0.4);
-          ctx.globalAlpha = 0.2 * alpha;
+          ctx.globalAlpha = 0.4 * alpha;
           ctx.fillRect(fingerEndX, histBarY, pedalW, histBarH);
+          // Thick glowing rim
           ctx.strokeStyle = histColor;
-          ctx.globalAlpha = 0.6 * pulse * alpha;
-          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = 0.7 * pulse * alpha;
+          ctx.lineWidth = 2.5;
           ctx.shadowColor = histColor;
           ctx.shadowBlur = 8 * pulse * alpha;
           ctx.strokeRect(fingerEndX, histBarY, pedalW, histBarH);
@@ -2267,16 +2270,16 @@ function drawKeyboard() {
         ctx.fillStyle = 'rgba(' + dc.r + ',' + dc.g + ',' + dc.b + ',0.95)';
         ctx.fillRect(barX, barTop, barW, 2);
       } else {
-        // Pedal sustained: glassy hollow with glowing rim
+        // Pedal sustained: filled bar with glowing rim
         var pulse = 0.8 + 0.2 * Math.sin(nowMsDyn / 400 + midi * 0.5);
         ctx.fillStyle = darkenedColor(note.velocity, 0.4);
-        ctx.globalAlpha = 0.15;
+        ctx.globalAlpha = 0.4;
         ctx.fillRect(barX, barTop, barW, barH);
         ctx.strokeStyle = color;
-        ctx.globalAlpha = 0.6 * pulse;
-        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.7 * pulse;
+        ctx.lineWidth = 2;
         ctx.shadowColor = color;
-        ctx.shadowBlur = 6 * pulse;
+        ctx.shadowBlur = 8 * pulse;
         ctx.strokeRect(barX, barTop, barW, barH);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1.0;

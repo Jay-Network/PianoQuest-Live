@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.20] - 2026-03-16
+
+### Fixed
+- **Pedal sustain too dim everywhere**: Interior fill increased from 0.12→0.4 alpha across waterfall, grand staff, and dynamic bars. Rim thickness increased from 1.5→2.5px. Rim alpha raised from 0.5→0.7. No longer hollow — pedal segments now have visible dimmed fill with bright glowing rim on top.
+
 ## [2.1.19] - 2026-03-16
 
 ### Changed
