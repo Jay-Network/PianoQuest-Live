@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.2] - 2026-03-16
+
+### Changed
+- **Camera fullscreen mode on secondary device** — when camera role activates, role cards and header hide, camera fills the screen in landscape orientation. Bottom bar shows "PianoQuest Room CODE" + status + Exit button. Tapping Exit deactivates camera and returns to role selection.
+
 ## [3.1.1] - 2026-03-16
 
 ### Fixed

@@ -274,6 +274,30 @@
     min-height: 100vh; gap: 20px; padding: 24px;
     background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif;
   }
+  .secondary-app.camera-fullscreen {
+    padding: 0; gap: 0; justify-content: flex-start;
+  }
+  .secondary-app.camera-fullscreen .secondary-header,
+  .secondary-app.camera-fullscreen .secondary-roles,
+  .secondary-app.camera-fullscreen .secondary-status { display: none; }
+  .secondary-app.camera-fullscreen .camera-preview-wrap {
+    max-width: 100%; width: 100%; margin: 0; border-radius: 0; border: none;
+    flex: 1; min-height: 0;
+  }
+  .secondary-app.camera-fullscreen .camera-preview-wrap video { width: 100%; height: 100%; object-fit: cover; }
+  .secondary-app.camera-fullscreen .camera-preview-wrap .hand-overlay { width: 100%; height: 100%; }
+  .camera-bottom-bar {
+    display: none; width: 100%; padding: 4px 12px;
+    background: rgba(0,0,0,0.85); align-items: center; gap: 8px;
+    font-size: 11px; color: var(--text2); flex-shrink: 0;
+  }
+  .secondary-app.camera-fullscreen .camera-bottom-bar { display: flex; }
+  .camera-bottom-bar .cam-title { font-weight: 700; color: var(--text1); }
+  .camera-bottom-bar .cam-title span { color: var(--accent); }
+  .camera-bottom-bar .cam-room { color: var(--text3); margin-left: 8px; }
+  .camera-bottom-bar .cam-room b { color: var(--accent); font-family: monospace; letter-spacing: 0.06em; }
+  .camera-bottom-bar .cam-status { margin-left: auto; }
+  .camera-bottom-bar .cam-exit { margin-left: 8px; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: var(--text2); font-size: 10px; cursor: pointer; }
   .secondary-header { text-align: center; }
   .secondary-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
   .secondary-header h2 span { color: var(--accent); }
@@ -452,7 +476,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.2</div>
       </div>
     </div>
     <div class="controls">
@@ -3331,6 +3355,40 @@ function updateQr(roomCode) {
   cameraPreviewWrap.style.display = 'none';
   app.appendChild(cameraPreviewWrap);
 
+  // Bottom bar for camera fullscreen mode
+  var camBottomBar = document.createElement('div');
+  camBottomBar.className = 'camera-bottom-bar';
+  camBottomBar.id = 'cameraBottomBar';
+  var camTitle = document.createElement('span');
+  camTitle.className = 'cam-title';
+  camTitle.textContent = 'Piano';
+  var camTitleSpan = document.createElement('span');
+  camTitleSpan.textContent = 'Quest';
+  camTitle.appendChild(camTitleSpan);
+  camBottomBar.appendChild(camTitle);
+  var camRoom = document.createElement('span');
+  camRoom.className = 'cam-room';
+  var camRoomB = document.createElement('b');
+  camRoomB.textContent = room;
+  camRoom.appendChild(document.createTextNode('Room '));
+  camRoom.appendChild(camRoomB);
+  camBottomBar.appendChild(camRoom);
+  var camStatusSpan = document.createElement('span');
+  camStatusSpan.className = 'cam-status';
+  camStatusSpan.id = 'camStatusText';
+  camStatusSpan.textContent = 'Camera active';
+  camBottomBar.appendChild(camStatusSpan);
+  var camExitBtn = document.createElement('button');
+  camExitBtn.className = 'cam-exit';
+  camExitBtn.textContent = 'Exit';
+  camExitBtn.onclick = function() {
+    if (secWs && secWs.readyState === WebSocket.OPEN) {
+      secWs.send(JSON.stringify({ type: 'request_role', role: 'camera', enabled: false }));
+    }
+  };
+  camBottomBar.appendChild(camExitBtn);
+  app.appendChild(camBottomBar);
+
   document.body.appendChild(app);
 
   // Audio playback context for secondary (to hear agent)
@@ -3430,12 +3488,21 @@ function updateQr(roomCode) {
 
     prevRoles = { mic: myRoles.mic, camera: myRoles.camera, midi: myRoles.midi };
 
+    // Camera fullscreen mode
+    if (myRoles.camera) {
+      app.classList.add('camera-fullscreen');
+    } else {
+      app.classList.remove('camera-fullscreen');
+    }
+
     if (myRoles.mic || myRoles.camera || myRoles.midi) {
       var active = [];
       if (myRoles.mic) active.push('Microphone');
       if (myRoles.camera) active.push('Camera');
       if (myRoles.midi) active.push('MIDI');
       statusEl.textContent = active.join(' + ') + ' active';
+      var camSt = document.getElementById('camStatusText');
+      if (camSt) camSt.textContent = active.join(' + ') + ' active';
     } else {
       statusEl.textContent = 'Connected \u2014 waiting for role assignment';
     }
