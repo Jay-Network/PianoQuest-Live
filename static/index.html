@@ -567,7 +567,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.14</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.15</div>
       </div>
     </div>
     <div class="controls">
@@ -3331,14 +3331,22 @@ var FINGERTIP_INDICES = [4,8,12,16,20];
 var FINGER_NAMES = ['thumb', 'index', 'middle', 'ring', 'pinky'];
 var FINGER_MCP = [2, 5, 9, 13, 17];
 
+function mpBadge(text) {
+  var b = document.getElementById('cameraBadge');
+  if (b) b.textContent = text;
+}
+
 function initDesktopMediaPipe() {
   if (typeof FilesetResolver === 'undefined' || typeof HandLandmarker === 'undefined') {
+    mpBadge('MediaPipe: CDN FAILED');
     console.log('MediaPipe not loaded on desktop');
     return;
   }
+  mpBadge('MediaPipe: loading WASM...');
   FilesetResolver.forVisionTasks(
     'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
   ).then(function(fileset) {
+    mpBadge('MediaPipe: loading model...');
     return HandLandmarker.createFromOptions(fileset, {
       baseOptions: {
         modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
@@ -3350,9 +3358,12 @@ function initDesktopMediaPipe() {
   }).then(function(landmarker) {
     desktopHandLandmarker = landmarker;
     mediapipeActive = true;
-    updateCameraUi();
+    mpBadge('MediaPipe: ON (GPU)');
+    var b = document.getElementById('cameraBadge');
+    if (b) { b.className = 'camera-badge ready'; }
     console.log('Desktop HandLandmarker ready (GPU)');
   }).catch(function(err) {
+    mpBadge('MediaPipe: GPU failed, trying CPU...');
     console.log('Desktop HandLandmarker GPU failed, trying CPU:', err);
     FilesetResolver.forVisionTasks(
       'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
@@ -3368,9 +3379,12 @@ function initDesktopMediaPipe() {
     }).then(function(landmarker) {
       desktopHandLandmarker = landmarker;
       mediapipeActive = true;
-      updateCameraUi();
+      mpBadge('MediaPipe: ON (CPU)');
+      var b = document.getElementById('cameraBadge');
+      if (b) { b.className = 'camera-badge ready'; }
       console.log('Desktop HandLandmarker ready (CPU)');
     }).catch(function(err2) {
+      mpBadge('MediaPipe: FAILED');
       console.log('Desktop HandLandmarker failed completely:', err2);
     });
   });
@@ -3388,12 +3402,26 @@ function analyzeFingerHeights(landmarks) {
   return fingers;
 }
 
+var _mpDetectCanvas = document.createElement('canvas');
+var _mpDetectCtx = _mpDetectCanvas.getContext('2d');
+
 function runDesktopHandDetection(imgElement) {
   if (!desktopHandLandmarker || !imgElement || !imgElement.naturalWidth) return;
   var overlay = document.getElementById('desktopHandOverlay');
   if (!overlay) return;
 
-  var results = desktopHandLandmarker.detect(imgElement);
+  // Draw img to canvas first — avoids cross-origin issues with detect()
+  _mpDetectCanvas.width = imgElement.naturalWidth;
+  _mpDetectCanvas.height = imgElement.naturalHeight;
+  _mpDetectCtx.drawImage(imgElement, 0, 0);
+
+  var results;
+  try {
+    results = desktopHandLandmarker.detect(_mpDetectCanvas);
+  } catch (e) {
+    console.log('MediaPipe detect error:', e);
+    return;
+  }
 
   // Draw skeleton overlay
   overlay.width = imgElement.naturalWidth;
