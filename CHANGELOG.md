@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.13] - 2026-03-16
+
+### Fixed
+- **Fur Elise sheet music rewrite**: Complete rewrite from 8 to 27 measures matching reference score. Corrected time signature (3/4), bass broken-chord patterns (A2-E3, E2-B2), added B section (C major, mf), A' return, 1st/2nd endings, dynamics markings, and final cadence.
+
+### Added
+- Fur Elise reference files saved to `docs/reference/` (PNG + PDF from pitt.edu)
+
 ## [2.1.12] - 2026-03-16
 
 ### Fixed

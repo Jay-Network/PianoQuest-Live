@@ -3,14 +3,16 @@
   "composer": "Ludwig van Beethoven",
   "key": "A minor",
   "tempo": 65,
-  "timeSig": "3/8",
+  "timeSig": "3/4",
   "beatsPerMeasure": 3,
+  "dynamics": "pp",
+  "marking": "Poco Moto",
   "measures": [
     {
-      "_": "Pickup: E5 D#5",
+      "_": "Pickup: E5 D#5 (beat 2 of incomplete measure)",
       "notes": [
-        { "midi": 76, "beat": 1, "dur": 0.5, "clef": "treble" },
-        { "midi": 75, "beat": 1.5, "dur": 0.5, "clef": "treble", "acc": "#" }
+        { "midi": 76, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 2.5, "dur": 0.5, "clef": "treble", "acc": "#" }
       ]
     },
     {
@@ -25,37 +27,40 @@
       ]
     },
     {
-      "_": "m2: A4 (rest) C4 E4 A4",
+      "_": "m2: Treble A4(quarter) rest C4 E4 A4 | Bass A2 E3 rest",
       "notes": [
-        { "midi": 69, "beat": 0, "dur": 1.5, "clef": "treble" },
-        { "midi": 45, "beat": 0, "dur": 1.5, "clef": "bass" },
-        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
-        { "midi": 57, "beat": 1.5, "dur": 0.5, "clef": "bass" },
-        { "midi": 60, "beat": 2, "dur": 0.5, "clef": "treble" }
+        { "midi": 69, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 60, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 64, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 69, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" }
       ]
     },
     {
-      "_": "m3: B4 (rest) E4 G#4 B4",
+      "_": "m3: Treble B4(quarter) rest E4 G#4 B4 | Bass E2 B2 rest",
       "notes": [
-        { "midi": 71, "beat": 0, "dur": 1.5, "clef": "treble" },
-        { "midi": 40, "beat": 0, "dur": 1.5, "clef": "bass" },
-        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
-        { "midi": 56, "beat": 1.5, "dur": 0.5, "clef": "bass", "acc": "#" },
-        { "midi": 59, "beat": 2, "dur": 0.5, "clef": "treble" }
+        { "midi": 71, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 52, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 56, "beat": 2, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 59, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 40, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 47, "beat": 0.5, "dur": 0.5, "clef": "bass" }
       ]
     },
     {
-      "_": "m4: C5 (rest) E4 E5 D#5",
+      "_": "m4: Treble C5(quarter) rest E4 | E5 D#5 | Bass A2 E3 rest",
       "notes": [
-        { "midi": 72, "beat": 0, "dur": 1.5, "clef": "treble" },
-        { "midi": 45, "beat": 0, "dur": 1.5, "clef": "bass" },
-        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
+        { "midi": 72, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 52, "beat": 1.5, "dur": 0.5, "clef": "treble" },
         { "midi": 76, "beat": 2, "dur": 0.5, "clef": "treble" },
-        { "midi": 75, "beat": 2.5, "dur": 0.5, "clef": "treble", "acc": "#" }
+        { "midi": 75, "beat": 2.5, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" }
       ]
     },
     {
-      "_": "m5: E5 D#5 E5 B4 D5 C5 (repeat)",
+      "_": "m5: E5 D#5 E5 B4 D5 C5 (theme repeat)",
       "notes": [
         { "midi": 76, "beat": 0, "dur": 0.5, "clef": "treble" },
         { "midi": 75, "beat": 0.5, "dur": 0.5, "clef": "treble", "acc": "#" },
@@ -66,30 +71,239 @@
       ]
     },
     {
-      "_": "m6: A4 (rest) C4 E4 A4",
+      "_": "m6: Treble A4(quarter) rest C4 E4 A4 | Bass A2 E3 rest",
       "notes": [
-        { "midi": 69, "beat": 0, "dur": 1.5, "clef": "treble" },
-        { "midi": 45, "beat": 0, "dur": 1.5, "clef": "bass" },
-        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
-        { "midi": 57, "beat": 1.5, "dur": 0.5, "clef": "bass" },
-        { "midi": 60, "beat": 2, "dur": 0.5, "clef": "treble" }
+        { "midi": 69, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 60, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 64, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 69, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" }
       ]
     },
     {
-      "_": "m7: B4 (rest) E4 C5 B4",
+      "_": "m7: Treble B4(quarter) rest E4 C5 B4 | Bass E2 B2 rest",
       "notes": [
-        { "midi": 71, "beat": 0, "dur": 1.5, "clef": "treble" },
-        { "midi": 40, "beat": 0, "dur": 1.5, "clef": "bass" },
-        { "midi": 52, "beat": 1, "dur": 0.5, "clef": "bass" },
+        { "midi": 71, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 52, "beat": 1.5, "dur": 0.5, "clef": "treble" },
         { "midi": 72, "beat": 2, "dur": 0.5, "clef": "treble" },
-        { "midi": 71, "beat": 2.5, "dur": 0.5, "clef": "treble" }
+        { "midi": 71, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 40, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 47, "beat": 0.5, "dur": 0.5, "clef": "bass" }
       ]
     },
     {
-      "_": "m8: A4 (held)",
+      "_": "m8 (1st ending): Treble A4(half) rest | Bass A2 E3 A3 rest",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 2, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 57, "beat": 1, "dur": 0.5, "clef": "bass" }
+      ],
+      "ending": 1,
+      "repeatEnd": true
+    },
+    {
+      "_": "m8b (2nd ending): Treble A4(quarter) rest A4 C5 E5 | Bass A2 E3 rest",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 69, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 76, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" }
+      ],
+      "ending": 2
+    },
+    {
+      "_": "m9 (B section): Treble E5(quarter) rest E5 F5 | Bass C3 G3 C4 rest | mf",
+      "dynamics": "mf",
+      "notes": [
+        { "midi": 76, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 76, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 77, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 48, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 55, "beat": 0.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 60, "beat": 1, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m10: Treble E5(quarter) rest E5 F5 | Bass G2 G3 B3 rest",
+      "notes": [
+        { "midi": 76, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 76, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 77, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 43, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 55, "beat": 0.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 59, "beat": 1, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m11: Treble E5(quarter) rest | E5 D5 | Bass A2 E3 A3 rest",
+      "notes": [
+        { "midi": 76, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 76, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 74, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 57, "beat": 1, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m12 (page 2 system 1): Treble D5(quarter) rest D5 E5 | Bass Bb2 F3 A3 rest",
+      "notes": [
+        { "midi": 74, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 74, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 76, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 46, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 53, "beat": 0.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 57, "beat": 1, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m13: Treble D5(quarter) rest D5 C5 | Bass A2 E3 A3 rest",
+      "notes": [
+        { "midi": 74, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 74, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" },
+        { "midi": 57, "beat": 1, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m14 (dim.): Treble C5(quarter) rest B4 | Bass rest",
+      "notes": [
+        { "midi": 72, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 71, "beat": 2, "dur": 0.5, "clef": "treble" }
+      ],
+      "dynamics": "dim."
+    },
+    {
+      "_": "m15 (r.h. over): Treble rest G#4 A4 B4 | Bass rest G#4 A4 rest",
+      "notes": [
+        { "midi": 68, "beat": 1, "dur": 0.5, "clef": "treble" },
+        { "midi": 69, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 71, "beat": 2, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m16 (pp): Treble rest rest E5 D#5 | Bass G#4 rest rest",
+      "dynamics": "pp",
+      "notes": [
+        { "midi": 76, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 2.5, "dur": 0.5, "clef": "treble", "acc": "#" }
+      ]
+    },
+    {
+      "_": "m17 (A' return): E5 D#5 E5 B4 D5 C5",
+      "notes": [
+        { "midi": 76, "beat": 0, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 0.5, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 76, "beat": 1, "dur": 0.5, "clef": "treble" },
+        { "midi": 71, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 74, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2.5, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m18: Treble A4(quarter) rest C4 E4 A4 | Bass A2 E3 rest",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 60, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 64, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 69, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m19: Treble B4(quarter) rest E4 G#4 B4 | Bass E2 B2 rest",
+      "notes": [
+        { "midi": 71, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 52, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 56, "beat": 2, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 59, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 40, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 47, "beat": 0.5, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m20: Treble C5(quarter) rest E4 E5 D#5 | Bass A2 E3 rest",
+      "notes": [
+        { "midi": 72, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 52, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 76, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 2.5, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m21: E5 D#5 E5 B4 D5 C5",
+      "notes": [
+        { "midi": 76, "beat": 0, "dur": 0.5, "clef": "treble" },
+        { "midi": 75, "beat": 0.5, "dur": 0.5, "clef": "treble", "acc": "#" },
+        { "midi": 76, "beat": 1, "dur": 0.5, "clef": "treble" },
+        { "midi": 71, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 74, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2.5, "dur": 0.5, "clef": "treble" }
+      ]
+    },
+    {
+      "_": "m22: Treble A4(quarter) rest C4 E4 A4 | Bass A2 E3 rest",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 60, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 64, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 69, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 52, "beat": 0.5, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m23: Treble B4(quarter) rest E4 C5 B4 | Bass E2 B2 rest",
+      "notes": [
+        { "midi": 71, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 52, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 71, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 40, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 47, "beat": 0.5, "dur": 0.5, "clef": "bass" }
+      ]
+    },
+    {
+      "_": "m24 (1st ending): Treble A4(quarter) rest A4 C5 E5 E5 D#5 | Bass A2 E3 A3 rest | then A2 E3 rest",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 69, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 76, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 56, "beat": 0.5, "dur": 0.5, "clef": "bass", "acc": "#" }
+      ],
+      "ending": 1
+    },
+    {
+      "_": "m24b (2nd ending): Treble A4(quarter) rest A4 C5 E5 | Bass A2 G#2 rest",
+      "notes": [
+        { "midi": 69, "beat": 0, "dur": 1, "clef": "treble" },
+        { "midi": 69, "beat": 1.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 72, "beat": 2, "dur": 0.5, "clef": "treble" },
+        { "midi": 76, "beat": 2.5, "dur": 0.5, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 0.5, "clef": "bass" },
+        { "midi": 56, "beat": 0.5, "dur": 0.5, "clef": "bass", "acc": "#" }
+      ],
+      "ending": 2,
+      "repeatEnd": true
+    },
+    {
+      "_": "m25 (final): Treble A4(half) + C5(half) | Bass A2(half) + A3(half)",
       "notes": [
         { "midi": 69, "beat": 0, "dur": 3, "clef": "treble" },
-        { "midi": 45, "beat": 0, "dur": 3, "clef": "bass" }
+        { "midi": 72, "beat": 0, "dur": 3, "clef": "treble" },
+        { "midi": 45, "beat": 0, "dur": 3, "clef": "bass" },
+        { "midi": 57, "beat": 0, "dur": 3, "clef": "bass" }
       ]
     }
   ]
