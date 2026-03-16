@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.9] - 2026-03-16
+
+### Fixed
+- **App not using full browser width**: Removed `max-width: 1920px` and `margin: 0 auto` — app now fills entire browser window
+
 ## [2.1.8] - 2026-03-16
 
 ### Fixed
