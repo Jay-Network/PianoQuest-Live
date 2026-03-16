@@ -128,3 +128,67 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Status: Investigating
 - Root cause: Gemini connection still twitching between connected/disconnected even with SDK live.connect(). Stripped to minimal config in v1.8.2.
 - Fix: TBD — stripped config to absolute minimum (responseModalities only). If still failing, need to check API key, model availability, or network issues.
+
+## BUG-017
+- Version found: `2.0.3`
+- Severity: High
+- Status: Fixed (v2.1.0)
+- Root cause: Gemini `inputAudioTranscription` outputs wrong languages (Arabic, Korean) — known unfixable API bug on native audio model.
+- Fix: Removed `inputAudioTranscription` from Gemini config. Added browser Web Speech API (`SpeechRecognition`) as replacement for user input transcription.
+- Prevention: Don't rely on Gemini's input transcription for native audio models. Use browser-side speech recognition.
+
+## BUG-018
+- Version found: `2.0.3`
+- Severity: High
+- Status: Fixed (v2.1.0)
+- Root cause: Output transcription showed only last few words because code replaced buffer (`bufOutput = text`) instead of appending.
+- Fix: Changed to `bufOutput += (bufOutput ? " " : "") + text` to accumulate full sentences.
+- Prevention: Transcription chunks are partial — always append, never replace.
+
+## BUG-019
+- Version found: `2.1.0`
+- Severity: High
+- Status: Fixed (v2.1.1)
+- Root cause: Gemini responds "that sounds really expressive" to user speech, thinking they played piano. Cannot distinguish voice from piano audio in the same stream.
+- Fix: Updated system instruction to explicitly describe two audio signal types (voice vs piano) and require MIDI data before commenting on playing.
+- Prevention: Always clarify input modality expectations in system instruction when multiple audio sources share one stream.
+
+## BUG-020
+- Version found: `2.1.0`
+- Severity: High
+- Status: Fixed (v2.1.1)
+- Root cause: Grand staff note tails go dark immediately on finger release. History drawing used flat alpha fade without distinguishing finger-held vs pedal-sustained segments (unlike waterfall which has separate headColor/pedalColor).
+- Fix: Grand staff history now draws two segments — finger-held (bright) and pedal-sustained (dimmer) — matching waterfall behavior.
+- Prevention: Keep visual rendering rules identical between waterfall and grand staff.
+
+## BUG-021
+- Version found: `2.1.1`
+- Severity: Medium
+- Status: Fixed (v2.1.2)
+- Root cause: Left panel resize handle placed inside left-col with `overflow: hidden`, making it invisible and non-functional.
+- Fix: Restructured resize handles as dedicated grid columns between panels instead of absolute-positioned elements inside overflow-hidden containers.
+- Prevention: Never place interactive handles inside overflow:hidden containers.
+
+## BUG-022
+- Version found: `2.1.0`
+- Severity: Medium
+- Status: Fixed (v2.1.3)
+- Root cause: Grand staff clefs overlapped time signature — clefW (24px) too narrow for rendered glyph size.
+- Fix: Widened clef area 24→32px and time sig zone 16→18px.
+- Prevention: Size margin zones based on actual glyph rendering, not assumptions.
+
+## BUG-023
+- Version found: `2.1.0`
+- Severity: Low
+- Status: Fixed (v2.1.4)
+- Root cause: Pistachio green for mezzo piano (mp) looked out of place in the dynamics color palette. Rainbow color scheme (blue→cyan→green→yellow→orange→red→pink→purple) had no visual coherence.
+- Fix: Replaced with cool blue→white temperature ramp (Option B from jworks:81 design team).
+- Prevention: Get design review before shipping color palettes.
+
+## BUG-024
+- Version found: `2.1.4`
+- Severity: Medium
+- Status: Fixed (v2.1.5)
+- Root cause: Option B dynamics colors too desaturated — at normal playing velocities (60-100), colors looked near-white/monochrome, indistinguishable from Option A.
+- Fix: Increased blue channel saturation across the gradient. Low velocities now clearly deep blue, mid-range sky blue, high velocities near-white.
+- Prevention: Test color palettes at typical velocity ranges, not just extremes.

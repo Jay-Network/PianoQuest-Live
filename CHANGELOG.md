@@ -6,14 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [2.1.1] - 2026-03-16
+## [2.1.5] - 2026-03-16
+
+### Fixed
+- **Dynamics colors too washed out**: Increased blue saturation so gradient is clearly visible (deep blue→rich blue→sky blue→white instead of gray-blue→white)
+
+## [2.1.4] - 2026-03-16
 
 ### Fixed
 - **Color palette**: Replace rainbow dynamics with cool blue→white temperature ramp (Option B by jworks:81) — quiet=steel blue, loud=white
-- **Clef area widened**: 24→32px so clefs don't overlap time signature
-- **Grand staff tail brightness**: Match waterfall rules — finger-held bright, pedal-sustained dims
-- **Gemini speech/piano confusion**: System instruction clarifies two audio signal types, requires MIDI before coaching
-- **Panel resize handles**: Restructured from clipped absolute-positioned to grid-level columns (left ↔ center ↔ score all draggable)
+
+## [2.1.3] - 2026-03-16
+
+### Fixed
+- **Clef area widened**: 24→32px so clefs don't overlap time signature, time sig zone 16→18px
+
+## [2.1.2] - 2026-03-16
+
+### Fixed
+- **Panel resize handles**: Restructured from clipped absolute-positioned to grid-level draggable columns (left ↔ center ↔ score)
+
+## [2.1.1] - 2026-03-16
+
+### Fixed
+- **Gemini speech/piano confusion**: System instruction clarifies two audio signal types (voice vs piano), requires MIDI data before coaching
+- **Grand staff tail brightness**: Match waterfall rules — finger-held segment stays bright, pedal-sustained dims
 - **Treble clef**: 10% larger (0.84→0.924), moved right
 - **Bass clef**: Moved one note lower so dots straddle F3 line
 

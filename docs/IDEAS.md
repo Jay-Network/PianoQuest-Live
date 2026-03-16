@@ -53,6 +53,18 @@ Each idea: ID, version proposed, severity (major/minor), status, description.
 - **Severity:** major
 - **Description:** MediaPipe hand tracking overlay, camera panel, report_technique tool (vision+audio correlation), video frame sending to Gemini, standalone phone camera mode, multi-device camera role. Full restoration guide: `docs/removed-camera-finger-tracking.md`
 
+**IDEA: Music notation symbols — rests, note types, expressions, pedal signs**
+- **Version:** 2.1.5
+- **Status:** proposed
+- **Severity:** major
+- **Description:** Add comprehensive music notation to the score renderer: rest symbols (whole through sixteenth), note duration types (whole/half/quarter/eighth with proper heads, stems, flags, beams), expression marks (staccato, legato, accent, tenuto, fermata, marcato), tempo markings, ornaments (trill, mordent, turn, grace notes), and pedal signs (Ped./asterisk, bracket notation). Reference doc at `docs/music-notation-reference.md`.
+
+**IDEA: Fix Fur Elise digital sheet music**
+- **Version:** 2.1.5
+- **Status:** proposed
+- **Severity:** minor
+- **Description:** Current `sheets/classical/fur-elise.json` has incorrect notation. Need to match a real reference sheet (requested from jayhub:31). Digital version should look exactly like a proper published score.
+
 **IDEA: Custom desktop UI for VoiceLauncher integration**
 - **Version:** 0.4.7
 - **Status:** proposed

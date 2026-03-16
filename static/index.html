@@ -390,7 +390,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.5</div>
       </div>
     </div>
     <div class="controls">
@@ -582,17 +582,17 @@ const FIRST_MIDI = 21;
 const WHITE_KEYS_COUNT = 52;
 const BLACK_KEY_PATTERN = [false, true, false, true, false, false, true, false, true, false, true, false];
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-// Option B: Cool blue→white temperature ramp (designed by jworks:81)
+// Option B: Cool blue→white temperature ramp (designed by jworks:81, saturated)
 const DYNAMICS_COLORS = [
-  { vel: 0,   r: 74,  g: 106, b: 138 },  // pp  #4a6a8a deep steel blue
-  { vel: 18,  r: 74,  g: 106, b: 138 },  // pp
-  { vel: 36,  r: 106, g: 143, b: 175 },  // p   #6a8faf muted blue
-  { vel: 54,  r: 138, g: 176, b: 204 },  // mp  #8ab0cc light steel
-  { vel: 72,  r: 176, g: 207, b: 224 },  // mf  #b0cfe0 pale blue-white
-  { vel: 90,  r: 212, g: 229, b: 240 },  // f   #d4e5f0 near-white blue
-  { vel: 100, r: 230, g: 240, b: 248 },  // f+
-  { vel: 112, r: 245, g: 249, b: 252 },  // ff
-  { vel: 127, r: 255, g: 255, b: 255 }   // fff #ffffff pure white
+  { vel: 0,   r: 40,  g: 70,  b: 130 },  // pp  deep blue
+  { vel: 18,  r: 40,  g: 70,  b: 130 },  // pp
+  { vel: 36,  r: 55,  g: 100, b: 170 },  // p   rich blue
+  { vel: 54,  r: 80,  g: 140, b: 200 },  // mp  medium blue
+  { vel: 72,  r: 120, g: 175, b: 220 },  // mf  sky blue
+  { vel: 90,  r: 170, g: 210, b: 240 },  // f   light blue
+  { vel: 100, r: 210, g: 230, b: 248 },  // f+  pale blue
+  { vel: 112, r: 235, g: 245, b: 252 },  // ff  near-white blue
+  { vel: 127, r: 255, g: 255, b: 255 }   // fff pure white
 ];
 const DYNAMICS_LABELS = [
   { vel: 0, label: 'ppp' },
