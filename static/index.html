@@ -554,7 +554,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.3</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.4</div>
       </div>
     </div>
     <div class="controls">
@@ -4171,7 +4171,6 @@ function buildSecondaryUI(room, params) {
     statusEl.style.color = 'var(--green)';
     // Auto-activate camera immediately — skip role selection
     secWs.send(JSON.stringify({ type: 'request_role', role: 'camera', enabled: true }));
-    secWs.send(JSON.stringify({ type: 'request_role', role: 'mic', enabled: true }));
   };
 
   secWs.onmessage = function(event) {

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.4] - 2026-03-16
+
+### Fixed
+- **Phone only auto-activates camera** — removed mic auto-activation from phone. Mic is handled by iPad/tablet or desktop, not the camera phone.
+
 ## [3.2.3] - 2026-03-16
 
 ### Changed
