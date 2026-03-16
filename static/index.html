@@ -556,7 +556,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.7</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.8</div>
       </div>
     </div>
     <div class="controls">
@@ -4072,7 +4072,7 @@ function buildSecondaryUI(room, params) {
   var rolesContainer = document.createElement('div');
   rolesContainer.className = 'secondary-roles';
   rolesContainer.id = 'secondaryRoles';
-  rolesContainer.style.display = 'none'; // Hidden — camera auto-activates
+  rolesContainer.style.display = 'none'; // Hidden — camera auto-activates on connect
 
   var roleConfigs = [
     { key: 'mic', icon: '\uD83C\uDF99\uFE0F', name: 'MIC' },
@@ -4248,12 +4248,7 @@ function buildSecondaryUI(room, params) {
 
     prevRoles = { mic: myRoles.mic, camera: myRoles.camera, midi: myRoles.midi };
 
-    // Camera fullscreen mode
-    if (myRoles.camera) {
-      app.classList.add('camera-fullscreen');
-    } else {
-      app.classList.remove('camera-fullscreen');
-    }
+    // No fullscreen — keep camera as inline preview with other UI elements visible
 
     if (myRoles.mic || myRoles.camera || myRoles.midi) {
       var active = [];

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.8] - 2026-03-16
+
+### Fixed
+- **Removed camera fullscreen mode on phone** — camera stays as inline preview, header/status/controls remain visible. No more fullscreen takeover hiding everything.
+
 ## [3.2.7] - 2026-03-16
 
 ### Fixed
