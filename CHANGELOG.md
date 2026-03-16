@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.5] - 2026-03-16
+
+### Changed
+- **Left panel (Gemini dialog) doubled to 520px** default width on desktop (was 260px).
+
 ## [3.2.4] - 2026-03-16
 
 ### Fixed
