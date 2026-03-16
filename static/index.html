@@ -567,7 +567,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.15</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.16</div>
       </div>
     </div>
     <div class="controls">
@@ -3290,24 +3290,19 @@ function updateCameraUi() {
   var panel = document.getElementById('techniquePanel');
   var entries = document.getElementById('techniqueEntries');
   if (!badge) return;
-  if (!cameraEnabled) {
-    badge.className = 'camera-badge off';
-    badge.textContent = 'Camera Off';
-    var camWrap = document.getElementById('remoteCameraWrap');
-    if (camWrap) camWrap.style.display = 'none';
-    if (entries && !entries.querySelector('.technique-entry')) {
-      entries.textContent = '';
-      var offMsg = document.createElement('div');
-      offMsg.style.cssText = 'font-size:11px;color:var(--text3);';
-      offMsg.textContent = 'Camera off';
-      entries.appendChild(offMsg);
-    }
-  } else if (mediapipeActive) {
+  // MediaPipe status takes priority — it runs on desktop regardless of camera
+  if (mediapipeActive) {
     badge.className = 'camera-badge ready';
     badge.textContent = 'MediaPipe: ON';
+  } else if (desktopHandLandmarker === null) {
+    // Still loading or failed — don't overwrite mpBadge() status
   } else {
     badge.className = 'camera-badge warn';
     badge.textContent = 'MediaPipe: OFF';
+  }
+  if (!cameraEnabled) {
+    var camWrap = document.getElementById('remoteCameraWrap');
+    if (camWrap) camWrap.style.display = 'none';
   }
   var drillCam = document.getElementById('drillCameraStatus');
   if (drillCam) drillCam.style.display = cameraEnabled ? '' : 'none';
