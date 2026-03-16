@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.7] - 2026-03-16
+
+### Fixed
+- **Hand skeleton overlay composited into JPEG frames** — desktop camera panel now shows MediaPipe bone overlay. Phone overlay canvas drawn onto offscreen canvas before encoding, so both phone and desktop see hand bones.
+
 ## [3.2.6] - 2026-03-16
 
 ### Fixed

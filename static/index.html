@@ -556,7 +556,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.6</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.7</div>
       </div>
     </div>
     <div class="controls">
@@ -4369,12 +4369,17 @@ function buildSecondaryUI(room, params) {
       var offCtx = offCanvas.getContext('2d');
 
       // Send JPEG frames to server at 4fps (250ms) for desktop preview + Gemini vision
+      // Composites hand skeleton overlay onto the frame so desktop sees bones too
       secCameraInterval = setInterval(function() {
         if (!secWs || secWs.readyState !== WebSocket.OPEN || !myRoles.camera) return;
         if (video.videoWidth === 0) return;
         offCanvas.width = video.videoWidth;
         offCanvas.height = video.videoHeight;
         offCtx.drawImage(video, 0, 0);
+        // Draw hand overlay on top if available
+        if (canvas.width > 0 && canvas.height > 0) {
+          offCtx.drawImage(canvas, 0, 0, offCanvas.width, offCanvas.height);
+        }
         var dataUrl = offCanvas.toDataURL('image/jpeg', 0.6);
         var base64 = dataUrl.split(',')[1];
         secWs.send(JSON.stringify({ type: 'video_frame', data: base64 }));
