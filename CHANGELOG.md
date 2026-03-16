@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.25] - 2026-03-16
+
+### Changed
+- **Active real-time analysis mode** — Gemini now actively monitors and comments during play (brief 1-sentence observations every 10-20s), responds to "hey Gemini", gives detailed analysis when asked
+
 ## [3.2.24] - 2026-03-16
 
 ### Changed
