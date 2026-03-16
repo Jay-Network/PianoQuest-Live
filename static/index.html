@@ -567,7 +567,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.20</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.21</div>
       </div>
     </div>
     <div class="controls">
@@ -3332,28 +3332,20 @@ function mpBadge(text) {
 }
 
 function initDesktopMediaPipe() {
-  mpBadge('MediaPipe: loading script...');
-  var script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.min.js';
-  script.crossOrigin = 'anonymous';
-  script.onerror = function() {
-    mpBadge('MediaPipe: CDN FAILED');
-    console.log('MediaPipe script failed to load');
-  };
-  script.onload = function() {
-    // Try bare globals first, then vision.* namespace
-    if (typeof FilesetResolver === 'undefined' && typeof vision !== 'undefined') {
-      window.FilesetResolver = vision.FilesetResolver;
-      window.HandLandmarker = vision.HandLandmarker;
-    }
-    if (typeof FilesetResolver === 'undefined' || typeof HandLandmarker === 'undefined') {
-      mpBadge('MediaPipe: globals missing');
-      console.log('MediaPipe globals:', typeof FilesetResolver, typeof HandLandmarker, typeof vision);
+  mpBadge('MediaPipe: loading...');
+  import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.min.js').then(function(mod) {
+    window.FilesetResolver = mod.FilesetResolver;
+    window.HandLandmarker = mod.HandLandmarker;
+    if (!window.FilesetResolver || !window.HandLandmarker) {
+      mpBadge('MediaPipe: exports missing');
+      console.log('MediaPipe module keys:', Object.keys(mod).slice(0, 20));
       return;
     }
     _initMediaPipeModel();
-  };
-  document.head.appendChild(script);
+  }).catch(function(err) {
+    mpBadge('MediaPipe: LOAD FAILED');
+    console.log('MediaPipe import error:', err);
+  });
 }
 
 function _initMediaPipeModel() {
