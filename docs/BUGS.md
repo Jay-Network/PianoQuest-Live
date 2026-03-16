@@ -288,3 +288,11 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: Two bugs preventing MIDI events from reaching spectators (and thus the livestream bridge): (1) Primary device had `roles.midi = false`, so `midi_event` messages from secondary handler were gated. (2) Primary handler's `midi_event` case was a no-op — it received events but never broadcast them.
 - Fix: Set primary device `roles.midi = true`. Added `broadcastToRoom` (or `broadcastSpectators` fallback) in primary handler's `midi_event` case.
 - Prevention: Any message type that needs to reach spectators must have an explicit broadcast call. Don't silently drop messages.
+
+## BUG-037
+- Version found: `2.1.50`
+- Severity: Critical
+- Status: Fixed (v2.1.52)
+- Root cause: The `ws` npm library delivers ALL WebSocket messages as `Buffer` by default, regardless of whether they were sent as text or binary. The `wsMessages()` generator pushed raw `data` into the queue, and the consumer checked `typeof rawMsg === "string"` — which was ALWAYS false. All JSON text messages (`midi_event`, `midi_snapshot`, `text`, `set_mode`) were silently routed into the binary (PCM audio) branch and sent to Gemini as garbage audio. This is why zero `midi_event` messages ever reached the broadcast code despite the browser sending them correctly.
+- Fix: Use the `isBinary` parameter from the ws `message` event. When `isBinary` is false, call `data.toString()` before pushing to the queue.
+- Prevention: Never assume `typeof data === "string"` with the ws library. Always use the `isBinary` flag.

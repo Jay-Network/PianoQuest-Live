@@ -495,8 +495,10 @@ async function* wsMessages(
   let resolve: (() => void) | null = null;
   let done = false;
 
-  ws.on("message", (data: Buffer | string) => {
-    queue.push(data);
+  ws.on("message", (data: Buffer | string, isBinary: boolean) => {
+    // ws library delivers ALL messages as Buffer; use isBinary to distinguish
+    const item = isBinary ? data : data.toString();
+    queue.push(item);
     if (resolve) {
       resolve();
       resolve = null;

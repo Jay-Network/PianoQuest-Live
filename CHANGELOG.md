@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.52] - 2026-03-16
+
+### Fixed
+- **CRITICAL: wsMessages delivered text as Buffer** — ws library delivers ALL messages as Buffer by default. `typeof rawMsg === "string"` was always false, so JSON messages (midi_event, midi_snapshot, text, set_mode) were silently treated as PCM audio. Fixed by using ws `isBinary` parameter to convert text messages to string.
+
 ## [2.1.51] - 2026-03-16
 
 ### Fixed
