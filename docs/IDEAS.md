@@ -49,9 +49,10 @@ Each idea: ID, version proposed, severity (major/minor), status, description.
 
 **IDEA: Camera + Finger Tracking (stripped in v2.1.0, re-add post-competition)**
 - **Version:** 2.1.0
-- **Status:** proposed (stripped in v2.1.0)
+- **Status:** implemented (v3.1.0)
+- **Implementation version:** 3.1.0
 - **Severity:** major
-- **Description:** MediaPipe hand tracking overlay, camera panel, report_technique tool (vision+audio correlation), video frame sending to Gemini, standalone phone camera mode, multi-device camera role. Full restoration guide: `docs/removed-camera-finger-tracking.md`
+- **Description:** MediaPipe hand tracking overlay, camera panel, report_technique tool (vision+audio correlation), video frame sending to Gemini, standalone phone camera mode, multi-device camera role. Full restoration guide: `docs/removed-camera-finger-tracking.md`. Re-implemented with hybrid approach: MediaPipe HandLandmarker runs client-side on phone for skeleton overlay, JPEG frames sent at 1fps to Gemini for vision coaching. Camera role in multi-device system. Finger tracking panel on primary shows technique reports.
 
 **IDEA: Music notation symbols — rests, note types, expressions, pedal signs**
 - **Version:** 2.1.5

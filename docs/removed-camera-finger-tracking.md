@@ -1,6 +1,8 @@
 # Removed: Camera + Finger Tracking Code (v2.0.3 → v2.1.0)
 
-Stripped for competition deadline. To restore, re-add these pieces:
+> **RESTORED in v3.1.0** — Re-implemented with hybrid approach (MediaPipe HandLandmarker client-side + Gemini Vision server-side). The implementation differs from the original (uses tasks-vision instead of legacy hands.js, camera runs on secondary device only, no standalone camera endpoint).
+
+Originally stripped for competition deadline. Reference below for the original pieces:
 
 ## What was removed
 

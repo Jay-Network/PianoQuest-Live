@@ -111,6 +111,7 @@ function broadcastSpectators(data: Buffer | string, binary = false) {
 
 interface DeviceRoles {
   mic: boolean;
+  camera: boolean;
   midi: boolean;
 }
 
@@ -133,6 +134,8 @@ interface RoomSession {
   /** Accumulated MIDI notes for periodic Gemini snapshots */
   midiBuffer: Array<{ note: number; velocity: number; event: string; timestampMs: number }>;
   midiFlushTimer: ReturnType<typeof setTimeout> | null;
+  cameraEnabled: boolean;
+  bothHandsDetected: boolean;
 }
 
 const rooms = new Map<string, RoomSession>();
@@ -572,7 +575,7 @@ async function handleSecondaryWebSocket(
     name: deviceTypeName(devType),
     deviceType: devType,
     isPrimary: false,
-    roles: { mic: false, midi: false },
+    roles: { mic: false, camera: false, midi: false },
     connectedAt: Date.now(),
   };
 
@@ -588,7 +591,7 @@ async function handleSecondaryWebSocket(
   }));
 
   // If role hint provided, auto-assign that role
-  if (roleHint === "mic" || roleHint === "midi") {
+  if (roleHint === "mic" || roleHint === "midi" || roleHint === "camera") {
     setDeviceRole(room, deviceId, roleHint as keyof DeviceRoles, true);
   }
 
@@ -620,6 +623,20 @@ async function handleSecondaryWebSocket(
         } else if (msgType === "midi_event" && device.roles.midi) {
           // Forward raw MIDI to all room devices for visualization
           broadcastToRoom(room, JSON.stringify(msg));
+        } else if (msgType === "video_frame" && device.roles.camera) {
+          // Forward camera JPEG frame to Gemini as vision input
+          const data = msg.data as string;
+          if (data) {
+            room.sendRealtimeInput({
+              media: { data, mimeType: "image/jpeg" },
+            });
+          }
+        } else if (msgType === "camera_state") {
+          room.cameraEnabled = Boolean(msg.enabled);
+          broadcastToRoom(room, JSON.stringify({ type: "camera_state", enabled: room.cameraEnabled }));
+        } else if (msgType === "hand_state") {
+          room.bothHandsDetected = Boolean(msg.bothHands);
+          broadcastToRoom(room, JSON.stringify({ type: "hand_state", hands: msg.hands, bothHands: msg.bothHands }));
         } else if (msgType === "text") {
           room.sendClientContent({
             turns: [{ role: "user", parts: [{ text: msg.content as string }] }],
@@ -679,7 +696,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
     name: deviceTypeName(devType) + " (Primary)",
     deviceType: devType,
     isPrimary: true,
-    roles: { mic: true, midi: true },
+    roles: { mic: true, camera: false, midi: true },
     connectedAt: Date.now(),
   };
 
@@ -726,6 +743,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             devices: new Map(),
             midiBuffer: [],
             midiFlushTimer: null,
+            cameraEnabled: false,
+            bothHandsDetected: false,
           };
           roomSession.devices.set(primaryDeviceId, primaryDevice);
           rooms.set(roomCode, roomSession);
@@ -881,9 +900,28 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             console.log(`[${APP_NAME}] midi_event broadcast to ${spectators.size} spectators (no room)`);
             broadcastSpectators(JSON.stringify(msg));
           }
+        } else if (msgType === "video_frame" && primaryDevice.roles.camera) {
+          const data = msg.data as string;
+          if (data) {
+            session.sendRealtimeInput({
+              media: { data, mimeType: "image/jpeg" },
+            });
+          }
+        } else if (msgType === "camera_state") {
+          const rs = roomSession as RoomSession | null;
+          if (rs) {
+            rs.cameraEnabled = Boolean(msg.enabled);
+            broadcastToRoom(rs, JSON.stringify({ type: "camera_state", enabled: rs.cameraEnabled }));
+          }
+        } else if (msgType === "hand_state") {
+          const rs = roomSession as RoomSession | null;
+          if (rs) {
+            rs.bothHandsDetected = Boolean(msg.bothHands);
+            broadcastToRoom(rs, JSON.stringify({ type: "hand_state", hands: msg.hands, bothHands: msg.bothHands }));
+          }
         } else if (msgType === "set_device_role") {
           const { deviceId, role, enabled } = msg;
-          if (roomSession && (role === "mic" || role === "midi")) {
+          if (roomSession && (role === "mic" || role === "midi" || role === "camera")) {
             setDeviceRole(roomSession as RoomSession, deviceId, role, Boolean(enabled));
             console.log(`[${APP_NAME}] Role ${role}=${enabled} on device ${deviceId}`);
           }

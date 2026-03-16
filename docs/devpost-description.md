@@ -11,6 +11,7 @@ PianoQuest Live is an AI piano coach that makes you a better musician through re
 **Multimodal inputs, processed simultaneously:**
 - **Audio** from microphone — piano sound, dynamics, user voice
 - **MIDI** from USB keyboard — exact notes, velocity, timing, pedal events
+- **Video** from phone camera — hand position and finger technique via MediaPipe + Gemini Vision
 - **Voice** — the user's goals, questions, and reactions
 
 **What you experience:**
@@ -19,15 +20,18 @@ PianoQuest Live is an AI piano coach that makes you a better musician through re
 - Waterfall display with velocity-colored falling notes
 - Dynamic bars showing per-note intensity across the keyboard
 - Coaching focus card updated by Gemini through tool calls
-- Multi-device support: desktop for MIDI + visualization, tablet for mic input
+- Camera finger tracking: phone points at keyboard, MediaPipe detects hands, Gemini correlates what it sees with what it hears
+- Finger tracking panel showing EYE (visual) + EAR (audio) technique reports
+- Multi-device support: desktop for MIDI + visualization, phone for camera/mic input
 
-The key innovation: Gemini processes audio AND structured MIDI data in the same Live API session. It can correlate what it *hears* with precise note/velocity/timing information, enabling coaching that was previously only possible with a human teacher.
+The key innovation: Gemini processes audio, video, AND structured MIDI data in the same Live API session. It can correlate what it *sees* (hand position), what it *hears* (audio), and what it *knows* (MIDI data) — enabling coaching that was previously only possible with a human teacher sitting next to you.
 
 ## How we built it
 
 - **Gemini 2.5 Flash** (native audio model) via the Live API processes microphone audio and MIDI context simultaneously in real-time streaming
 - **Google GenAI SDK** (`@google/genai`) handles the Live API connection with bidirectional audio streaming
-- **Google ADK** defines the agent structure with tool functions (`set_coaching_focus`) that Gemini calls to drive visual changes
+- **Google ADK** defines the agent structure with tool functions (`set_coaching_focus`, `report_technique`) that Gemini calls to drive visual changes
+- **MediaPipe HandLandmarker** runs client-side on the phone for real-time hand skeleton overlay (fingertip detection, connection drawing)
 - **TypeScript + Express + WebSocket** streams 16kHz PCM audio and MIDI events from browser to Gemini, and 24kHz voice audio plus tool events back
 - **Web MIDI API** captures real keyboard input (note-on/off, velocity, pedal, timing)
 - **Canvas** renders grand staff notation, waterfall display, and dynamics visualization in real time
@@ -44,8 +48,9 @@ The key innovation: Gemini processes audio AND structured MIDI data in the same 
 
 - **Real-time music notation from MIDI** — proper grand staff with clefs, accidentals, key signatures, scrolling in time with the music
 - **Natural voice coaching** — Gemini doesn't lecture; it has a conversation. Short, specific, encouraging.
-- **Multi-device architecture** — desktop for MIDI + visualization, tablet for audio capture, phone for spectating. All synced via WebSocket rooms.
-- **MIDI + audio fusion** — combining precise digital data with acoustic perception in the same AI context window
+- **Trimodal perception** — Gemini simultaneously processes audio (piano + voice), video (hand position via camera), and MIDI data (notes, velocity, timing) for coaching that connects what it sees to what it hears
+- **Multi-device architecture** — desktop for MIDI + visualization, phone for camera + mic. All synced via WebSocket rooms with role-based device management.
+- **Client-side hand tracking** — MediaPipe HandLandmarker runs on the phone browser at ~15fps, drawing hand skeletons over the camera feed without any server-side ML
 
 ## What we learned
 
@@ -55,6 +60,7 @@ The key innovation: Gemini processes audio AND structured MIDI data in the same 
 
 ## What's next for PianoQuest Live
 
+- Finger-to-key mapping with calibration (which finger plays which note)
 - Sheet music loading and comparison (play-along with target notes)
 - Session history with progress tracking
 - Livestream to web viewers (piano performance broadcasting)
@@ -62,4 +68,4 @@ The key innovation: Gemini processes audio AND structured MIDI data in the same 
 
 ## Built With
 
-`gemini-2.5-flash` `google-genai-sdk` `google-adk` `cloud-run` `cloud-build` `typescript` `express` `websocket` `web-midi-api` `web-audio-api` `canvas`
+`gemini-2.5-flash` `google-genai-sdk` `google-adk` `cloud-run` `cloud-build` `typescript` `express` `websocket` `web-midi-api` `web-audio-api` `canvas` `mediapipe-hand-landmarker`

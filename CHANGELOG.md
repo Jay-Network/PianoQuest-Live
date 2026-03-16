@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-03-16
+
+### Added
+- **Camera finger tracking** — hybrid MediaPipe + Gemini Vision approach:
+  - Phone camera sends JPEG frames (1fps) to Gemini for vision-based technique coaching
+  - MediaPipe HandLandmarker runs client-side on phone for real-time hand skeleton overlay
+  - Camera role in device management (secondary device can be assigned camera)
+  - `report_technique` tool — Gemini correlates what it sees (hands) with what it hears (piano) for multimodal coaching
+  - FINGER TRACKING panel on primary device shows technique report cards (EYE/EAR observations)
+  - Camera status badge: "Camera Off" / "1 Hand" / "2 Hands Ready"
+  - Drill camera integration — Gemini told when camera is active during drills
+- **Vision section in system instruction** — Gemini knows to connect visual + audio observations
+
 ## [3.0.4] - 2026-03-16
 
 ### Fixed

@@ -28,6 +28,9 @@ export function executeToolLocally(
       const instruction = args.instruction as string;
       return { status: "ok", instruction };
     }
+    case "report_technique": {
+      return { status: "ok", ...args };
+    }
     default:
       return { error: `Unknown tool: ${name}` };
   }
@@ -44,6 +47,8 @@ export function toolCallToVisualEvent(
   switch (name) {
     case "set_coaching_focus":
       return { type: "coaching_focus", text: args.instruction };
+    case "report_technique":
+      return { type: "technique_report", finger: args.finger, visual_observation: args.visual_observation, audio_observation: args.audio_observation, suggestion: args.suggestion };
     default:
       return null;
   }
@@ -72,6 +77,34 @@ export function buildToolDeclarations() {
               },
             },
             required: ["instruction"],
+          },
+        },
+        {
+          name: "report_technique",
+          description:
+            "Report a visual+audio technique observation when camera is active. " +
+            "Use when you can correlate what you see in the video with what you hear.",
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              finger: {
+                type: Type.STRING,
+                description: "Which finger or hand area observed (e.g. 'right thumb', 'left pinky', 'both hands').",
+              },
+              visual_observation: {
+                type: Type.STRING,
+                description: "What you see in the video frame.",
+              },
+              audio_observation: {
+                type: Type.STRING,
+                description: "What you hear in the audio/MIDI that correlates.",
+              },
+              suggestion: {
+                type: Type.STRING,
+                description: "Actionable suggestion for improvement.",
+              },
+            },
+            required: ["finger", "visual_observation", "audio_observation", "suggestion"],
           },
         },
       ],
@@ -105,6 +138,13 @@ You receive TWO types of audio in the same stream:
 You also receive MIDI data messages (notes, velocity, timing, pedal) from their digital piano. \
 Use MIDI data to understand what they are playing, but do NOT comment on it unless asked.
 
+## WHAT YOU SEE
+
+When camera is enabled, you receive video frames of the user's hands on the keyboard.
+Connect what you SEE to what you HEAR for technique coaching.
+Use the report_technique tool for correlated vision+audio feedback.
+If camera is off or hands not visible, coach from audio/MIDI only.
+
 ## WHEN THE USER SPEAKS TO YOU
 
 - 1-2 sentences per response. Short and vivid.
@@ -116,6 +156,7 @@ Use MIDI data to understand what they are playing, but do NOT comment on it unle
 ## TOOLS — USE SPARINGLY
 
 - set_coaching_focus: Update the tip card when you give a specific actionable tip.
+- report_technique: Report a visual+audio technique observation when camera is active.
 
 ## SESSION FLOW
 
@@ -136,11 +177,26 @@ const setCoachingFocusTool = new FunctionTool({
   execute: (input: any) => ({ status: "ok", instruction: input.instruction }),
 });
 
+const reportTechniqueTool = new FunctionTool({
+  name: "report_technique",
+  description: "Report a visual+audio technique observation when camera is active.",
+  parameters: z.object({
+    finger: z.string().describe("Which finger or hand area observed."),
+    visual_observation: z.string().describe("What you see in the video frame."),
+    audio_observation: z.string().describe("What you hear in the audio/MIDI."),
+    suggestion: z.string().describe("Actionable suggestion for improvement."),
+  }) as any,
+  execute: (input: any) => {
+    return { status: "ok", finger: input.finger, visual_observation: input.visual_observation, audio_observation: input.audio_observation, suggestion: input.suggestion };
+  },
+});
+
 export const storytellerAgent = new LlmAgent({
   name: "pianoquest_storyteller",
   model: LIVE_MODEL,
   instruction: STORYTELLER_INSTRUCTION,
   tools: [
     setCoachingFocusTool,
+    reportTechniqueTool,
   ],
 });
