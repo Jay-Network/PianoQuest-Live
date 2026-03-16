@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.17</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.18</div>
       </div>
     </div>
     <div class="controls">
@@ -2013,15 +2013,15 @@ function drawGrandStaff() {
         // Pedal-sustained segment: glassy hollow bar with glowing animated rim
         if (playLineX > fingerEndX) {
           var pedalW = playLineX - fingerEndX;
-          var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + midi * 0.5);
-          ctx.fillStyle = darkenedColor(noteData.velocity, 0.3);
-          ctx.globalAlpha = 0.12;
+          var pulse = 0.8 + 0.2 * Math.sin(nowMs / 400 + midi * 0.5);
+          ctx.fillStyle = darkenedColor(noteData.velocity, 0.4);
+          ctx.globalAlpha = 0.2;
           ctx.fillRect(fingerEndX, barY, pedalW, barH);
           ctx.strokeStyle = color;
-          ctx.globalAlpha = 0.5 * pulse;
+          ctx.globalAlpha = 0.6 * pulse;
           ctx.lineWidth = 1.5;
           ctx.shadowColor = color;
-          ctx.shadowBlur = 6 * pulse;
+          ctx.shadowBlur = 8 * pulse;
           ctx.strokeRect(fingerEndX, barY, pedalW, barH);
           ctx.shadowBlur = 0;
         }
@@ -2098,15 +2098,15 @@ function drawGrandStaff() {
         if (tailEndX > fingerEndX) {
           var pedalW = tailEndX - fingerEndX;
           var histColor = dynamicsColor(entry.velocity);
-          var pulse = 0.6 + 0.4 * Math.sin(nowMs / 400 + entry.note * 0.5);
-          ctx.fillStyle = darkenedColor(entry.velocity, 0.3);
-          ctx.globalAlpha = 0.12 * alpha;
+          var pulse = 0.8 + 0.2 * Math.sin(nowMs / 400 + entry.note * 0.5);
+          ctx.fillStyle = darkenedColor(entry.velocity, 0.4);
+          ctx.globalAlpha = 0.2 * alpha;
           ctx.fillRect(fingerEndX, histBarY, pedalW, histBarH);
           ctx.strokeStyle = histColor;
-          ctx.globalAlpha = 0.5 * pulse * alpha;
+          ctx.globalAlpha = 0.6 * pulse * alpha;
           ctx.lineWidth = 1.5;
           ctx.shadowColor = histColor;
-          ctx.shadowBlur = 6 * pulse * alpha;
+          ctx.shadowBlur = 8 * pulse * alpha;
           ctx.strokeRect(fingerEndX, histBarY, pedalW, histBarH);
           ctx.shadowBlur = 0;
         }
@@ -2225,6 +2225,7 @@ function drawKeyboard() {
   });
 
   // Dynamic bars — grow upward from keyboard top
+  var nowMsDyn = Date.now();
   function drawDynBars(blackOnly) {
     activeNotes.forEach(function(note, midi) {
       var keyInfo = KEY_BY_MIDI.get(midi);
@@ -2234,13 +2235,44 @@ function drawKeyboard() {
         ? (keyInfo.whiteIndex + 1) * whiteKeyW - blackKeyW / 2
         : keyInfo.whiteIndex * whiteKeyW + 1;
       var barW = keyInfo.isBlack ? blackKeyW : whiteKeyW - 2;
-      var color = fingerDownNotes.has(midi) ? dynamicsColor(note.velocity) : darkenedColor(note.velocity, 0.5);
+      var barTop = keyTop - barH;
+      var isFingerDown = fingerDownNotes.has(midi);
+      var color = isFingerDown ? dynamicsColor(note.velocity) : darkenedColor(note.velocity, 0.5);
+      var dc = dynamicsRgb(note.velocity);
       if (keyInfo.isBlack) {
         ctx.fillStyle = '#050508';
         ctx.fillRect(barX, 0, barW, dynamicsH);
       }
-      ctx.fillStyle = color;
-      ctx.fillRect(barX, keyTop - barH, barW, barH);
+      if (isFingerDown) {
+        // Finger held: inner gradient (bright edges, darker center) + glow
+        var dGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+        dGrad.addColorStop(0, 'rgba(' + dc.r + ',' + dc.g + ',' + dc.b + ',0.9)');
+        dGrad.addColorStop(0.35, 'rgba(' + Math.round(dc.r * 0.6) + ',' + Math.round(dc.g * 0.6) + ',' + Math.round(dc.b * 0.6) + ',0.6)');
+        dGrad.addColorStop(0.65, 'rgba(' + Math.round(dc.r * 0.6) + ',' + Math.round(dc.g * 0.6) + ',' + Math.round(dc.b * 0.6) + ',0.6)');
+        dGrad.addColorStop(1, 'rgba(' + dc.r + ',' + dc.g + ',' + dc.b + ',0.9)');
+        ctx.fillStyle = dGrad;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+        ctx.fillRect(barX, barTop, barW, barH);
+        ctx.shadowBlur = 0;
+        // Bright top cap
+        ctx.fillStyle = 'rgba(' + dc.r + ',' + dc.g + ',' + dc.b + ',0.95)';
+        ctx.fillRect(barX, barTop, barW, 2);
+      } else {
+        // Pedal sustained: glassy hollow with glowing rim
+        var pulse = 0.8 + 0.2 * Math.sin(nowMsDyn / 400 + midi * 0.5);
+        ctx.fillStyle = darkenedColor(note.velocity, 0.4);
+        ctx.globalAlpha = 0.15;
+        ctx.fillRect(barX, barTop, barW, barH);
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = 0.6 * pulse;
+        ctx.lineWidth = 1;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 6 * pulse;
+        ctx.strokeRect(barX, barTop, barW, barH);
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1.0;
+      }
     });
   }
   drawDynBars(false);

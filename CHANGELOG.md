@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.18] - 2026-03-16
+
+### Changed
+- **Dynamic bars visual upgrade**: Finger-held bars now have inner gradient (bright edges, darker center) with glow and bright top cap. Pedal-sustained bars render as glassy hollow with animated glowing rim (matching waterfall/grand staff).
+- **Pedal glow brightness increased**: Raised pulse floor from 0.6→0.8 (subtler animation), interior fill from 0.12→0.2 alpha, rim from 0.5→0.6 alpha. Prevents pedal bars from going too dim during animation trough.
+
 ## [2.1.17] - 2026-03-16
 
 ### Changed
