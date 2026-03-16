@@ -973,6 +973,12 @@ function processGeminiMessage(
 ): void {
   const message = msg as Record<string, unknown>;
 
+  // Log message keys for diagnostics
+  const msgKeys = Object.keys(message);
+  if (!msgKeys.includes("serverContent") || (message.serverContent as any)?.turnComplete || (message.serverContent as any)?.interrupted || (message.serverContent as any)?.inputTranscription) {
+    console.log(`[${APP_NAME}] Gemini msg keys: ${msgKeys.join(",")}`);
+  }
+
   const sendAll = (data: Buffer | string, binary = false) => {
     broadcastToRoom(roomSession, data, binary);
   };
@@ -987,11 +993,9 @@ function processGeminiMessage(
         const inlineData = part.inlineData as Record<string, unknown> | undefined;
         if (inlineData?.data) {
           const audioBuffer = Buffer.from(inlineData.data as string, "base64");
-          if (state.turnHasUserSpeech()) {
-            sendAll(audioBuffer, true);
-          } else {
-            state.pendingAudioChunks.push(audioBuffer);
-          }
+          // Always send audio — client-side echo cancellation handles feedback
+          sendAll(audioBuffer, true);
+          state.setTurnHasUserSpeech(true);
         }
       }
     }
@@ -1018,35 +1022,29 @@ function processGeminiMessage(
 
     // Turn complete
     if (serverContent.turnComplete) {
-      if (state.turnHasUserSpeech() && state.bufInput()) {
+      if (state.bufInput()) {
         sendAll(JSON.stringify({ type: "input_transcript", text: state.bufInput() }));
         state.setBufInput("");
       }
-      if (state.turnHasUserSpeech() && state.bufOutput()) {
+      if (state.bufOutput()) {
         sendAll(JSON.stringify({ type: "output_transcript", text: state.bufOutput() }));
         state.setBufOutput("");
       }
-      state.pendingAudioChunks.length = 0;
-      if (state.turnHasUserSpeech()) {
-        sendAll(JSON.stringify({ type: "turn_complete" }));
-      }
+      sendAll(JSON.stringify({ type: "turn_complete" }));
       state.setTurnHasUserSpeech(false);
     }
 
     // Interrupted
     if (serverContent.interrupted) {
-      if (state.turnHasUserSpeech() && state.bufInput()) {
+      if (state.bufInput()) {
         sendAll(JSON.stringify({ type: "input_transcript", text: state.bufInput() }));
         state.setBufInput("");
       }
-      if (state.turnHasUserSpeech() && state.bufOutput()) {
+      if (state.bufOutput()) {
         sendAll(JSON.stringify({ type: "output_transcript", text: state.bufOutput() }));
         state.setBufOutput("");
       }
-      state.pendingAudioChunks.length = 0;
-      if (state.turnHasUserSpeech()) {
-        sendAll(JSON.stringify({ type: "interrupted" }));
-      }
+      sendAll(JSON.stringify({ type: "interrupted" }));
       state.setTurnHasUserSpeech(false);
     }
   }

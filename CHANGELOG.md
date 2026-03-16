@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.8.8] - 2026-03-15
+
+### Fixed
+- **CRITICAL**: Gemini audio responses were gated behind `turnHasUserSpeech` flag — audio buffered in `pendingAudioChunks` and never sent to client. Removed gate; audio now sent immediately.
+- Transcript sending no longer gated on `turnHasUserSpeech` — always send on turnComplete/interrupted
+
+### Added
+- Diagnostic logging for Gemini message keys (non-audio messages logged for debugging)
+
 ## [1.8.7] - 2026-03-15
 
 ### Added
