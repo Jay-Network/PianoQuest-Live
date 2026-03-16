@@ -1,0 +1,173 @@
+Implement the following plan:
+
+# Plan: iPad Primary Device Mode
+
+## Context
+Jay uses PianoQuest Live with an iPad placed on the piano in front of him. The iPad:
+1. Scans the QR code to join the room (like phone does today)
+2. Acts as the **primary interaction device** — speaker + mic for talking to Gemini
+3. Shows different panels that the user can toggle on/off
+4. Needs draggable partitions for resizing panels
+
+Currently, the secondary device (phone) is a simple role-card UI that activates mic/camera/midi. The primary device (desktop) has all the panels but no touch optimization. The iPad needs to be a hybrid — it connects via QR like a secondary device, but shows the full panel UI like the primary.
+
+## Architecture Decision
+
+**New device mode: `tablet`** — detected via QR param `?room=CODE&mode=tablet` or auto-detected via screen size + touch.
+
+The tablet mode renders the full panel set (like primary) but:
+- Connects as a secondary WebSocket (room join, not session creator)
+- Has mic/speaker built-in (no separate phone needed)
+- Touch-optimized toggle toolbar
+- Draggable partition handles (touch-friendly, 12px wide)
+- Panels can be toggled on/off via pill buttons in a toolbar
+
+---
+
+## Panel Set (same as desktop primary)
+
+| Panel | Default ON | Description |
+|-------|-----------|-------------|
+| MIDI Visualizer (piano roll + keyboard) | YES | Waterfall + keyboard canvas |
+| Conversation | YES | Chat with Gemini |
+| Audio Levels | YES | Mic + Gemini level meters |
+| Finger Tracking | NO | Camera feed + technique reports |
+| Drills | NO | Drill cards + settings |
+| Grand Staff | NO | Musical notation |
+
+## UI Layout
+
+### Toolbar (top, fixed)
+Horizontal row of pill toggle buttons — same pattern as jayismocking.com/live:
+```
+[Piano] [Chat] [Audio] [Fingers] [Drills] [Staff] | Room: ABCD | 🔴 Exit
+```
+- Each pill: subtle glass style (rgba white bg, border, 11px font)
+- Active: brighter bg + border
+- Tapping toggles panel visibility
+- State stored in localStorage for persistence across refreshes
+
+### Panel Area (below toolbar)
+- **Single column layout** (iPad portrait) or **two columns** (iPad landscape)
+- Active panels stack vertically (portrait) or fill a 2-column grid (landscape)
+- **Draggable partition handles** between panels:
+  - 12px tall horizontal bars (portrait) or 12px wide vertical bars (landscape)
+  - Touch-friendly drag to resize
+  - `touch-action: none` on handles for smooth dragging
+  - Min panel height: 100px
+  - Sizes stored in localStorage
+
+### Responsive Behavior
+- Portrait (768px width): single column, panels stack
+- Landscape (1024px+ width): two columns with draggable vertical partition
+- Auto-detect via `window.matchMedia('(orientation: landscape)')`
+
+---
+
+## Implementation
+
+### Phase 1: Tablet Detection & Entry (~15 min)
+
+**`static/index.html`**
+
+1. Add tablet detection after room param check:
+```javascript
+var isTabletMode = urlParams.get('mode') === 'tablet' ||
+  (isSecondaryDevice && window.innerWidth >= 768 && 'ontouchstart' in window);
+```
+
+2. If `isTabletMode`, render tablet UI instead of secondary UI
+
+3. Connect WebSocket same as secondary: `/ws/session?room=CODE`
+
+4. Auto-request mic role on connect (iPad is the mic/speaker device)
+
+### Phase 2: Tablet UI Shell (~20 min)
+
+**`static/index.html` — CSS**
+
+Add tablet-specific styles:
+```css
+.tablet-app { ... }           /* Full viewport flex column */
+.tablet-toolbar { ... }       /* Fixed top bar with pill toggles */
+.tablet-pill { ... }          /* Toggle button */
+.tablet-pill.active { ... }   /* Active state */
+.tablet-panels { ... }        /* Panel container (flex or grid) */
+.tablet-panel { ... }         /* Individual panel */
+.tablet-partition { ... }     /* Draggable divider (12px, touch) */
+```
+
+**`static/index.html` — JS**
+
+1. `buildTabletUI()` — constructs the DOM:
+   - Toolbar with pill buttons
+   - Panel container
+   - Each panel wrapped in a toggleable div
+
+2. `tabletPanelState` object — tracks which panels are visible + sizes
+   - Load from localStorage on init
+   - Save on every toggle/resize
+
+3. `toggleTabletPanel(name)` — show/hide panel, update toolbar button state
+
+### Phase 3: Panel Rendering (~25 min)
+
+Reuse existing canvas/panel rendering code from the primary UI. Each panel's content:
+
+1. **Piano (MIDI Visualizer)**: Clone `#midiStack` pattern — create pianoRollCanvas + keyboardCanvas, wire to incoming `midi_event` messages
+2. **Chat (Conversation)**: Clone chat-area pattern, wire to `model_turn` / `user_speech_transcript` messages
+3. **Audio**: Clone level-meter pattern, wire to audio level data
+4. **Fingers**: Clone `#techniquePanel` pattern + remoteCameraImg, wire to `video_frame` / `technique_report`
+5. **Drills**: Clone drill cards + settings, wire to drill events
+6. **Staff**: Clone grandStaffCanvas, wire to MIDI events
+
+Key: the tablet receives ALL messages the primary desktop does (because it's in the room). It just renders them in its own UI.
+
+### Phase 4: Draggable Partitions (~15 min)
+
+1. Between each visible panel, insert a `.tablet-partition` div
+2. Touch event handlers:
+   - `touchstart` → record start Y (portrait) or X (landscape)
+   - `touchmove` → calculate delta, resize adjacent panels
+   - `touchend` → save sizes to localStorage
+3. CSS: `touch-action: none` on partition handles
+4. Min size constraint: 100px per panel
+5. Mouse events too (for testing on desktop)
+
+### Phase 5: Mic/Speaker Integration (~10 min)
+
+1. On tablet connect, auto-send `request_role` for mic
+2. Start audio capture (same as `startSecondaryMic()`)
+3. Start audio playback (same as secondary playback context)
+4. Show speaking indicator in toolbar when Gemini is talking
+
+---
+
+## Files Modified
+
+| File | Changes |
+|------|---------|
+| `static/index.html` | Tablet detection, tablet UI (CSS + JS), panel toggle toolbar, draggable partitions, panel rendering, mic/speaker auto-start |
+| `src/agent/server.ts` | No changes needed — tablet connects as secondary device with roles |
+
+---
+
+## Verification
+
+1. Open PianoQuest Live on desktop → get QR code
+2. Scan QR on iPad → should auto-detect tablet mode (screen width >= 768 + touch)
+3. Toolbar shows with pill buttons, Piano + Chat + Audio panels visible by default
+4. Tap pills to toggle panels on/off
+5. Drag partition handles to resize panels
+6. Mic auto-activates → can talk to Gemini
+7. Gemini audio plays through iPad speaker
+8. MIDI events from desktop keyboard show on iPad's piano visualizer
+9. If camera phone also connected, finger tracking panel shows camera feed
+10. Rotate iPad landscape → two-column layout
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/takuma/.claude/projects/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/26c98832-e85a-4ff0-a853-37c293f7069f.jsonl
+
+---
+
+why the fuck havent you deployed
