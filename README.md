@@ -1,12 +1,12 @@
 # PianoQuest Live
 
-**Real-time AI piano coaching through creative storytelling.**
+**Real-time AI piano coaching with Gemini Live API.**
 
-Your piano playing drives a living story. The AI sees your hands, hears your playing, and speaks to you in real time — turning practice into an interactive quest with visual feedback.
+Play your MIDI keyboard, talk to the AI, and get real-time coaching through voice conversation and visual feedback. Your playing drives the session — Gemini listens to your audio, reads your MIDI data, and coaches you like a teacher sitting next to you on the bench.
 
 Built for the [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/) — **Creative Storyteller** category.
 
-**Live Demo:** https://pianoquest-live-tydxja77iq-uc.a.run.app
+**Live Demo:** https://pianoquest-live-604879855725.us-central1.run.app
 
 ![Architecture](docs/architecture.svg)
 
@@ -14,38 +14,30 @@ Built for the [Gemini Live Agent Challenge](https://geminiliveagentchallenge.dev
 
 ## What It Does
 
-PianoQuest Live is a multimodal AI piano coach that combines **3 input streams** with **8 interleaved output modalities**:
+PianoQuest Live is a multimodal AI piano coach powered by Gemini's native audio model:
 
 ### Inputs
 | Modality | Source | What It Captures |
 |----------|--------|-----------------|
-| **Vision** | Camera | Finger position, hand shape, technique |
-| **Audio** | Microphone | Piano notes, dynamics, rhythm, voice |
+| **Audio** | Microphone | Piano sound, dynamics, rhythm, user voice |
+| **MIDI** | USB keyboard (Web MIDI API) | Note-on/off, velocity, pedal, timing |
 | **Voice** | Microphone | User goals, questions, reactions |
 
-### Outputs
-| Modality | Source | Description |
-|----------|--------|-------------|
-| **Voice Narration** | Gemini audio | Real-time coaching wrapped in storytelling |
-| **Story Scenes** | Gemini → `set_scene()` tool | 8 themed scene cards triggered by agent tool calls |
-| **Achievement Badges** | Gemini → `award_badge()` tool | Animated popups when agent detects genuine improvement |
-| **Coaching Focus** | Gemini → `set_coaching_focus()` tool | Current technique tip set by agent |
-| **Quest Journey Map** | Gemini → `advance_quest()` tool | 5-phase arc: Opening → Assessment → Challenge → Mastery → Celebration |
-| **MIDI Dynamic Bars** | Client-side Web Audio | 36-band frequency analysis mapped to piano range |
-| **Rhythm Accuracy Grid** | Client-side Web Audio | Onset detection vs. BPM grid with color-coded timing |
-| **Technique Score** | Client-side computation | Real-time 0-100 score (dynamics evenness + rhythm accuracy) |
+### Real-Time Visual Feedback
+| Feature | Description |
+|---------|-------------|
+| **Grand Staff** | Scrolling music notation with proper clefs, accidentals, key signatures |
+| **Waterfall Display** | Falling note bars color-coded by velocity |
+| **Dynamic Bars** | Per-note velocity visualization across the piano range |
+| **Virtual Keyboard** | 88-key display with active note highlighting |
+| **Coaching Focus** | Technique tip card updated by Gemini via tool calls |
+| **Conversation Panel** | Real-time transcription of both user and AI speech |
 
-Gemini drives the narrative UI through ADK tool calls. Audio analysis runs client-side for low latency.
-
-### The Demo Arc
-
-**Bad playing → Coaching → Visible improvement**
-
-1. User plays a C major triad with uneven dynamics
-2. Agent sees fingers via camera, hears the imbalance, names it "Chapter 1: The Harmony Garden"
-3. Agent coaches: "Your 4th finger on the E is landing flat — try leading with the fingertip"
-4. User improves — technique score rises from ~40 to ~85, scene transitions to "Sunrise Peak"
-5. Agent awards "Resonant Triad" achievement, quest map advances to Mastery
+### Multi-Device Support
+Multiple devices can join a session with assigned roles:
+- **Primary** — MIDI + visualization (desktop with USB keyboard)
+- **Mic** — Audio capture + speech recognition (tablet/phone near face)
+- **Spectator** — Read-only view of the session
 
 ---
 
@@ -53,55 +45,43 @@ Gemini drives the narrative UI through ADK tool calls. Audio analysis runs clien
 
 | Component | Technology |
 |-----------|-----------|
-| **AI Model** | Gemini 2.5 Flash (native audio + vision) via Live API |
-| **Framework** | Google ADK (Agent Development Kit) v1.26+ |
-| **Backend** | Python, FastAPI, WebSocket streaming |
-| **Frontend** | HTML/JS, Web Audio API, Canvas |
+| **AI Model** | Gemini 2.5 Flash (native audio) via Live API |
+| **SDK** | Google GenAI SDK (`@google/genai`) + Google ADK |
+| **Backend** | TypeScript, Express, WebSocket streaming |
+| **Frontend** | HTML/JS, Web Audio API, Web MIDI API, Canvas |
 | **Deployment** | Google Cloud Run, Cloud Build |
-| **Voice** | Puck (prebuilt voice) |
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
-- Python 3.11+
+- Node.js 18+
 - Google Cloud API key with Gemini access
+- MIDI keyboard (optional — works with audio-only too)
 
 ### Local Development
 
 ```bash
 # Clone and install
-git clone https://github.com/jayismocking/pianoquest-live.git
-cd pianoquest-live
-pip install -r requirements.txt
+git clone https://github.com/Jay-Network/PianoQuest-Live.git
+cd PianoQuest-Live
+npm install
 
 # Set your API key
 echo "GOOGLE_API_KEY=your-key-here" > .env
 
-# Run
-python -m agent
+# Build and run
+npx tsc && node dist/agent/server.js
 ```
 
-Open http://localhost:8080 — allow camera and microphone access.
+Open http://localhost:8080 — allow microphone access. Connect a MIDI keyboard for full experience.
 
 ### Deploy to Cloud Run
 
 ```bash
-# Set your GCP project
 gcloud config set project YOUR_PROJECT_ID
 
-# Create Artifact Registry repo (one-time)
-gcloud artifacts repositories create pianoquest-live \
-  --repository-format=docker --location=us-central1
-
-# Deploy
-bash deploy/deploy.sh
-```
-
-Or use Cloud Build directly:
-
-```bash
 gcloud builds submit --config=cloudbuild.yaml \
   --substitutions=_API_KEY=your-key-here
 ```
@@ -111,36 +91,36 @@ gcloud builds submit --config=cloudbuild.yaml \
 ## Project Structure
 
 ```
-pianoquest-live/
-├── agent/
-│   ├── agent.py        # ADK agent with storyteller prompt
-│   ├── server.py       # FastAPI + WebSocket server
-│   └── __main__.py     # Entry point
+PianoQuest-Live/
+├── src/agent/
+│   ├── agent.ts       # ADK agent definition, tools, system instruction
+│   └── server.ts      # Express + WebSocket server, Gemini Live session
 ├── static/
-│   └── index.html      # Full frontend (camera, viz, UI)
-├── deploy/
-│   └── deploy.sh       # Cloud Run deploy script
+│   ├── index.html     # Full frontend (MIDI viz, grand staff, UI)
+│   └── sheets/        # Reference sheet music (Fur Elise)
+├── sheets/            # Digitized sheet music JSON (target notes)
 ├── docs/
-│   ├── architecture.svg    # System architecture diagram
-│   └── demo-script.md     # Demo video script
-├── cloudbuild.yaml     # Cloud Build CI/CD
-├── Dockerfile          # Container config
-└── requirements.txt    # Python dependencies
+│   ├── architecture.svg
+│   └── demo-script.md
+├── cloudbuild.yaml    # Cloud Build CI/CD
+├── Dockerfile
+├── package.json
+└── tsconfig.json
 ```
 
 ---
 
 ## How It Works
 
-1. **Browser** captures camera video + microphone audio
-2. **WebSocket** streams audio (16kHz PCM) and video frames (JPEG every 2s) to server
-3. **ADK Runner** routes streams through `LiveRequestQueue` to Gemini Live API
-4. **Gemini 2.5 Flash** processes vision + audio + voice simultaneously, generates coaching narration
-5. **Gemini calls ADK tools** (`set_scene`, `award_badge`, `set_coaching_focus`, `advance_quest`) to control the visual UI — tool events flow through a per-session `asyncio.Queue` via `contextvars`
-6. **Voice response** (24kHz PCM) and **tool events** (JSON) stream back to browser via WebSocket
-7. **Web Audio API** analyzes microphone input locally for MIDI bars and rhythm grid
+1. **Browser** captures microphone audio + MIDI keyboard input
+2. **WebSocket** streams 16kHz PCM audio and MIDI events to server
+3. **Server** connects to Gemini Live API via `@google/genai` SDK
+4. **Gemini 2.5 Flash** (native audio model) processes audio + MIDI context, generates voice coaching
+5. **Gemini calls tools** (`set_coaching_focus`) to update the visual UI — tool events flow back through WebSocket
+6. **Voice response** (24kHz PCM) streams back to browser for playback
+7. **Canvas** renders grand staff notation, waterfall, dynamics, and keyboard in real time
 
-The agent controls the full experience — Gemini decides when to change scenes, award achievements, and update coaching tips through tool calls, not frontend keyword matching.
+The agent controls the coaching experience — Gemini decides when to give feedback and what to focus on through natural conversation, not scripted triggers.
 
 ---
 
@@ -148,16 +128,10 @@ The agent controls the full experience — Gemini decides when to change scenes,
 
 - **Challenge:** [Gemini Live Agent Challenge](https://geminiliveagentchallenge.devpost.com/)
 - **Category:** Creative Storyteller
-- **GCP Project:** jworks-interpreter-challenge
 - **Cloud Run:** pianoquest-live (us-central1)
-
-### Judging Criteria
-| Criterion | Weight | How We Address It |
-|-----------|--------|-------------------|
-| Innovation & Multimodal UX | 40% | 3 inputs × 8 outputs, bidirectional multimodal streaming |
-| Technical Implementation | 30% | ADK + Live API + Cloud Run, real-time WebSocket streaming |
-| Demo & Presentation | 30% | Clear arc: bad playing → coaching → visible improvement |
 
 ---
 
-Built by Jay — MIT · STEM Educator · [pianoquest.app](https://pianoquest.app)
+Copyright (c) 2026 JWorks. All rights reserved.
+
+Built by Jay — MIT · STEM Educator

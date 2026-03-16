@@ -2,61 +2,64 @@
 
 ## Inspiration
 
-After a piano lesson, you're on your own. No teacher watches your hands. No one hears that your E is weaker than your C. Practice apps grade notes right or wrong but never see *how* you play — and they certainly don't make it meaningful. We asked: what if an AI could see your hands, hear your music, and coach you to actually play better?
+After a piano lesson, you're on your own. No teacher hears that your E is weaker than your C, or that you're rushing the second beat. Practice apps grade notes right or wrong but never *coach* — and they certainly don't have a conversation with you about it. We asked: what if an AI could listen to your playing, read your MIDI data, and coach you through natural voice conversation in real time?
 
 ## What it does
 
-PianoQuest Live is an AI piano coach that makes you a better musician. Point your camera at the keyboard, play, and talk — Gemini watches your technique, listens to your sound, and coaches you through creative narrative in real time. The result is measurable: users improve from a technique score of ~40 to ~85 in a single session.
+PianoQuest Live is an AI piano coach that makes you a better musician through real-time voice conversation. Connect a MIDI keyboard, play, and talk — Gemini listens to your audio, reads your MIDI data (notes, velocity, timing, pedal), and coaches you like a teacher sitting next to you on the bench.
 
-**3 multimodal inputs, processed simultaneously:**
-- **Camera** sees finger position, hand shape, and technique
-- **Microphone** hears piano notes, dynamics, rhythm, and articulation
-- **Voice** captures the user's goals, questions, and reactions
+**Multimodal inputs, processed simultaneously:**
+- **Audio** from microphone — piano sound, dynamics, user voice
+- **MIDI** from USB keyboard — exact notes, velocity, timing, pedal events
+- **Voice** — the user's goals, questions, and reactions
 
 **What you experience:**
-- Real-time voice coaching wrapped in storytelling ("Welcome to the Harmony Garden — every note must bloom equally")
-- Visual scene transitions that Gemini triggers through tool calls when the narrative shifts
-- Achievement badges awarded by Gemini when it detects genuine improvement
-- MIDI dynamic bars and rhythm accuracy grid computed from live audio analysis
-- A technique score that quantifies your progress in real time
+- Real-time voice coaching through natural conversation ("That C was a bit heavy — try lighter touch")
+- Scrolling grand staff notation showing your playing in real time
+- Waterfall display with velocity-colored falling notes
+- Dynamic bars showing per-note intensity across the keyboard
+- Coaching focus card updated by Gemini through tool calls
+- Multi-device support: desktop for MIDI + visualization, tablet for mic input
 
-The key innovation: Gemini doesn't just respond to your playing — it **correlates what it sees with what it hears**. "I can see your middle finger is flatter than the others, and I can hear the E getting lost." This integrated visual-audio feedback was previously impossible without expensive specialized equipment.
+The key innovation: Gemini processes audio AND structured MIDI data in the same Live API session. It can correlate what it *hears* with precise note/velocity/timing information, enabling coaching that was previously only possible with a human teacher.
 
 ## How we built it
 
-- **Gemini 2.5 Flash** (native audio + vision) via the Live API processes camera frames and microphone audio simultaneously in a single context window — no separate transcription or MIDI conversion needed
-- **Google ADK** (Agent Development Kit) handles the streaming runtime. The agent has 4 custom tool functions (`set_scene`, `award_badge`, `set_coaching_focus`, `advance_quest`) that Gemini calls to drive visual changes on the user's screen
-- **FastAPI + WebSocket** streams 16kHz PCM audio and JPEG frames from browser to ADK, and 24kHz voice audio plus tool-driven visual events back
-- **Web Audio API** performs client-side frequency analysis for the MIDI dynamic bars and onset detection for the rhythm grid
+- **Gemini 2.5 Flash** (native audio model) via the Live API processes microphone audio and MIDI context simultaneously in real-time streaming
+- **Google GenAI SDK** (`@google/genai`) handles the Live API connection with bidirectional audio streaming
+- **Google ADK** defines the agent structure with tool functions (`set_coaching_focus`) that Gemini calls to drive visual changes
+- **TypeScript + Express + WebSocket** streams 16kHz PCM audio and MIDI events from browser to Gemini, and 24kHz voice audio plus tool events back
+- **Web MIDI API** captures real keyboard input (note-on/off, velocity, pedal, timing)
+- **Canvas** renders grand staff notation, waterfall display, and dynamics visualization in real time
 - **Cloud Run** hosts the containerized application
-
-The agent prompt combines music pedagogy with creative storytelling. Gemini decides when to shift scenes, award achievements, and update coaching tips by calling its tools — the model controls the full multimodal experience, not frontend keyword matching.
 
 ## Challenges we ran into
 
-- **Audio feedback loops**: The agent's voice output would feed back into the microphone. Solved by disabling echo cancellation so raw piano audio reaches Gemini cleanly.
-- **Tool-driven visual control**: We initially used frontend keyword matching on transcripts to trigger scenes and badges. This felt dishonest — the "multimodal output" was really just string parsing. We rewrote the architecture so Gemini calls ADK tool functions that push events through a per-session queue to the frontend via WebSocket. Now the model genuinely decides when visuals change.
-- **Quantifying improvement**: Turning subjective musical quality into a number required combining dynamics evenness (coefficient of variation across frequency bands) with rhythm accuracy (onset proximity to beat grid).
+- **Audio feedback loops**: Gemini's voice output feeding back into the microphone. Solved with multi-device architecture — separate mic device from speaker device.
+- **MIDI-to-notation in real time**: Rendering proper grand staff notation (treble/bass clef, accidentals, key signatures) from live MIDI input required careful music theory implementation — natural signs for non-diatonic white keys, proper sharp/flat handling per key signature.
+- **Cloud Run WebSocket timeouts**: Idle spectator connections were being killed. Solved with 25-second keepalive pings.
+- **Gemini input transcription bug**: The Live API's `inputAudioTranscription` outputs wrong languages (Arabic, Korean) on native audio models. Solved by using Web Speech API on the client side instead.
 
 ## Accomplishments that we're proud of
 
-- **AI that develops a real creative skill** — after using PianoQuest, you play piano better. The technique score proves it: ~40 to ~85. AI amplifies human creativity rather than replacing it.
-- **Bidirectional multimodal interaction** — most entries do text-in, multimodal-out. We do multimodal-in (vision + audio + voice), multimodal-out (voice + tool-driven visuals + real-time data). The agent correlates what it *sees* with what it *hears* in a single response.
-- **Agent-driven UI** — Gemini controls the visual experience through ADK tool calls, not scripted frontend triggers. The model decides when to change scenes, award achievements, and update coaching tips.
+- **Real-time music notation from MIDI** — proper grand staff with clefs, accidentals, key signatures, scrolling in time with the music
+- **Natural voice coaching** — Gemini doesn't lecture; it has a conversation. Short, specific, encouraging.
+- **Multi-device architecture** — desktop for MIDI + visualization, tablet for audio capture, phone for spectating. All synced via WebSocket rooms.
+- **MIDI + audio fusion** — combining precise digital data with acoustic perception in the same AI context window
 
 ## What we learned
 
-1. **Latency is the UI** — in a musical context, even 500ms delay breaks the experience. Streaming raw PCM via ADK's LiveRequestQueue was critical.
-2. **Narrative anchors engagement** — the same coaching tip feels robotic as text but engaging as a story beat. "Your E is weak" becomes "The flower hasn't bloomed yet."
-3. **Let the model drive** — our first approach (frontend keyword matching) was fragile and dishonest. Giving Gemini tool functions to control the UI made the system more robust and genuinely multimodal.
+1. **Native audio models need workarounds** — input transcription doesn't work reliably on Gemini's native audio models. Web Speech API on the client is more reliable for user speech-to-text.
+2. **Latency is the UI** — in a musical context, streaming raw PCM through the Live API is critical. Any buffering breaks the conversational flow.
+3. **Let the model drive** — giving Gemini tool functions to update the UI (rather than pattern-matching on transcripts) makes the system robust and the coaching feel natural.
 
 ## What's next for PianoQuest Live
 
-- Web MIDI API integration for actual MIDI keyboard input (velocity data for true dynamic analysis)
-- Multi-instrument support (guitar, drums)
-- Session history with progress tracking across sessions
-- Integration with the PianoQuest mobile app for a complete learning ecosystem
+- Sheet music loading and comparison (play-along with target notes)
+- Session history with progress tracking
+- Livestream to web viewers (piano performance broadcasting)
+- Multi-instrument support
 
 ## Built With
 
-`gemini-2.5-flash` `google-adk` `cloud-run` `cloud-build` `python` `fastapi` `websocket` `web-audio-api` `canvas` `docker`
+`gemini-2.5-flash` `google-genai-sdk` `google-adk` `cloud-run` `cloud-build` `typescript` `express` `websocket` `web-midi-api` `web-audio-api` `canvas`
