@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.9] - 2026-03-16
+
+### Fixed
+- **Phone secondary UI scrollable** — added overflow-y:auto so content below the camera can be scrolled to. Aligned to top instead of center.
+
 ## [3.2.8] - 2026-03-16
 
 ### Fixed

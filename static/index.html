@@ -270,9 +270,10 @@
 
   /* Secondary device mode */
   .secondary-app {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     min-height: 100vh; gap: 20px; padding: 24px;
     background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   .secondary-app.camera-fullscreen {
     padding: 0; gap: 0; justify-content: flex-start; background: #000;
@@ -556,7 +557,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.8</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.9</div>
       </div>
     </div>
     <div class="controls">
