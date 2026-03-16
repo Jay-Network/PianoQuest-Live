@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.19] - 2026-03-16
+
+### Changed
+- **Grand staff breathing sync**: Finger-held segments now pulse in sync with pedal-sustained segments (same sine wave `0.8 + 0.2 * sin(t/400 + midi*0.5)`). Both segments breathe together.
+- **Grand staff note heads → thin bars**: Note heads replaced with thin vertical rectangles (3px wide) for clear timing indication instead of round circles.
+- **Grand staff start bars widened**: Start bars now 3px (was 2px) matching the note head width.
+
 ## [2.1.18] - 2026-03-16
 
 ### Changed
