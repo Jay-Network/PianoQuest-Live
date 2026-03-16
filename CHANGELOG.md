@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-03-15
+
+### Fixed
+- Grand staff BPM: measure width no longer changes with tempo. Fixed to always show 4 measures in scrollable area. Higher BPM = faster scroll speed, not narrower measures.
+- Derived `pxPerMs = measureWidthPx / measureDurationMs` instead of fixed `scrollWindow / scrollableW`
+
 ## [1.8.9] - 2026-03-15
 
 ### Fixed

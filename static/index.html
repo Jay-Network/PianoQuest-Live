@@ -451,7 +451,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.8.9</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v1.9.0</div>
       </div>
     </div>
     <div class="controls">
@@ -2008,12 +2008,13 @@ function drawGrandStaff() {
   ctx.stroke();
 
   // Flowing measure bar lines — scroll from right to left
-  var scrollWindow = 6000; // 6 seconds visible
+  // Fixed measure width: always show ~4 measures; BPM controls scroll speed
   var scrollableW = W - playLineX;
-  var pxPerMs = scrollableW / scrollWindow;
-
-  // Calculate which measures are visible
+  var measuresVisible = 4;
   var measureDurationMs = msPerMeasure;
+  var measureWidthPx = scrollableW / measuresVisible;
+  var pxPerMs = measureWidthPx / measureDurationMs;
+  var scrollWindow = scrollableW / pxPerMs;
   var firstMeasureOffset = nowMs % measureDurationMs;
   var totalMeasures = Math.ceil(scrollWindow / measureDurationMs) + 2;
 
