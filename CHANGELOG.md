@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.31] - 2026-03-16
+
+### Changed
+- **Silent during play rule** — Gemini now stays completely silent while MIDI notes are actively flowing. Only speaks when player talks, stops playing, or asks for feedback. No running commentary or interruptions.
+
 ## [3.2.30] - 2026-03-16
 
 ### Fixed
