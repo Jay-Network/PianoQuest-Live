@@ -275,30 +275,36 @@
     background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif;
   }
   .secondary-app.camera-fullscreen {
-    padding: 0; gap: 0; justify-content: flex-start;
+    padding: 0; gap: 0; justify-content: flex-start; background: #000;
   }
   .secondary-app.camera-fullscreen .secondary-header,
   .secondary-app.camera-fullscreen .secondary-roles,
   .secondary-app.camera-fullscreen .secondary-status { display: none; }
   .secondary-app.camera-fullscreen .camera-preview-wrap {
     max-width: 100%; width: 100%; margin: 0; border-radius: 0; border: none;
-    flex: 1; min-height: 0;
+    flex: 1; min-height: 0; position: relative;
   }
   .secondary-app.camera-fullscreen .camera-preview-wrap video { width: 100%; height: 100%; object-fit: cover; }
   .secondary-app.camera-fullscreen .camera-preview-wrap .hand-overlay { width: 100%; height: 100%; }
+  /* Camera bottom bar */
   .camera-bottom-bar {
-    display: none; width: 100%; padding: 4px 12px;
-    background: rgba(0,0,0,0.85); align-items: center; gap: 8px;
-    font-size: 11px; color: var(--text2); flex-shrink: 0;
+    display: none; width: 100%; padding: 12px 16px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+    position: absolute; bottom: 0; left: 0; z-index: 10;
+    align-items: center; justify-content: center; gap: 16px;
   }
   .secondary-app.camera-fullscreen .camera-bottom-bar { display: flex; }
-  .camera-bottom-bar .cam-title { font-weight: 700; color: var(--text1); }
-  .camera-bottom-bar .cam-title span { color: var(--accent); }
-  .camera-bottom-bar .cam-room { color: var(--text3); margin-left: 8px; }
-  .camera-bottom-bar .cam-room b { color: var(--accent); font-family: monospace; letter-spacing: 0.06em; }
-  .camera-bottom-bar .cam-status { margin-left: auto; }
-  .camera-bottom-bar .cam-exit { margin-left: 8px; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: var(--text2); font-size: 10px; cursor: pointer; }
-  .camera-bottom-bar .cam-flip { padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); color: #fff; font-size: 18px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .camera-bottom-bar .cam-status { font-size: 11px; color: rgba(255,255,255,0.6); position: absolute; left: 16px; }
+  .camera-bottom-bar .cam-status.tracking { color: #86efac; }
+  .cam-btn {
+    width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1); color: #fff; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent; backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); transition: background 0.15s;
+  }
+  .cam-btn:active { background: rgba(255,255,255,0.25); }
+  .cam-btn.exit-btn { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.15); font-size: 14px; font-weight: 600; }
   .secondary-header { text-align: center; }
   .secondary-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
   .secondary-header h2 span { color: var(--accent); }
@@ -477,7 +483,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.7</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.1.8</div>
       </div>
     </div>
     <div class="controls">
@@ -3370,40 +3376,29 @@ function updateQr(roomCode) {
   var camBottomBar = document.createElement('div');
   camBottomBar.className = 'camera-bottom-bar';
   camBottomBar.id = 'cameraBottomBar';
-  var camTitle = document.createElement('span');
-  camTitle.className = 'cam-title';
-  camTitle.textContent = 'Piano';
-  var camTitleSpan = document.createElement('span');
-  camTitleSpan.textContent = 'Quest';
-  camTitle.appendChild(camTitleSpan);
-  camBottomBar.appendChild(camTitle);
-  var camRoom = document.createElement('span');
-  camRoom.className = 'cam-room';
-  var camRoomB = document.createElement('b');
-  camRoomB.textContent = room;
-  camRoom.appendChild(document.createTextNode('Room '));
-  camRoom.appendChild(camRoomB);
-  camBottomBar.appendChild(camRoom);
+  // Status text (left-aligned absolute)
   var camStatusSpan = document.createElement('span');
   camStatusSpan.className = 'cam-status';
   camStatusSpan.id = 'camStatusText';
   camStatusSpan.textContent = 'Camera active';
   camBottomBar.appendChild(camStatusSpan);
+  // Flip button (circular)
   var camFlipBtn = document.createElement('button');
-  camFlipBtn.className = 'cam-flip';
+  camFlipBtn.className = 'cam-btn';
   camFlipBtn.textContent = '\uD83D\uDD04';
   camFlipBtn.onclick = function() { switchCamera(); };
   camBottomBar.appendChild(camFlipBtn);
+  // Exit button (circular, red-tinted)
   var camExitBtn = document.createElement('button');
-  camExitBtn.className = 'cam-exit';
-  camExitBtn.textContent = 'Exit';
+  camExitBtn.className = 'cam-btn exit-btn';
+  camExitBtn.textContent = '\u2715';
   camExitBtn.onclick = function() {
     if (secWs && secWs.readyState === WebSocket.OPEN) {
       secWs.send(JSON.stringify({ type: 'request_role', role: 'camera', enabled: false }));
     }
   };
   camBottomBar.appendChild(camExitBtn);
-  app.appendChild(camBottomBar);
+  cameraPreviewWrap.appendChild(camBottomBar);
 
   document.body.appendChild(app);
 
@@ -3698,7 +3693,7 @@ function updateQr(roomCode) {
       });
     }).then(function(landmarker) {
       secHandLandmarker = landmarker;
-      if (camStatus) camStatus.textContent = 'Hand tracking active';
+      if (camStatus) { camStatus.textContent = 'Hand tracking active'; camStatus.classList.add('tracking'); }
       processHands(video, overlayCanvas);
     }).catch(function(err) {
       console.log('HandLandmarker init failed:', err);

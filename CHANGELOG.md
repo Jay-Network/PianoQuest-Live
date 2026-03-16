@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.8] - 2026-03-16
+
+### Improved
+- **Camera fullscreen UI redesign** — floating controls overlay on camera feed. Circular flip (🔄) and exit (✕) buttons with backdrop blur, status text bottom-left. No top bar. Clean professional look.
+
 ## [3.1.7] - 2026-03-16
 
 ### Fixed
