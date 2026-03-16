@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.26] - 2026-03-16
+
+### Changed
+- **Natural conversational Gemini** — removed rigid command structure, Gemini now talks like a human piano teacher. Responds to any speech naturally, analyzes with numbers when it has MIDI data, doesn't ask for commands.
+
 ## [3.2.25] - 2026-03-16
 
 ### Changed
