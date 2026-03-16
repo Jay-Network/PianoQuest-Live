@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.30] - 2026-03-16
+
+### Fixed
+- **MIDI snapshots now sent to Gemini** — critical fix: primary WebSocket path was silently dropping midi_snapshot messages, so Gemini never received any MIDI data about piano playing
+
+### Changed
+- **System instruction: multimodal integration** — completely rewritten to emphasize integrating all three input streams (voice + MIDI + camera) simultaneously. Gemini now explicitly told to cross-reference what it sees, hears, and reads from MIDI data.
+
 ## [3.2.28] - 2026-03-16
 
 ### Added

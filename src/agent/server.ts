@@ -921,8 +921,14 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             turnComplete: true,
           });
         } else if (msgType === "midi_snapshot") {
-          // MIDI snapshots are for local visualization only — don't send to Gemini.
-          // Gemini hears the piano audio directly and responds to voice, not text summaries.
+          // Send MIDI snapshot to Gemini as text so it can analyze playing
+          const summary = describeMidiSnapshot(msg);
+          if (summary) {
+            session.sendClientContent({
+              turns: [{ role: "user", parts: [{ text: summary }] }],
+              turnComplete: true,
+            });
+          }
         } else if (msgType === "user_speech_transcript") {
           // Browser SpeechRecognition transcript — broadcast to all devices
           const text = (msg.text as string || "").trim();
