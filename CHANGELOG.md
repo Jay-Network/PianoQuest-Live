@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.8] - 2026-03-16
+
+### Fixed
+- **Grand staff clef/time sig overlap**: Widened clef zone from 32→44px and time sig zone 18→22px. Clef glyphs at large font sizes need more horizontal room.
+
 ## [2.1.7] - 2026-03-16
 
 ### Fixed

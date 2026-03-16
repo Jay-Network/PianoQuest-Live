@@ -390,7 +390,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.7</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.8</div>
       </div>
     </div>
     <div class="controls">
@@ -1573,8 +1573,8 @@ function drawGrandStaff() {
   }
 
   // Layout zones
-  var clefW = 32;
-  var timeSigW = 18;
+  var clefW = 44;
+  var timeSigW = 22;
   var keySigW = Math.abs(keySigNum) * 10 + 4;
   var marginLeft = clefW + timeSigW + keySigW + 4;
   var playLineX = marginLeft + (W - marginLeft) * 0.5; // center of staff
@@ -1623,8 +1623,8 @@ function drawGrandStaff() {
   ctx.fillText('\uD834\uDD22', 6, bassClefY);
   ctx.textBaseline = 'alphabetic';
 
-  // Time signature — to the RIGHT of clefs
-  var tsX = clefW + 8;
+  // Time signature — well to the RIGHT of clefs
+  var tsX = clefW + 4;
   var tsFontSize = Math.round(staffH * 0.48);
   ctx.font = 'bold ' + tsFontSize + 'px DM Sans, sans-serif';
   ctx.fillStyle = '#999999';
