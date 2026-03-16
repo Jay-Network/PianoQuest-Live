@@ -567,7 +567,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.19</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.20</div>
       </div>
     </div>
     <div class="controls">
@@ -3341,8 +3341,14 @@ function initDesktopMediaPipe() {
     console.log('MediaPipe script failed to load');
   };
   script.onload = function() {
+    // Try bare globals first, then vision.* namespace
+    if (typeof FilesetResolver === 'undefined' && typeof vision !== 'undefined') {
+      window.FilesetResolver = vision.FilesetResolver;
+      window.HandLandmarker = vision.HandLandmarker;
+    }
     if (typeof FilesetResolver === 'undefined' || typeof HandLandmarker === 'undefined') {
       mpBadge('MediaPipe: globals missing');
+      console.log('MediaPipe globals:', typeof FilesetResolver, typeof HandLandmarker, typeof vision);
       return;
     }
     _initMediaPipeModel();
