@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.39] - 2026-03-16
+
+### Fixed
+- **MIDI recognition restored** — reverted turnComplete back to true (false caused Gemini to ignore MIDI data entirely). Increased snapshot interval from 1.2s to 5s to reduce response triggers. The "only speak when asked" instruction now handles unwanted responses instead.
+
 ## [3.2.38] - 2026-03-16
 
 ### Fixed
