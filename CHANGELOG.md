@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.3] - 2026-03-16
+
+### Added
+- **Camera preview on desktop** — primary device shows live camera feed from phone in the FINGER TRACKING panel. Frames stream at 4fps for smooth preview.
+- **Increased camera frame rate** — phone sends frames at 4fps (was 1fps). Server throttles Gemini to 1fps but forwards all frames to desktop for smooth preview.
+
 ## [3.1.2] - 2026-03-16
 
 ### Changed

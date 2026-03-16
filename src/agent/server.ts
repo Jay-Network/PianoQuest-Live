@@ -136,6 +136,7 @@ interface RoomSession {
   midiFlushTimer: ReturnType<typeof setTimeout> | null;
   cameraEnabled: boolean;
   bothHandsDetected: boolean;
+  _lastGeminiFrame: number;
 }
 
 const rooms = new Map<string, RoomSession>();
@@ -624,12 +625,22 @@ async function handleSecondaryWebSocket(
           // Forward raw MIDI to all room devices for visualization
           broadcastToRoom(room, JSON.stringify(msg));
         } else if (msgType === "video_frame" && device.roles.camera) {
-          // Forward camera JPEG frame to Gemini as vision input
+          // Forward camera JPEG frame to Gemini (throttled 1fps) + broadcast to room (every frame)
           const data = msg.data as string;
           if (data) {
-            room.sendRealtimeInput({
-              media: { data, mimeType: "image/jpeg" },
-            });
+            const now = Date.now();
+            if (!room._lastGeminiFrame || now - room._lastGeminiFrame >= 1000) {
+              room._lastGeminiFrame = now;
+              room.sendRealtimeInput({
+                media: { data, mimeType: "image/jpeg" },
+              });
+            }
+            // Send every frame to other devices for smooth preview
+            for (const d of room.devices.values()) {
+              if (d.id !== deviceId && d.ws.readyState === WebSocket.OPEN) {
+                try { d.ws.send(JSON.stringify({ type: "video_frame", data })); } catch {}
+              }
+            }
           }
         } else if (msgType === "camera_state") {
           room.cameraEnabled = Boolean(msg.enabled);
@@ -752,6 +763,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             midiFlushTimer: null,
             cameraEnabled: false,
             bothHandsDetected: false,
+            _lastGeminiFrame: 0,
           };
           roomSession.devices.set(primaryDeviceId, primaryDevice);
           rooms.set(roomCode, roomSession);
