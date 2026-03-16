@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.10</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.11</div>
       </div>
     </div>
     <div class="controls">
@@ -1827,8 +1827,9 @@ function drawGrandStaff() {
       if (histEntry && histEntry.fingerDurationMs > 0) {
         // Finger released, pedal sustaining — draw two segments
         var fingerMs = histEntry.fingerDurationMs;
-        var fingerPx = fingerMs * pxPerMs;
-        var fingerEndX = Math.max(headX, playLineX - fingerPx);
+        // fingerEndX = screen position where finger was released
+        // Age of finger-release moment = holdMs - fingerMs
+        var fingerEndX = Math.max(headX, playLineX - (holdMs - fingerMs) * pxPerMs);
         // Finger-held segment: bright
         if (fingerEndX > headX) {
           ctx.fillStyle = color;

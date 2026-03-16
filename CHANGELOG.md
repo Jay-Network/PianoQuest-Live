@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.11] - 2026-03-16
+
+### Fixed
+- **Grand staff pedal split position inverted**: `fingerEndX` was calculated as `playLineX - fingerMs * pxPerMs` (wrong) instead of `playLineX - (holdMs - fingerMs) * pxPerMs` (correct). The finger/pedal bright/dim split was at the wrong X position — finger segment appeared tiny, pedal segment appeared huge.
+
 ## [2.1.10] - 2026-03-16
 
 ### Changed
