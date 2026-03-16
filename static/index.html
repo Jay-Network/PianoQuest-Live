@@ -567,7 +567,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.13</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.14</div>
       </div>
     </div>
     <div class="controls">
@@ -4487,6 +4487,7 @@ function buildSecondaryUI(room, params) {
       offCanvas.height = 480;
       var offCtx = offCanvas.getContext('2d');
 
+      // Send frames at ~20fps for smooth hand tracking on desktop
       secCameraInterval = setInterval(function() {
         if (!secWs || secWs.readyState !== WebSocket.OPEN || !myRoles.camera) return;
         if (video.videoWidth === 0) return;
@@ -4496,7 +4497,7 @@ function buildSecondaryUI(room, params) {
         var dataUrl = offCanvas.toDataURL('image/jpeg', 0.6);
         var base64 = dataUrl.split(',')[1];
         secWs.send(JSON.stringify({ type: 'video_frame', data: base64 }));
-      }, 250);
+      }, 50);
 
       secWs.send(JSON.stringify({ type: 'camera_state', enabled: true }));
     }).catch(function(err) {

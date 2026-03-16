@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.14] - 2026-03-16
+
+### Changed
+- **Phone camera frame rate 4fps → 20fps** (250ms → 50ms) for smooth hand tracking on desktop
+
 ## [3.2.13] - 2026-03-16
 
 ### Changed
