@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.1.9] - 2026-03-16
+
+### Fixed
+- **Camera controls visible** — fixed overflow:hidden on camera wrap clipping the floating buttons. Controls now render over camera feed.
+
 ## [3.1.8] - 2026-03-16
 
 ### Improved
