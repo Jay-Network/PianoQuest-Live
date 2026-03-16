@@ -390,7 +390,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.5</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.6</div>
       </div>
     </div>
     <div class="controls">
@@ -1811,21 +1811,51 @@ function drawGrandStaff() {
   activeNotes.forEach(function(noteData, midi) {
     if (midi < FIRST_MIDI || midi > FIRST_MIDI + TOTAL_KEYS - 1) return;
     var noteY = midiToY(midi);
-    // Always bright while sounding (active), regardless of finger/pedal
     var color = dynamicsColor(noteData.velocity);
     var holdMs = nowMs - noteData.timestamp;
-    var headPx = holdMs * pxPerMs; // head moves left at tempo speed
+    var headPx = holdMs * pxPerMs;
     var headX = Math.max(marginLeft, playLineX - headPx);
-
-    // Draw tail from head to play line — always bright while active
     var tailLen = playLineX - headX;
+
     if (tailLen > 2) {
-      ctx.fillStyle = color;
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.roundRect(headX, noteY - noteRadius * 0.7, tailLen, noteRadius * 1.4, noteRadius * 0.7);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
+      // Check if finger released but pedal sustaining — split bright/dim segments
+      var histEntry = null;
+      for (var hi = noteHistory.length - 1; hi >= 0; hi--) {
+        if (noteHistory[hi].note === midi && noteHistory[hi].endMs === 0) {
+          histEntry = noteHistory[hi]; break;
+        }
+      }
+      if (histEntry && histEntry.fingerDurationMs > 0) {
+        // Finger released, pedal sustaining — draw two segments
+        var fingerMs = histEntry.fingerDurationMs;
+        var fingerPx = fingerMs * pxPerMs;
+        var fingerEndX = Math.max(headX, playLineX - fingerPx);
+        // Finger-held segment: bright
+        if (fingerEndX > headX) {
+          ctx.fillStyle = color;
+          ctx.globalAlpha = 0.6;
+          ctx.beginPath();
+          ctx.roundRect(headX, noteY - noteRadius * 0.7, fingerEndX - headX, noteRadius * 1.4, noteRadius * 0.7);
+          ctx.fill();
+        }
+        // Pedal-sustained segment: dimmer
+        if (playLineX > fingerEndX) {
+          ctx.fillStyle = darkenedColor(noteData.velocity, 0.5);
+          ctx.globalAlpha = 0.35;
+          ctx.beginPath();
+          ctx.roundRect(fingerEndX, noteY - noteRadius * 0.7, playLineX - fingerEndX, noteRadius * 1.4, noteRadius * 0.7);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+      } else {
+        // Finger still held — all bright
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.6;
+        ctx.beginPath();
+        ctx.roundRect(headX, noteY - noteRadius * 0.7, tailLen, noteRadius * 1.4, noteRadius * 0.7);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
     }
 
     drawLedgerLines(headX, noteY);

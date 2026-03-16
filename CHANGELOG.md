@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.6] - 2026-03-16
+
+### Fixed
+- **Grand staff pedal sustain brightness**: Active notes with finger released but pedal sustaining now show dim pedal segment (was all bright until pedal release). Splits active tail into finger-held (bright) + pedal-sustained (dim) matching waterfall behavior.
+
 ## [2.1.5] - 2026-03-16
 
 ### Fixed
