@@ -1842,30 +1842,52 @@ function drawGrandStaff() {
     var noteX = playLineX - offsetPx;
     if (noteX < marginLeft) continue;
 
-    // Draw duration tail for history notes
+    // Draw duration tail for history notes — match waterfall brightness rules
     var duration = (entry.endMs || nowMs) - entry.startMs;
     var durationPx = duration * pxPerMs;
-    var tailRight = noteX;
-    var tailLeft = Math.max(marginLeft, noteX - durationPx + offsetPx > marginLeft ? playLineX - (age - duration) * pxPerMs : marginLeft);
-    // Simpler: tail from noteX to noteX + durationPx, but capped
     var tailEndX = Math.min(playLineX, noteX + durationPx);
 
     var t = offsetPx / maxLeftPx;
     var alpha = Math.max(0.1, 1 - t);
-    var color = dynamicsColor(entry.velocity, alpha);
+    var headColor = dynamicsColor(entry.velocity, alpha);
+    var pedalAlpha = alpha * 0.5;
 
     if (durationPx > 2) {
-      ctx.fillStyle = color;
-      ctx.globalAlpha = alpha * 0.6;
-      ctx.beginPath();
-      ctx.roundRect(noteX, noteY - noteRadius * 0.7, tailEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
-      ctx.fill();
-      ctx.globalAlpha = 1.0;
+      var fingerEndMs = (entry.fingerDurationMs > 0) ? entry.startMs + entry.fingerDurationMs : null;
+      if (fingerEndMs && fingerEndMs < entry.endMs) {
+        // Finger-held segment: bright (same as waterfall headColor)
+        var fingerEndAge = nowMs - fingerEndMs;
+        var fingerEndX = Math.min(playLineX, playLineX - fingerEndAge * pxPerMs);
+        if (fingerEndX > noteX) {
+          ctx.fillStyle = headColor;
+          ctx.globalAlpha = alpha * 0.6;
+          ctx.beginPath();
+          ctx.roundRect(noteX, noteY - noteRadius * 0.7, fingerEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
+          ctx.fill();
+        }
+        // Pedal-sustained segment: dimmer (same as waterfall pedalColor)
+        if (tailEndX > fingerEndX) {
+          ctx.fillStyle = dynamicsColor(entry.velocity, pedalAlpha);
+          ctx.globalAlpha = pedalAlpha * 0.6;
+          ctx.beginPath();
+          ctx.roundRect(fingerEndX, noteY - noteRadius * 0.7, tailEndX - fingerEndX, noteRadius * 1.4, noteRadius * 0.7);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+      } else {
+        // No pedal sustain — all bright
+        ctx.fillStyle = headColor;
+        ctx.globalAlpha = alpha * 0.6;
+        ctx.beginPath();
+        ctx.roundRect(noteX, noteY - noteRadius * 0.7, tailEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
     }
 
     if (alpha > 0.3) drawLedgerLines(noteX, noteY);
     if (alpha > 0.3) drawAccidental(noteX, noteY, entry.note, dynamicsColor(entry.velocity, alpha * 0.8));
-    drawNoteHead(noteX, noteY, color, noteRadius * (0.6 + 0.4 * (1 - t)));
+    drawNoteHead(noteX, noteY, headColor, noteRadius * (0.6 + 0.4 * (1 - t)));
   }
 
   // Left margin overlay to clean up clef area
