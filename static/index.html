@@ -354,8 +354,18 @@
   .right-tab-content { display: none; flex: 1; overflow-y: auto; min-height: 0; }
   .right-tab-content.active { display: flex; flex-direction: column; }
   /* Drills panel */
+  .drill-stage-header {
+    padding: 6px 8px; font-size: 10px; font-weight: 700; color: var(--text3);
+    letter-spacing: 0.05em; cursor: pointer; display: flex; align-items: center; gap: 4px;
+    user-select: none; border-bottom: 1px solid var(--border);
+  }
+  .drill-stage-header:hover { color: var(--text2); }
+  .drill-stage-header .caret { font-size: 8px; transition: transform 0.2s; }
+  .drill-stage-header.collapsed .caret { transform: rotate(-90deg); }
+  .drill-stage-body { overflow: hidden; }
+  .drill-stage-body.collapsed { display: none; }
   .drill-card {
-    padding: 10px 12px; margin: 6px 8px; border-radius: 8px; border: 1px solid var(--border);
+    padding: 8px 12px; margin: 4px 8px; border-radius: 8px; border: 1px solid var(--border);
     background: var(--bg2); cursor: pointer; transition: all 0.2s;
   }
   .drill-card:hover { border-color: var(--accent); }
@@ -363,6 +373,10 @@
   .drill-card .drill-id { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.05em; }
   .drill-card .drill-name { font-size: 13px; font-weight: 700; color: var(--text1); margin: 2px 0; }
   .drill-card .drill-desc { font-size: 10px; color: var(--text3); line-height: 1.4; }
+  .drill-result-bar { display: flex; gap: 6px; align-items: center; padding: 6px 0; }
+  .drill-medal { font-size: 16px; }
+  .drill-score { font-size: 12px; font-weight: 700; color: var(--text1); }
+  .drill-metrics { font-size: 10px; color: var(--text3); line-height: 1.5; }
   .drill-settings { padding: 8px 12px; font-size: 11px; }
   .drill-settings label { display: block; color: var(--text2); margin: 6px 0 2px; font-weight: 600; }
   .drill-settings select, .drill-settings input {
@@ -567,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.21</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.22</div>
       </div>
     </div>
     <div class="controls">
@@ -618,6 +632,16 @@
           <div class="level-bar-bg"><div class="level-bar" id="geminiVolFill" style="background:var(--gemini);"></div></div>
           <span id="geminiSpeakLabel" style="font-size:9px;color:var(--text3);min-width:38px;text-align:right;">Silent</span>
         </div>
+      </div>
+
+      <div class="panel" id="recordPanel" style="padding:8px 12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="dot" style="background:var(--red, #f66)"></div>
+          <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.05em;">ON DEMAND</span>
+          <div style="flex:1"></div>
+          <button id="recordBtn" onclick="toggleRecordMode()" style="padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text1);font-size:11px;font-weight:700;cursor:pointer;">Record</button>
+        </div>
+        <div id="recordStatus" style="display:none;font-size:10px;color:var(--red, #f66);padding:4px 0;">Recording... play a passage, then tap Analyze</div>
       </div>
 
       <div class="panel" style="flex:1;display:flex;flex-direction:column;min-height:100px;">
@@ -725,21 +749,11 @@
         </div>
 
         <!-- Drills tab -->
-        <div class="right-tab-content active" id="drillsTab">
-          <div style="padding:8px 8px 4px;font-size:10px;color:var(--text3);letter-spacing:0.05em;font-weight:700;">STAGE 1: SINGLE FINGER</div>
-          <div class="drill-card" id="drill-1-1" onclick="selectDrill('1-1')">
-            <div class="drill-id">1-1</div>
-            <div class="drill-name">Tempo</div>
-            <div class="drill-desc">Play a single note at a steady tempo. Target notes flow down — match the rhythm.</div>
-          </div>
-          <div class="drill-card" id="drill-1-2" onclick="selectDrill('1-2')">
-            <div class="drill-id">1-2</div>
-            <div class="drill-name">Strength</div>
-            <div class="drill-desc">Play a note at a specific dynamic level. Gemini evaluates your velocity accuracy.</div>
-          </div>
+        <div class="right-tab-content active" id="drillsTab" style="overflow-y:auto;">
+          <div id="drillCatalogList"></div>
           <div id="drillSettings" style="display:none;">
             <div class="drill-settings">
-              <label>Note
+              <label>Root Note
                 <select id="drillNote">
                   <option value="60">C4 (Middle C)</option>
                   <option value="62">D4</option>
@@ -763,11 +777,24 @@
                   <option value="112">ff</option>
                 </select>
               </label>
+              <label id="drillKeyLabel" style="display:none;">Key
+                <select id="drillKey">
+                  <option value="C">C Major</option>
+                  <option value="G">G Major</option>
+                  <option value="D">D Major</option>
+                  <option value="F">F Major</option>
+                  <option value="Bb">Bb Major</option>
+                  <option value="Am">A Minor</option>
+                  <option value="Em">E Minor</option>
+                  <option value="Dm">D Minor</option>
+                </select>
+              </label>
               <label>Measures
                 <input type="number" id="drillMeasures" value="8" min="2" max="32">
               </label>
             </div>
             <div class="drill-start-btn" id="drillStartBtn" onclick="startDrill()">Start Drill</div>
+            <div id="drillResult" style="display:none;padding:8px 12px;font-size:11px;"></div>
             <div id="drillCameraStatus" style="display:none;text-align:center;padding:4px 8px;font-size:10px;color:var(--green);letter-spacing:0.04em;">Camera active — Gemini watching technique</div>
           </div>
         </div>
@@ -831,6 +858,8 @@ let deviceList = [];
 let cameraEnabled = false;
 let bothHandsDetected = false;
 let mediapipeActive = false;
+let lastFrameTime = 0;
+let cameraStaleTimer = null;
 
 let midiAccess = null;
 let midiInput = null;
@@ -1311,6 +1340,7 @@ function handleMidiMessage(event) {
 }
 
 function handleNoteOn(note, velocity, nowMs) {
+  recordMidiEvent(note, velocity, nowMs, true);
   // Close any open history entries for this note (e.g. pedal-sustained re-trigger)
   for (var hi = noteHistory.length - 1; hi >= 0; hi--) {
     if (noteHistory[hi].note === note && noteHistory[hi].endMs === 0) {
@@ -1326,6 +1356,22 @@ function handleNoteOn(note, velocity, nowMs) {
   if (noteHistory.length > 500) noteHistory.splice(0, noteHistory.length - 500);
   recentMidiNotes.push({ note: note, velocity: velocity, timestampMs: nowMs });
   if (recentMidiNotes.length > 64) recentMidiNotes.splice(0, recentMidiNotes.length - 64);
+  // Drill hit detection — check if this note matches an upcoming target
+  if (drillRunning && targetNotes.length > 0) {
+    var hitWindow = 250; // ±250ms
+    var bestIdx = -1, bestDist = Infinity;
+    for (var ti = 0; ti < targetNotes.length; ti++) {
+      var tn = targetNotes[ti];
+      if (tn.hit || tn.midi !== note) continue;
+      var dist = Math.abs(nowMs - tn.arriveMs);
+      if (dist < hitWindow && dist < bestDist) { bestIdx = ti; bestDist = dist; }
+    }
+    if (bestIdx >= 0) {
+      targetNotes[bestIdx].hit = true;
+      targetNotes[bestIdx].hitTime = nowMs;
+      targetNotes[bestIdx].hitVelocity = velocity;
+    }
+  }
   vfxSpawnParticles(note, velocity);
   onsets.push(nowMs);
   while (onsets.length && nowMs - onsets[0] > 30000) onsets.shift();
@@ -1333,6 +1379,7 @@ function handleNoteOn(note, velocity, nowMs) {
 }
 
 function handleNoteOff(note, nowMs) {
+  recordMidiEvent(note, 0, nowMs, false);
   fingerDownNotes.delete(note);
 
   for (var i = noteHistory.length - 1; i >= 0; i--) {
@@ -1525,6 +1572,16 @@ async function startSession() {
               camImg.onload = function() { runDesktopHandDetection(camImg); };
               camImg.src = 'data:image/jpeg;base64,' + msg.data;
               if (camWrap) camWrap.style.display = '';
+              // Track frame freshness for stale detection
+              lastFrameTime = Date.now();
+              if (cameraStaleTimer) clearInterval(cameraStaleTimer);
+              cameraStaleTimer = setInterval(function() {
+                if (Date.now() - lastFrameTime > 5000 && cameraEnabled) {
+                  mpBadge('Camera: FROZEN');
+                  var badge = document.getElementById('cameraBadge');
+                  if (badge) { badge.className = 'camera-badge warn'; }
+                }
+              }, 3000);
             }
           } else if (msg.type === 'camera_state') {
             cameraEnabled = Boolean(msg.enabled);
@@ -3079,10 +3136,108 @@ function loadScoreToTargets() {
 }
 
 // ============================================================================
-// Right panel tabs + Drills
+// Right panel tabs + Drills — 7-stage curriculum
 // ============================================================================
 var activeDrill = null;
 var drillRunning = false;
+var drillStartTime = 0;
+var drillHits = [];
+var drillMisses = 0;
+
+// Scale patterns (semitone intervals from root)
+var SCALES = {
+  C: [0,2,4,5,7,9,11], G: [0,2,4,5,7,9,11], D: [0,2,4,5,7,9,11],
+  F: [0,2,4,5,7,9,11], Bb: [0,2,4,5,7,9,11],
+  Am: [0,2,3,5,7,8,10], Em: [0,2,3,5,7,8,10], Dm: [0,2,3,5,7,8,10]
+};
+var KEY_ROOTS = { C:60, G:55, D:62, F:53, Bb:58, Am:57, Em:52, Dm:50 };
+
+// Full drill catalog
+var DRILL_CATALOG = [
+  // Stage 1: Single Finger
+  { id:'1-1', stage:1, name:'Tempo', desc:'Play a single note at a steady tempo. Match the rhythm of the falling targets.', settings:['note','bpm','measures'] },
+  { id:'1-2', stage:1, name:'Strength', desc:'Hit a specific dynamic level (velocity). Gemini evaluates accuracy.', settings:['note','bpm','measures','dynamic'] },
+  { id:'1-3', stage:1, name:'Staccato', desc:'Play short, detached notes. Release quickly after each strike.', settings:['note','bpm','measures'] },
+  { id:'1-4', stage:1, name:'Legato Hold', desc:'Hold each note for its full duration. Smooth, connected playing.', settings:['note','bpm','measures'] },
+  { id:'1-5', stage:1, name:'Dynamics Ramp', desc:'Gradually increase from pp to ff over the drill. Control your crescendo.', settings:['note','bpm','measures'] },
+  // Stage 2: Two Fingers
+  { id:'2-1', stage:2, name:'Alternating', desc:'Alternate between two adjacent notes. Build finger independence.', settings:['note','bpm','measures'] },
+  { id:'2-2', stage:2, name:'Trill', desc:'Rapid alternation between two notes. Speed and evenness matter.', settings:['note','bpm','measures'] },
+  { id:'2-3', stage:2, name:'Legato Connect', desc:'Smoothly connect two notes with no gap. Overlap slightly.', settings:['note','bpm','measures'] },
+  // Stage 3: Five-Finger Patterns
+  { id:'3-1', stage:3, name:'Five-Finger Scale', desc:'Play 5 notes ascending then descending. Even rhythm and tone.', settings:['note','bpm','measures'] },
+  { id:'3-2', stage:3, name:'Finger Independence', desc:'Random notes within a 5-note hand position. React quickly.', settings:['note','bpm','measures'] },
+  { id:'3-3', stage:3, name:'Thumb Under', desc:'Practice the thumb-under crossing used in scales.', settings:['note','bpm','measures'] },
+  // Stage 4: Scales & Arpeggios
+  { id:'4-1', stage:4, name:'Major Scale (1 oct)', desc:'One-octave major scale ascending and descending.', settings:['bpm','measures','key'] },
+  { id:'4-2', stage:4, name:'Major Scale (2 oct)', desc:'Two-octave major scale. Focus on smooth crossovers.', settings:['bpm','measures','key'] },
+  { id:'4-3', stage:4, name:'Minor Scale', desc:'Natural minor scale, one octave.', settings:['bpm','measures','key'] },
+  { id:'4-4', stage:4, name:'Arpeggio', desc:'Root-3rd-5th-octave pattern. Smooth hand position shifts.', settings:['bpm','measures','key'] },
+  { id:'4-5', stage:4, name:'Chromatic Scale', desc:'All 12 semitones ascending and descending.', settings:['note','bpm','measures'] },
+  // Stage 5: Chords & Voicing
+  { id:'5-1', stage:5, name:'Block Chords', desc:'Play 3-note chords simultaneously. Even attack across all fingers.', settings:['bpm','measures','key'] },
+  { id:'5-2', stage:5, name:'Broken Chords', desc:'Arpeggiate chords note by note. Smooth and even.', settings:['bpm','measures','key'] },
+  { id:'5-3', stage:5, name:'Chord Progressions', desc:'I-IV-V-I progression. Smooth voice leading between chords.', settings:['bpm','measures','key'] },
+  // Stage 6: Advanced Technique
+  { id:'6-1', stage:6, name:'Octaves', desc:'Play octave intervals (1-5 fingering). Wrist relaxation is key.', settings:['note','bpm','measures'] },
+  { id:'6-2', stage:6, name:'Repeated Notes', desc:'Same note repeated rapidly with finger substitution (3-2-1).', settings:['note','bpm','measures'] },
+  { id:'6-3', stage:6, name:'Double Thirds', desc:'Parallel thirds moving stepwise. Finger independence challenge.', settings:['note','bpm','measures','key'] },
+  { id:'6-4', stage:6, name:'Hand Independence', desc:'Right hand melody over left hand steady pulse.', settings:['bpm','measures','key'] },
+  // Stage 7: Musical Application
+  { id:'7-1', stage:7, name:'Sight Reading', desc:'Random melodic patterns. Read and play in real time.', settings:['bpm','measures','key'] },
+  { id:'7-2', stage:7, name:'Rhythm Patterns', desc:'Mixed note values: quarters, eighths, dotted rhythms.', settings:['bpm','measures'] },
+  { id:'7-3', stage:7, name:'Expression', desc:'Play a phrase with dynamics, rubato feel. Gemini evaluates musicality.', settings:['note','bpm','measures'] }
+];
+
+var STAGE_NAMES = {
+  1: 'STAGE 1: SINGLE FINGER',
+  2: 'STAGE 2: TWO FINGERS',
+  3: 'STAGE 3: FIVE-FINGER PATTERNS',
+  4: 'STAGE 4: SCALES & ARPEGGIOS',
+  5: 'STAGE 5: CHORDS & VOICING',
+  6: 'STAGE 6: ADVANCED TECHNIQUE',
+  7: 'STAGE 7: MUSICAL APPLICATION'
+};
+
+// Build drill catalog UI
+function buildDrillCatalog() {
+  var container = document.getElementById('drillCatalogList');
+  if (!container) return;
+  container.innerHTML = '';
+  var stages = {};
+  DRILL_CATALOG.forEach(function(d) {
+    if (!stages[d.stage]) stages[d.stage] = [];
+    stages[d.stage].push(d);
+  });
+  Object.keys(stages).sort().forEach(function(stageNum) {
+    var header = document.createElement('div');
+    header.className = 'drill-stage-header';
+    header.innerHTML = '<span class="caret">&#9660;</span> ' + STAGE_NAMES[stageNum];
+    var body = document.createElement('div');
+    body.className = 'drill-stage-body';
+    // Collapse stages > 1 by default
+    if (parseInt(stageNum) > 1) {
+      header.classList.add('collapsed');
+      body.classList.add('collapsed');
+    }
+    header.onclick = function() {
+      header.classList.toggle('collapsed');
+      body.classList.toggle('collapsed');
+    };
+    stages[stageNum].forEach(function(d) {
+      var card = document.createElement('div');
+      card.className = 'drill-card';
+      card.id = 'drill-' + d.id;
+      card.onclick = function() { selectDrill(d.id); };
+      card.innerHTML = '<div class="drill-id">' + d.id + '</div>' +
+        '<div class="drill-name">' + d.name + '</div>' +
+        '<div class="drill-desc">' + d.desc + '</div>';
+      body.appendChild(card);
+    });
+    container.appendChild(header);
+    container.appendChild(body);
+  });
+}
 
 function switchRightTab(tab) {
   var tabs = document.querySelectorAll('.right-tab');
@@ -3099,38 +3254,256 @@ function switchRightTab(tab) {
 }
 
 function selectDrill(drillId) {
-  // Deselect all
   document.querySelectorAll('.drill-card').forEach(function(c) { c.classList.remove('active'); });
   var card = document.getElementById('drill-' + drillId);
   if (card) card.classList.add('active');
   activeDrill = drillId;
 
-  // Show settings
+  var drill = DRILL_CATALOG.find(function(d) { return d.id === drillId; });
+  if (!drill) return;
+
   var settings = document.getElementById('drillSettings');
   settings.style.display = '';
 
-  // Show/hide dynamic selector for drill 1-2
+  // Show/hide controls based on drill settings
   var dynLabel = document.getElementById('drillDynamicLabel');
-  dynLabel.style.display = drillId === '1-2' ? '' : 'none';
+  dynLabel.style.display = drill.settings.indexOf('dynamic') >= 0 ? '' : 'none';
+  var keyLabel = document.getElementById('drillKeyLabel');
+  keyLabel.style.display = drill.settings.indexOf('key') >= 0 ? '' : 'none';
+  var noteLabel = document.getElementById('drillNote').parentElement;
+  noteLabel.style.display = drill.settings.indexOf('note') >= 0 ? '' : 'none';
 
-  // Update start button
+  document.getElementById('drillResult').style.display = 'none';
   var btn = document.getElementById('drillStartBtn');
   btn.textContent = drillRunning ? 'Stop Drill' : 'Start Drill';
 }
 
-function startDrill() {
-  if (drillRunning) {
-    stopDrill();
-    return;
+// ---- Note generators for each drill type ----
+
+function generateDrillNotes(drillId, root, bpm, measures, beatsPerMeasure, targetVel, key) {
+  var notes = [];
+  var msPerBeat = 60000 / bpm;
+  var startMs = Date.now() + 2000;
+  var totalBeats = measures * beatsPerMeasure;
+  var keyRoot = KEY_ROOTS[key] || 60;
+  var scale = SCALES[key] || SCALES.C;
+
+  function scaleNote(degree) {
+    var octave = Math.floor(degree / scale.length);
+    var idx = ((degree % scale.length) + scale.length) % scale.length;
+    return keyRoot + octave * 12 + scale[idx];
   }
+
+  function pushNote(beat, midi, dur, vel) {
+    notes.push({ midi: midi, arriveMs: startMs + beat * msPerBeat, durationBeats: dur, velocity: vel || 64, hit: false });
+  }
+
+  switch (drillId) {
+    case '1-1': // Tempo — single note on every beat
+      for (var b = 0; b < totalBeats; b++) pushNote(b, root, 0.5, 64);
+      break;
+
+    case '1-2': // Strength — single note at target velocity
+      for (var b = 0; b < totalBeats; b++) pushNote(b, root, 0.5, targetVel);
+      break;
+
+    case '1-3': // Staccato — short notes (0.25 beat duration)
+      for (var b = 0; b < totalBeats; b++) pushNote(b, root, 0.25, 64);
+      break;
+
+    case '1-4': // Legato Hold — long notes (full beat)
+      for (var b = 0; b < totalBeats; b++) pushNote(b, root, 1.0, 64);
+      break;
+
+    case '1-5': // Dynamics Ramp — pp to ff crescendo
+      for (var b = 0; b < totalBeats; b++) {
+        var vel = Math.round(30 + (b / Math.max(1, totalBeats - 1)) * 90);
+        pushNote(b, root, 0.5, vel);
+      }
+      break;
+
+    case '2-1': // Alternating — two adjacent notes
+      for (var b = 0; b < totalBeats; b++) pushNote(b, b % 2 === 0 ? root : root + 2, 0.5, 64);
+      break;
+
+    case '2-2': // Trill — rapid alternation (eighth notes)
+      for (var b = 0; b < totalBeats * 2; b++) pushNote(b * 0.5, b % 2 === 0 ? root : root + 2, 0.25, 64);
+      break;
+
+    case '2-3': // Legato Connect — pairs of connected notes
+      for (var b = 0; b < totalBeats; b += 2) {
+        pushNote(b, root, 1.0, 64);
+        if (b + 1 < totalBeats) pushNote(b + 1, root + 2, 1.0, 64);
+      }
+      break;
+
+    case '3-1': // Five-Finger Scale — up then down
+      var fiveUp = [0, 2, 4, 5, 7];
+      var fivePattern = fiveUp.concat(fiveUp.slice(0, 4).reverse());
+      for (var b = 0; b < totalBeats; b++) {
+        var idx = b % fivePattern.length;
+        pushNote(b, root + fivePattern[idx], 0.5, 64);
+      }
+      break;
+
+    case '3-2': // Finger Independence — random within 5-note position
+      var fiveNotes = [root, root+2, root+4, root+5, root+7];
+      for (var b = 0; b < totalBeats; b++) {
+        pushNote(b, fiveNotes[Math.floor(Math.random() * 5)], 0.5, 64);
+      }
+      break;
+
+    case '3-3': // Thumb Under — ascending with crossover pattern
+      var thumbPattern = [0, 2, 4, 5, 7, 9, 11, 12];
+      for (var b = 0; b < totalBeats; b++) {
+        pushNote(b, root + thumbPattern[b % thumbPattern.length], 0.5, 64);
+      }
+      break;
+
+    case '4-1': // Major Scale 1 octave — up then down
+      var upDown = [];
+      for (var i = 0; i <= scale.length; i++) upDown.push(scaleNote(i));
+      for (var i = scale.length - 1; i >= 0; i--) upDown.push(scaleNote(i));
+      for (var b = 0; b < totalBeats; b++) pushNote(b, upDown[b % upDown.length], 0.5, 64);
+      break;
+
+    case '4-2': // Major Scale 2 octaves
+      var upDown2 = [];
+      for (var i = 0; i <= scale.length * 2; i++) upDown2.push(scaleNote(i));
+      for (var i = scale.length * 2 - 1; i >= 0; i--) upDown2.push(scaleNote(i));
+      for (var b = 0; b < totalBeats; b++) pushNote(b, upDown2[b % upDown2.length], 0.5, 64);
+      break;
+
+    case '4-3': // Minor scale — uses key's minor scale
+      var minUp = [];
+      for (var i = 0; i <= scale.length; i++) minUp.push(scaleNote(i));
+      for (var i = scale.length - 1; i >= 0; i--) minUp.push(scaleNote(i));
+      for (var b = 0; b < totalBeats; b++) pushNote(b, minUp[b % minUp.length], 0.5, 64);
+      break;
+
+    case '4-4': // Arpeggio — root, 3rd, 5th, octave
+      var arp = [scaleNote(0), scaleNote(2), scaleNote(4), scaleNote(7),
+                 scaleNote(4), scaleNote(2)];
+      for (var b = 0; b < totalBeats; b++) pushNote(b, arp[b % arp.length], 0.5, 64);
+      break;
+
+    case '4-5': // Chromatic — all 12 semitones
+      var chrom = [];
+      for (var i = 0; i < 13; i++) chrom.push(root + i);
+      for (var i = 11; i >= 0; i--) chrom.push(root + i);
+      for (var b = 0; b < totalBeats; b++) pushNote(b, chrom[b % chrom.length], 0.5, 64);
+      break;
+
+    case '5-1': // Block Chords — triads on each beat
+      for (var b = 0; b < totalBeats; b++) {
+        var deg = b % 4; // I, IV, V, I
+        var chordRoot = [0, 3, 4, 0][deg];
+        pushNote(b, scaleNote(chordRoot), 1.0, 64);
+        pushNote(b, scaleNote(chordRoot + 2), 1.0, 64);
+        pushNote(b, scaleNote(chordRoot + 4), 1.0, 64);
+      }
+      break;
+
+    case '5-2': // Broken Chords — arpeggiated triads
+      for (var b = 0; b < totalBeats; b += 3) {
+        var deg = Math.floor(b / 3) % 4;
+        var cr = [0, 3, 4, 0][deg];
+        pushNote(b, scaleNote(cr), 0.5, 64);
+        if (b+1 < totalBeats) pushNote(b+1, scaleNote(cr+2), 0.5, 64);
+        if (b+2 < totalBeats) pushNote(b+2, scaleNote(cr+4), 0.5, 64);
+      }
+      break;
+
+    case '5-3': // Chord Progressions — I-IV-V-I, one chord per measure
+      for (var m = 0; m < measures; m++) {
+        var deg = [0, 3, 4, 0][m % 4];
+        for (var beat = 0; beat < beatsPerMeasure; beat++) {
+          var b = m * beatsPerMeasure + beat;
+          if (beat === 0) {
+            pushNote(b, scaleNote(deg), beatsPerMeasure, 64);
+            pushNote(b, scaleNote(deg+2), beatsPerMeasure, 64);
+            pushNote(b, scaleNote(deg+4), beatsPerMeasure, 64);
+          }
+        }
+      }
+      break;
+
+    case '6-1': // Octaves — root + octave above
+      for (var b = 0; b < totalBeats; b++) {
+        pushNote(b, root, 0.5, 64);
+        pushNote(b, root + 12, 0.5, 64);
+      }
+      break;
+
+    case '6-2': // Repeated Notes — same note with finger substitution (triplets)
+      for (var b = 0; b < totalBeats * 3; b++) {
+        pushNote(b / 3, root, 0.17, 64);
+      }
+      break;
+
+    case '6-3': // Double Thirds — parallel thirds moving stepwise
+      for (var b = 0; b < totalBeats; b++) {
+        var deg = b % (scale.length + 1);
+        pushNote(b, scaleNote(deg), 0.5, 64);
+        pushNote(b, scaleNote(deg + 2), 0.5, 64);
+      }
+      break;
+
+    case '6-4': // Hand Independence — RH melody over LH steady pulse
+      for (var b = 0; b < totalBeats; b++) {
+        // LH: root on every beat (low octave)
+        pushNote(b, keyRoot - 12, 0.5, 48);
+        // RH: scale melody
+        if (b % 2 === 0) pushNote(b, scaleNote(b % 8), 0.5, 72);
+      }
+      break;
+
+    case '7-1': // Sight Reading — random scale notes
+      for (var b = 0; b < totalBeats; b++) {
+        var deg = Math.floor(Math.random() * 8);
+        pushNote(b, scaleNote(deg), 0.5, 64);
+      }
+      break;
+
+    case '7-2': // Rhythm Patterns — mixed note values
+      var rhythms = [1, 0.5, 0.5, 1, 0.5, 0.5, 0.5, 0.5]; // pattern in beats
+      var pos = 0;
+      for (var i = 0; pos < totalBeats; i++) {
+        var dur = rhythms[i % rhythms.length];
+        pushNote(pos, root + [0,2,4,5,7,4,2,0][i % 8], dur * 0.9, 64);
+        pos += dur;
+      }
+      break;
+
+    case '7-3': // Expression — phrase with dynamics
+      var phrase = [0, 2, 4, 7, 4, 2, 0, -1];
+      var dynCurve = [48, 56, 72, 96, 80, 64, 48, 40];
+      for (var b = 0; b < totalBeats; b++) {
+        var idx = b % phrase.length;
+        pushNote(b, root + phrase[idx], 0.75, dynCurve[idx]);
+      }
+      break;
+
+    default:
+      for (var b = 0; b < totalBeats; b++) pushNote(b, root, 0.5, 64);
+  }
+  return notes;
+}
+
+function startDrill() {
+  if (drillRunning) { stopDrill(); return; }
   if (!activeDrill) return;
 
-  var note = parseInt(document.getElementById('drillNote').value);
+  var drill = DRILL_CATALOG.find(function(d) { return d.id === activeDrill; });
+  if (!drill) return;
+
+  var root = parseInt(document.getElementById('drillNote').value);
   var bpm = parseInt(document.getElementById('drillBpm').value) || 80;
   var measures = parseInt(document.getElementById('drillMeasures').value) || 8;
   var timeSigParts = (document.getElementById('staffTimeSig').value || '4/4').split('/');
   var beatsPerMeasure = parseInt(timeSigParts[0]) || 4;
-  var targetVelocity = activeDrill === '1-2' ? parseInt(document.getElementById('drillDynamic').value) : null;
+  var targetVel = drill.settings.indexOf('dynamic') >= 0 ? parseInt(document.getElementById('drillDynamic').value) : null;
+  var key = drill.settings.indexOf('key') >= 0 ? document.getElementById('drillKey').value : 'C';
 
   // Sync BPM slider
   document.getElementById('bpmSlider').value = bpm;
@@ -3138,30 +3511,27 @@ function startDrill() {
 
   // Generate target notes
   targetNotes.length = 0;
-  var msPerBeat = 60000 / bpm;
-  var startMs = Date.now() + 2000; // 2s lead-in
-  var totalBeats = measures * beatsPerMeasure;
-
-  for (var b = 0; b < totalBeats; b++) {
-    targetNotes.push({
-      midi: note,
-      arriveMs: startMs + b * msPerBeat,
-      durationBeats: 0.5,
-      velocity: targetVelocity || 64,
-      hit: false
-    });
-  }
+  var generated = generateDrillNotes(activeDrill, root, bpm, measures, beatsPerMeasure, targetVel || 64, key);
+  generated.forEach(function(n) { targetNotes.push(n); });
 
   drillRunning = true;
+  drillStartTime = Date.now();
+  drillHits = [];
+  drillMisses = 0;
+
   document.getElementById('drillStartBtn').textContent = 'Stop Drill';
   document.getElementById('drillStartBtn').style.borderColor = 'var(--red, #f66)';
   document.getElementById('drillStartBtn').style.color = 'var(--red, #f66)';
+  document.getElementById('drillResult').style.display = 'none';
 
-  // Notify Gemini about drill start (with camera status if active)
+  // Auto-stop when drill ends
+  var drillDuration = (generated.length > 0 ? generated[generated.length - 1].arriveMs - Date.now() + 3000 : 5000);
+  setTimeout(function() { if (drillRunning && activeDrill === drill.id) finishDrill(); }, drillDuration);
+
+  // Notify Gemini
   if (ws && ws.readyState === WebSocket.OPEN) {
-    var drillName = activeDrill === '1-1' ? 'Tempo' : activeDrill === '1-2' ? 'Strength' : activeDrill;
     var camNote = cameraEnabled ? ' Camera is active — watch my hand technique.' : '';
-    ws.send(JSON.stringify({ type: 'text', content: 'Starting drill: ' + drillName + '.' + camNote }));
+    ws.send(JSON.stringify({ type: 'text', content: 'Starting drill ' + drill.id + ': ' + drill.name + ' (' + drill.desc + ').' + camNote }));
   }
 }
 
@@ -3171,6 +3541,180 @@ function stopDrill() {
   document.getElementById('drillStartBtn').textContent = 'Start Drill';
   document.getElementById('drillStartBtn').style.borderColor = '';
   document.getElementById('drillStartBtn').style.color = '';
+}
+
+function finishDrill() {
+  if (!drillRunning) return;
+  var result = evaluateDrill();
+  stopDrill();
+  showDrillResult(result);
+
+  // Send result to Gemini for coaching
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'text', content:
+      'Drill ' + result.drillId + ' finished. Grade: ' + result.grade +
+      '. Accuracy: ' + result.accuracy + '%. Timing avg error: ' + result.avgTimingError + 'ms.' +
+      ' Velocity avg error: ' + result.avgVelocityError +
+      '. Please give brief coaching feedback.'
+    }));
+  }
+}
+
+function evaluateDrill() {
+  var total = targetNotes.length;
+  var hits = targetNotes.filter(function(n) { return n.hit; }).length;
+  var accuracy = total > 0 ? Math.round(hits / total * 100) : 0;
+
+  // Timing errors (how far off from target time)
+  var timingErrors = [];
+  var velErrors = [];
+  targetNotes.forEach(function(n) {
+    if (n.hit && n.hitTime) {
+      timingErrors.push(Math.abs(n.hitTime - n.arriveMs));
+    }
+    if (n.hit && n.hitVelocity !== undefined) {
+      velErrors.push(Math.abs(n.hitVelocity - n.velocity));
+    }
+  });
+
+  var avgTiming = timingErrors.length > 0 ? Math.round(timingErrors.reduce(function(a,b){return a+b;},0) / timingErrors.length) : 0;
+  var avgVel = velErrors.length > 0 ? Math.round(velErrors.reduce(function(a,b){return a+b;},0) / velErrors.length) : 0;
+
+  var grade = gradeDrill(accuracy, avgTiming, avgVel);
+
+  return {
+    drillId: activeDrill,
+    accuracy: accuracy,
+    hits: hits,
+    total: total,
+    avgTimingError: avgTiming,
+    avgVelocityError: avgVel,
+    grade: grade,
+    medal: grade === 'gold' ? '&#127942;' : grade === 'silver' ? '&#129352;' : grade === 'bronze' ? '&#129353;' : '&#128260;'
+  };
+}
+
+function gradeDrill(accuracy, avgTiming, avgVel) {
+  if (accuracy >= 90 && avgTiming < 80) return 'gold';
+  if (accuracy >= 75 && avgTiming < 120) return 'silver';
+  if (accuracy >= 50 && avgTiming < 200) return 'bronze';
+  return 'retry';
+}
+
+function showDrillResult(result) {
+  var el = document.getElementById('drillResult');
+  if (!el) return;
+  el.style.display = '';
+  el.innerHTML = '<div class="drill-result-bar">' +
+    '<span class="drill-medal">' + result.medal + '</span>' +
+    '<span class="drill-score">' + result.grade.toUpperCase() + '</span>' +
+    '</div>' +
+    '<div class="drill-metrics">' +
+    'Accuracy: ' + result.accuracy + '% (' + result.hits + '/' + result.total + ')<br>' +
+    'Timing: ±' + result.avgTimingError + 'ms<br>' +
+    'Velocity: ±' + result.avgVelocityError +
+    '</div>';
+}
+
+// Build the catalog on load
+setTimeout(buildDrillCatalog, 100);
+
+// ============================================================================
+// On Demand Analysis — Record a passage, then send to Gemini for deep analysis
+// ============================================================================
+var recordMode = false;
+var recordBuffer = { midi: [], startTime: 0 };
+
+function toggleRecordMode() {
+  var btn = document.getElementById('recordBtn');
+  var status = document.getElementById('recordStatus');
+  if (!recordMode) {
+    // Start recording
+    recordMode = true;
+    recordBuffer = { midi: [], startTime: Date.now() };
+    btn.textContent = 'Analyze';
+    btn.style.borderColor = 'var(--red, #f66)';
+    btn.style.color = 'var(--red, #f66)';
+    status.style.display = '';
+  } else {
+    // Stop and analyze
+    recordMode = false;
+    btn.textContent = 'Record';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+    status.style.display = 'none';
+    analyzeRecordedPassage();
+  }
+}
+
+function recordMidiEvent(note, velocity, timestampMs, isNoteOn) {
+  if (!recordMode) return;
+  recordBuffer.midi.push({
+    note: note, velocity: velocity, time: timestampMs - recordBuffer.startTime,
+    type: isNoteOn ? 'on' : 'off'
+  });
+}
+
+function analyzeRecordedPassage() {
+  var buf = recordBuffer;
+  if (buf.midi.length === 0) return;
+
+  var durationMs = buf.midi[buf.midi.length - 1].time;
+  var noteOns = buf.midi.filter(function(e) { return e.type === 'on' && e.velocity > 0; });
+  if (noteOns.length < 2) return;
+
+  // Compute IOI (inter-onset intervals)
+  var iois = [];
+  for (var i = 1; i < noteOns.length; i++) {
+    iois.push(noteOns[i].time - noteOns[i-1].time);
+  }
+  var avgIoi = iois.reduce(function(a,b){return a+b;},0) / iois.length;
+  var ioiVariance = iois.reduce(function(a,b){return a+(b-avgIoi)*(b-avgIoi);},0) / iois.length;
+  var ioiStdDev = Math.sqrt(ioiVariance);
+
+  // Velocity stats
+  var vels = noteOns.map(function(e){return e.velocity;});
+  var avgVel = vels.reduce(function(a,b){return a+b;},0) / vels.length;
+  var velMin = Math.min.apply(null, vels);
+  var velMax = Math.max.apply(null, vels);
+  var velStdDev = Math.sqrt(vels.reduce(function(a,b){return a+(b-avgVel)*(b-avgVel);},0)/vels.length);
+
+  // Implied BPM
+  var impliedBpm = avgIoi > 0 ? Math.round(60000 / avgIoi) : 0;
+
+  // Build analysis summary for Gemini
+  var summary = 'ON DEMAND PASSAGE ANALYSIS — ' + noteOns.length + ' notes over ' +
+    Math.round(durationMs/1000) + 's.\n' +
+    'TEMPO: avg IOI=' + Math.round(avgIoi) + 'ms (implied ~' + impliedBpm + ' BPM), ' +
+    'IOI stddev=' + Math.round(ioiStdDev) + 'ms (' + Math.round(ioiStdDev/avgIoi*100) + '% variation).\n' +
+    'DYNAMICS: avg velocity=' + Math.round(avgVel) + ', range=' + velMin + '-' + velMax +
+    ', stddev=' + Math.round(velStdDev) + '.\n' +
+    'RAW NOTE DATA (time_ms, note, velocity):\n';
+
+  // Include note data (truncate if too long)
+  var maxNotes = Math.min(noteOns.length, 60);
+  for (var i = 0; i < maxNotes; i++) {
+    var n = noteOns[i];
+    summary += n.time + ',' + n.note + ',' + n.velocity + '\n';
+  }
+  if (noteOns.length > maxNotes) summary += '... (' + (noteOns.length - maxNotes) + ' more notes)\n';
+  summary += '\nAnalyze this passage. Focus on tempo uniformity and velocity habits. Be specific with numbers.';
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'text', content: summary }));
+  }
+
+  // Show in chat
+  var chatArea = document.getElementById('chatArea');
+  if (chatArea) {
+    var div = document.createElement('div');
+    div.className = 'system-msg';
+    div.style.fontSize = '10px';
+    div.style.color = 'var(--text3)';
+    div.textContent = 'Sent ' + noteOns.length + ' notes for analysis (' + Math.round(durationMs/1000) + 's passage)';
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
 }
 
 function toggleSheetMusicView() {
@@ -4329,11 +4873,16 @@ function buildSecondaryUI(room, params) {
 
   var proto = location.protocol === 'https:' ? 'wss' : 'ws';
   var roleHint = params.get('role') || '';
-  var wsUrl = proto + '://' + location.host + '/ws/session?room=' + encodeURIComponent(room);
-  if (roleHint) wsUrl += '&role=' + encodeURIComponent(roleHint);
-  var secWs = new WebSocket(wsUrl);
-  ws = secWs;
-  secWs.binaryType = 'arraybuffer';
+  var roomCode = room;
+  var secWs = null;
+  var secReconnectDisabled = false;
+
+  function connectSecondary(rc) {
+    var wsUrl = proto + '://' + location.host + '/ws/session?room=' + encodeURIComponent(rc);
+    if (roleHint) wsUrl += '&role=' + encodeURIComponent(roleHint);
+    secWs = new WebSocket(wsUrl);
+    ws = secWs;
+    secWs.binaryType = 'arraybuffer';
 
   secWs.onopen = function() {
     statusEl.textContent = 'Connected';
@@ -4380,15 +4929,30 @@ function buildSecondaryUI(room, params) {
     } else if (msg.type === 'room_closed' || msg.type === 'error') {
       statusEl.textContent = msg.message || 'Room closed';
       statusEl.style.color = 'var(--rose)';
+      secReconnectDisabled = true;
       stopSecondaryHardware();
     }
   };
 
-  secWs.onclose = function() {
-    statusEl.textContent = 'Disconnected';
-    statusEl.style.color = 'var(--rose)';
+  secWs.onclose = function(ev) {
     stopSecondaryHardware();
+    // Auto-reconnect unless room was intentionally closed
+    if (!secReconnectDisabled && ev.code !== 4000) {
+      statusEl.textContent = 'Reconnecting...';
+      statusEl.style.color = 'var(--amber, #fbbf24)';
+      setTimeout(function() {
+        if (document.visibilityState !== 'hidden') {
+          connectSecondary(roomCode);
+        }
+      }, 2000);
+    } else {
+      statusEl.textContent = 'Disconnected';
+      statusEl.style.color = 'var(--rose)';
+    }
   };
+  } // end connectSecondary
+
+  connectSecondary(room);
 
   var prevRoles = { mic: false, camera: false, midi: false };
 

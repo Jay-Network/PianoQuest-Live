@@ -583,6 +583,16 @@ async function handleSecondaryWebSocket(
   room.devices.set(deviceId, device);
   console.log(`[${APP_NAME}] Secondary device ${deviceId} (${devType}) joined room "${roomCode}"`);
 
+  // Keepalive ping every 20s to prevent Cloud Run from killing idle connections
+  let secAlive = true;
+  const secPingInterval = setInterval(() => {
+    if (ws.readyState !== WebSocket.OPEN) { clearInterval(secPingInterval); return; }
+    if (!secAlive) { ws.terminate(); return; }
+    secAlive = false;
+    ws.ping();
+  }, 20000);
+  ws.on("pong", () => { secAlive = true; });
+
   // Send identity to the secondary device
   ws.send(JSON.stringify({
     type: "you_are_secondary",
@@ -678,6 +688,7 @@ async function handleSecondaryWebSocket(
   } catch (e: any) {
     console.log(`[${APP_NAME}] Secondary ${deviceId} error:`, e?.message);
   } finally {
+    clearInterval(secPingInterval);
     room.devices.delete(deviceId);
     console.log(`[${APP_NAME}] Secondary device ${deviceId} disconnected from room "${roomCode}"`);
     sendDeviceList(room);
@@ -876,6 +887,16 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
 
   console.log(`[${APP_NAME}] Gemini session ready: ${sessionId}, room: ${roomCode}`);
 
+  // Keepalive ping every 20s to prevent Cloud Run from killing the connection
+  let primaryAlive = true;
+  const primaryPingInterval = setInterval(() => {
+    if (ws.readyState !== WebSocket.OPEN) { clearInterval(primaryPingInterval); return; }
+    if (!primaryAlive) { ws.terminate(); return; }
+    primaryAlive = false;
+    ws.ping();
+  }, 20000);
+  ws.on("pong", () => { primaryAlive = true; });
+
   // ---------------------------------------------------------------------------
   // Receive from primary client, forward to Gemini
   // ---------------------------------------------------------------------------
@@ -954,6 +975,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   }
 
   closed = true;
+  clearInterval(primaryPingInterval);
   try { session.close(); } catch {}
 
   // Cleanup

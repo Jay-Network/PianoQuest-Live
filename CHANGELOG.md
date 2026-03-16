@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.22] - 2026-03-16
+
+### Added
+- **7-stage drill curriculum** — 25 drills across 7 progressive stages: Single Finger (5), Two Fingers (3), Five-Finger Patterns (3), Scales & Arpeggios (5), Chords & Voicing (3), Advanced Technique (4), Musical Application (3)
+- **Drill evaluation system** — accuracy, timing error, velocity error metrics with gold/silver/bronze/retry grading
+- **Drill result coaching** — sends drill results to Gemini for quantitative analytical feedback
+- **Note generator per drill type** — scales, arpeggios, chords, chromatic runs, rhythm patterns, expression phrases
+- **Key selector** for scale/chord drills (C/G/D/F/Bb major, Am/Em/Dm minor)
+- **Stage accordion UI** — collapsible stages, only Stage 1 expanded by default
+- **Auto-stop + evaluation** — drills auto-finish after last target note, show medal + metrics
+- **MIDI hit detection** — ±250ms window matches played notes to targets with timing/velocity tracking
+- **On Demand passage analysis** — Record button captures MIDI events during a passage, computes IOI/velocity stats, sends full data to Gemini for deep quantitative analysis
+- **Three analysis contexts** — Drill sessions, On-demand recording, Instant feedback (documented in system instruction)
+
+### Changed
+- **System instruction rewritten** — Gemini is now a quantitative analytical coach, not an encourager. All feedback must cite MIDI data (timestamps, velocities). No praise, no encouragement. Focus on tempo uniformity, dynamics habits, and identifying patterns the player doesn't notice.
+
+### Fixed
+- **Camera/MediaPipe freeze** — added server-side WebSocket keepalive pings (20s interval) for both primary and secondary connections, preventing Cloud Run idle timeout
+- **Stale frame detection** on desktop — badge shows "Camera: FROZEN" if no frames for 5 seconds
+- **Phone auto-reconnect** — secondary WebSocket auto-reconnects on disconnect (2s delay), unless room was intentionally closed
+
 ## [3.2.14] - 2026-03-16
 
 ### Changed
