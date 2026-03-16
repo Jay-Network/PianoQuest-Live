@@ -304,8 +304,41 @@
   .secondary-role-card.active .role-name { color: var(--green); }
   .secondary-role-card .role-status { font-size: 9px; color: var(--text3); margin-top: 4px; }
   .secondary-role-card.active .role-status { color: var(--green); }
+  /* Right panel tabs */
+  .right-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .right-tab {
+    flex: 1; padding: 8px 12px; text-align: center; font-size: 11px; font-weight: 700;
+    color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent;
+    letter-spacing: 0.05em; transition: all 0.2s;
+  }
+  .right-tab:hover { color: var(--text2); }
+  .right-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .right-tab-content { display: none; flex: 1; overflow-y: auto; min-height: 0; }
+  .right-tab-content.active { display: flex; flex-direction: column; }
+  /* Drills panel */
+  .drill-card {
+    padding: 10px 12px; margin: 6px 8px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg2); cursor: pointer; transition: all 0.2s;
+  }
+  .drill-card:hover { border-color: var(--accent); }
+  .drill-card.active { border-color: var(--green); background: rgba(134,239,172,0.06); }
+  .drill-card .drill-id { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.05em; }
+  .drill-card .drill-name { font-size: 13px; font-weight: 700; color: var(--text1); margin: 2px 0; }
+  .drill-card .drill-desc { font-size: 10px; color: var(--text3); line-height: 1.4; }
+  .drill-settings { padding: 8px 12px; font-size: 11px; }
+  .drill-settings label { display: block; color: var(--text2); margin: 6px 0 2px; font-weight: 600; }
+  .drill-settings select, .drill-settings input {
+    width: 100%; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border);
+    background: var(--bg1); color: var(--text1); font-size: 11px;
+  }
+  .drill-start-btn {
+    margin: 8px; padding: 8px; border-radius: 6px; border: 1px solid var(--green);
+    background: rgba(134,239,172,0.08); color: var(--green); font-size: 12px; font-weight: 700;
+    cursor: pointer; text-align: center; transition: all 0.2s;
+  }
+  .drill-start-btn:hover { background: rgba(134,239,172,0.15); }
   /* Score panel (right column) */
-  .score-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
+  .score-col { display: flex; flex-direction: column; gap: 0; min-height: 0; overflow: hidden; }
   .score-browser {
     display: flex; flex-direction: column; height: 100%;
   }
@@ -389,7 +422,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.0.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.0.1</div>
       </div>
     </div>
     <div class="controls">

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-03-16
+
+### Fixed
+- **Gemini talking nonstop** — midi_snapshot was sent with `turnComplete: true`, triggering a Gemini response every 250ms. Changed to `turnComplete: false` so MIDI data is context-only. Gemini only responds when user speaks.
+
 ## [3.0.0] - 2026-03-16
 
 ### Fixed

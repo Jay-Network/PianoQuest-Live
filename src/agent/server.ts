@@ -847,7 +847,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           if (summary) {
             session.sendClientContent({
               turns: [{ role: "user", parts: [{ text: summary }] }],
-              turnComplete: true,
+              turnComplete: false,
             });
           }
         } else if (msgType === "user_speech_transcript") {
