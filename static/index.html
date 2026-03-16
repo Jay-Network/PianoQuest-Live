@@ -389,7 +389,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.13</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.1.14</div>
       </div>
     </div>
     <div class="controls">
@@ -1606,7 +1606,7 @@ function drawGrandStaff() {
 
   // Treble clef — Unicode 𝄞, centered on G4 line
   ctx.fillStyle = '#AAAAAA';
-  var trebleClefSize = Math.round(staffH * 0.924);
+  var trebleClefSize = Math.round(staffH * 0.924 * 1.2);
   ctx.font = trebleClefSize + 'px serif';
   ctx.textBaseline = 'middle';
   var trebleClefX = 4;
@@ -1617,7 +1617,7 @@ function drawGrandStaff() {
   ctx.font = bassClefSize + 'px serif';
   var bassLineSpacing = (bassBottom - bassTop) / 4;
   var bassF3LineY = midiToY(53); // F3 = 4th line from bottom
-  var bassClefY = bassF3LineY + bassLineSpacing; // shift down so dots straddle F3
+  var bassClefY = bassF3LineY + bassLineSpacing * 2; // shift down one more note
   var bassClefX = 6;
   ctx.fillText('\uD834\uDD22', bassClefX, bassClefY);
   var bassClefW = ctx.measureText('\uD834\uDD22').width;
@@ -1844,10 +1844,10 @@ function drawGrandStaff() {
           ctx.roundRect(headX, noteY - noteRadius * 0.7, fingerEndX - headX, noteRadius * 1.4, noteRadius * 0.7);
           ctx.fill();
         }
-        // Pedal-sustained segment: dimmer
+        // Pedal-sustained segment: dimmer (match waterfall brightness)
         if (playLineX > fingerEndX) {
           ctx.fillStyle = darkenedColor(noteData.velocity, 0.5);
-          ctx.globalAlpha = 0.35;
+          ctx.globalAlpha = 0.55;
           ctx.beginPath();
           ctx.roundRect(fingerEndX, noteY - noteRadius * 0.7, playLineX - fingerEndX, noteRadius * 1.4, noteRadius * 0.7);
           ctx.fill();
@@ -1895,29 +1895,29 @@ function drawGrandStaff() {
     if (durationPx > 2) {
       var fingerEndMs = (entry.fingerDurationMs > 0) ? entry.startMs + entry.fingerDurationMs : null;
       if (fingerEndMs && fingerEndMs < entry.endMs) {
-        // Finger-held segment: bright (same as waterfall headColor)
+        // Finger-held segment: stays bright (no distance fade on tail)
         var fingerEndAge = nowMs - fingerEndMs;
         var fingerEndX = Math.min(playLineX, playLineX - fingerEndAge * pxPerMs);
         if (fingerEndX > noteX) {
-          ctx.fillStyle = headColor;
-          ctx.globalAlpha = alpha * 0.6;
+          ctx.fillStyle = dynamicsColor(entry.velocity);
+          ctx.globalAlpha = 0.6;
           ctx.beginPath();
           ctx.roundRect(noteX, noteY - noteRadius * 0.7, fingerEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
           ctx.fill();
         }
-        // Pedal-sustained segment: dimmer (same as waterfall pedalColor)
+        // Pedal-sustained segment: dimmer (match waterfall brightness)
         if (tailEndX > fingerEndX) {
-          ctx.fillStyle = dynamicsColor(entry.velocity, pedalAlpha);
-          ctx.globalAlpha = pedalAlpha * 0.6;
+          ctx.fillStyle = darkenedColor(entry.velocity, 0.5);
+          ctx.globalAlpha = alpha * 0.55;
           ctx.beginPath();
           ctx.roundRect(fingerEndX, noteY - noteRadius * 0.7, tailEndX - fingerEndX, noteRadius * 1.4, noteRadius * 0.7);
           ctx.fill();
         }
         ctx.globalAlpha = 1.0;
       } else {
-        // No pedal sustain — all bright
-        ctx.fillStyle = headColor;
-        ctx.globalAlpha = alpha * 0.6;
+        // No pedal sustain — stays bright (no distance fade on tail)
+        ctx.fillStyle = dynamicsColor(entry.velocity);
+        ctx.globalAlpha = 0.6;
         ctx.beginPath();
         ctx.roundRect(noteX, noteY - noteRadius * 0.7, tailEndX - noteX, noteRadius * 1.4, noteRadius * 0.7);
         ctx.fill();

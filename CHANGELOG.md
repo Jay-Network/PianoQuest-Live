@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.1.14] - 2026-03-16
+
+### Fixed
+- **Grand staff pedal brightness too dim**: Removed double/triple alpha dimming on pedal-sustained segments. Active notes pedal segment now uses `globalAlpha=0.55` (was 0.35). History pedal segment uses `darkenedColor` without extra alpha multiplication.
+- **Grand staff finger-held tail dims on release**: History finger-held segments now use full color with constant `globalAlpha=0.6` — same as active notes. No distance-based fade on tails, matching waterfall behavior.
+
+### Changed
+- **Treble clef 1.2x larger**: Scale factor increased from `staffH * 0.924` to `staffH * 0.924 * 1.2`
+- **Bass clef moved down one note**: Shifted down by additional `bassLineSpacing`
+
 ## [2.1.13] - 2026-03-16
 
 ### Fixed
