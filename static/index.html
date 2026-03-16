@@ -554,7 +554,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.1</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.2</div>
       </div>
     </div>
     <div class="controls">
@@ -1236,7 +1236,13 @@ async function refreshMidiInputs() {
     });
 
     if (!midiInput || !midiAccess.inputs.has(midiInput.id)) {
-      setMidiInput(inputs[0].id);
+      // Auto-select: prefer CASIO, then saved device, then first available
+      var savedMidiId = localStorage.getItem('preferredMidiInput');
+      var casioInput = inputs.find(function(inp) { return inp.name && inp.name.toUpperCase().indexOf('CASIO') >= 0; });
+      var savedInput = savedMidiId ? inputs.find(function(inp) { return inp.id === savedMidiId; }) : null;
+      var best = casioInput || savedInput || inputs[0];
+      setMidiInput(best.id);
+      localStorage.setItem('preferredMidiInput', best.id);
     } else {
       select.value = midiInput.id;
       updateMidiStatus('MIDI: ' + (midiInput.name || 'Connected'));
@@ -1259,6 +1265,7 @@ function setMidiInput(inputId) {
   if (midiInput) {
     midiInput.onmidimessage = handleMidiMessage;
     document.getElementById('midiInputSelect').value = midiInput.id;
+    localStorage.setItem('preferredMidiInput', midiInput.id);
     updateMidiStatus('MIDI: ' + (midiInput.name || 'Connected'));
   } else {
     updateMidiStatus('MIDI not connected');
@@ -3360,9 +3367,9 @@ function updateQr(roomCode) {
   if (!room) return;
   if (params.get('spectator') === '1' || params.get('camera') === '1') return;
 
-  // Tablet detection: explicit param or large touch screen joining a room
+  // Tablet detection: explicit param or iPad-sized touch screen (min dimension >= 768 excludes phones)
   var isTabletMode = params.get('mode') === 'tablet' ||
-    (window.innerWidth >= 768 && 'ontouchstart' in window);
+    (Math.min(window.innerWidth, window.innerHeight) >= 768 && 'ontouchstart' in window);
 
   if (!isTabletMode) {
     buildSecondaryUI(room, params);

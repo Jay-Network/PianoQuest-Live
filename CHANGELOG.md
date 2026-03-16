@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.2] - 2026-03-16
+
+### Changed
+- **Auto-select CASIO MIDI device** — CASIO USB-MIDI is now preferred by default. Selection saved to localStorage so it persists across deploys.
+
 ## [3.2.1] - 2026-03-16
 
 ### Changed
