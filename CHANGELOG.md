@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-03-16
+
+### Fixed
+- **CRITICAL**: Grand staff missing — canvas had `height:100%` CSS but flex parent had zero height. Replaced with `sizeMidiStack()` that computes concrete pixel heights from midi-stack container (5:2.5:4 ratio for waterfall:keyboard:staff)
+
 ## [2.0.0] - 2026-03-16
 
 ### Changed

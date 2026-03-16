@@ -452,7 +452,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.0.0</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v2.0.1</div>
       </div>
     </div>
     <div class="controls">
@@ -540,14 +540,14 @@
     <div class="right-col">
 
       <div class="midi-stack" id="midiStack">
-        <div class="roll-wrap" style="flex:5;min-height:0;background:#0a0a0f;border-radius:12px 12px 0 0;overflow:hidden;">
-          <canvas id="pianoRollCanvas" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="roll-wrap" id="rollWrap" style="background:#0a0a0f;border-radius:12px 12px 0 0;overflow:hidden;">
+          <canvas id="pianoRollCanvas"></canvas>
         </div>
-        <div class="keyboard-wrap" style="flex:2.5;min-height:0;background:#0a0a0a;">
-          <canvas id="keyboardCanvas" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="keyboard-wrap" id="keyboardWrap" style="background:#0a0a0a;">
+          <canvas id="keyboardCanvas"></canvas>
         </div>
-        <div class="staff-wrap" style="flex:4;min-height:0;padding:0;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
-          <canvas id="grandStaffCanvas" style="width:100%;height:100%;display:block;"></canvas>
+        <div class="staff-wrap" id="staffWrap" style="padding:0;background:#050508;border-radius:0 0 12px 12px;overflow:hidden;">
+          <canvas id="grandStaffCanvas"></canvas>
         </div>
       </div>
       <div class="midi-footer" style="display:flex;align-items:center;gap:12px;padding:6px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
@@ -1604,8 +1604,23 @@ function queueAudio(arrayBuf) {
 // ============================================================================
 // Visualization loop
 // ============================================================================
+function sizeMidiStack() {
+  var stack = document.getElementById('midiStack');
+  if (!stack) return;
+  var totalH = stack.clientHeight;
+  if (totalH < 100) return;
+  // Proportions: waterfall 5, keyboard 2.5, grand staff 4 = 11.5 total
+  var rollH = Math.round(totalH * 5 / 11.5);
+  var kbH = Math.round(totalH * 2.5 / 11.5);
+  var staffH = totalH - rollH - kbH;
+  document.getElementById('rollWrap').style.height = rollH + 'px';
+  document.getElementById('keyboardWrap').style.height = kbH + 'px';
+  document.getElementById('staffWrap').style.height = staffH + 'px';
+}
+
 function drawLoop() {
   if (!sessionActive) return;
+  sizeMidiStack();
   processHandTracking();
   drawPianoRoll();
   drawGrandStaff();
