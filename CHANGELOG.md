@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.3] - 2026-03-16
+
+### Changed
+- **Phone auto-activates camera + mic on QR scan** — skips role selection cards, jumps straight to live camera with hand tracking. No buttons to tap.
+
 ## [3.2.2] - 2026-03-16
 
 ### Changed

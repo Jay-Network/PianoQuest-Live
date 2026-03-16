@@ -554,7 +554,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.2</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.3</div>
       </div>
     </div>
     <div class="controls">
@@ -4070,6 +4070,7 @@ function buildSecondaryUI(room, params) {
   var rolesContainer = document.createElement('div');
   rolesContainer.className = 'secondary-roles';
   rolesContainer.id = 'secondaryRoles';
+  rolesContainer.style.display = 'none'; // Hidden — camera auto-activates
 
   var roleConfigs = [
     { key: 'mic', icon: '\uD83C\uDF99\uFE0F', name: 'MIC' },
@@ -4166,8 +4167,11 @@ function buildSecondaryUI(room, params) {
   secWs.binaryType = 'arraybuffer';
 
   secWs.onopen = function() {
-    statusEl.textContent = 'Connected \u2014 waiting for role assignment';
+    statusEl.textContent = 'Connected';
     statusEl.style.color = 'var(--green)';
+    // Auto-activate camera immediately — skip role selection
+    secWs.send(JSON.stringify({ type: 'request_role', role: 'camera', enabled: true }));
+    secWs.send(JSON.stringify({ type: 'request_role', role: 'mic', enabled: true }));
   };
 
   secWs.onmessage = function(event) {
