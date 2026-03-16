@@ -582,16 +582,17 @@ const FIRST_MIDI = 21;
 const WHITE_KEYS_COUNT = 52;
 const BLACK_KEY_PATTERN = [false, true, false, true, false, false, true, false, true, false, true, false];
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+// Option B: Cool blue→white temperature ramp (designed by jworks:81)
 const DYNAMICS_COLORS = [
-  { vel: 0, r: 59, g: 130, b: 246 },
-  { vel: 18, r: 59, g: 130, b: 246 },
-  { vel: 36, r: 6, g: 182, b: 212 },
-  { vel: 54, r: 16, g: 185, b: 129 },
-  { vel: 72, r: 234, g: 179, b: 8 },
-  { vel: 90, r: 249, g: 115, b: 22 },
-  { vel: 100, r: 239, g: 68, b: 68 },
-  { vel: 112, r: 236, g: 72, b: 153 },
-  { vel: 127, r: 168, g: 85, b: 247 }
+  { vel: 0,   r: 74,  g: 106, b: 138 },  // pp  #4a6a8a deep steel blue
+  { vel: 18,  r: 74,  g: 106, b: 138 },  // pp
+  { vel: 36,  r: 106, g: 143, b: 175 },  // p   #6a8faf muted blue
+  { vel: 54,  r: 138, g: 176, b: 204 },  // mp  #8ab0cc light steel
+  { vel: 72,  r: 176, g: 207, b: 224 },  // mf  #b0cfe0 pale blue-white
+  { vel: 90,  r: 212, g: 229, b: 240 },  // f   #d4e5f0 near-white blue
+  { vel: 100, r: 230, g: 240, b: 248 },  // f+
+  { vel: 112, r: 245, g: 249, b: 252 },  // ff
+  { vel: 127, r: 255, g: 255, b: 255 }   // fff #ffffff pure white
 ];
 const DYNAMICS_LABELS = [
   { vel: 0, label: 'ppp' },
