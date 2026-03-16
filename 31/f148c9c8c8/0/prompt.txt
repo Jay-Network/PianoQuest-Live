@@ -1,0 +1,220 @@
+Implement the following plan:
+
+# Plan: Transcription Fix + Multi-Device + Grand Staff Clefs
+
+## Context
+Gemini's `inputAudioTranscription` on native audio model outputs wrong languages (Arabic, Korean) — known unfixable API bug. Output transcription only shows last few words because code replaces buffer instead of appending. Jay has 3 devices (Ubuntu, iPad, iPhone) ready to connect. Grand staff clefs also need positioning fixes.
+
+---
+
+## Part 1: Transcription Fix
+
+### 1A. Fix output transcription accumulation (`server.ts`)
+- Change `bufOutput = text` → `bufOutput += (bufOutput ? " " : "") + text` (append chunks)
+- Same for `bufInput`
+- Remove `inputAudioTranscription: {}` from Gemini config (stop the garbage)
+- Keep `outputAudioTranscription: {}`
+
+### 1B. Add Web Speech API for user input (`index.html`)
+- `startSpeechRecognition()` / `stopSpeechRecognition()` — primary device
+- `startSecondarySpeechRec()` / `stopSecondarySpeechRec()` — secondary device
+- `SpeechRecognition` with `lang = 'en-US'`, `continuous = true`, `interimResults = false`
+- Auto-restart on `onend` (both Chrome and Safari can stop unexpectedly)
+- Send final results as `{ type: 'user_speech_transcript', text }` via WebSocket
+- Use `window.SpeechRecognition || window.webkitSpeechRecognition` for Safari compat
+
+### 1C. Server relay (`server.ts`)
+- Handle `user_speech_transcript` in both primary and secondary handlers
+- Broadcast as `input_transcript` to all room devices (existing message type, already displayed in chat)
+
+---
+
+## Part 2: Multi-Device Task Distribution
+
+### Optimal 3-device setup:
+| Device | Role | Responsibility |
+|--------|------|----------------|
+| **Ubuntu (Chrome)** | Primary + MIDI | Visualization, chat display, device manager, USB piano MIDI. No mic (piano bleed). |
+| **iPad (Safari)** | Mic | Voice capture → Gemini PCM + SpeechRecognition for transcript. Near face, away from piano. Plays Gemini audio. |
+| **iPhone (Safari)** | Spectator/backup | Second display for chat. Swap to mic if iPad has issues. |
+
+### How it works:
+- Mic device automatically runs SpeechRecognition (no separate role needed)
+- SpeechRecognition and getUserMedia coexist on iOS Safari
+- Transcript text flows: device → server → broadcast to all
+
+---
+
+## Part 3: Grand Staff Clef Fixes (`index.html`)
+
+- Move 4/4 time signature to the right so clefs have room
+- Shrink treble clef by 20%
+- Enlarge bass clef by 40%
+- Move bass clef to lower right
+- Align the "dots" of treble and bass clefs vertically
+
+---
+
+## Files to modify:
+- `src/agent/server.ts` — transcription accumulation fix, remove inputAudioTranscription, add relay
+- `static/index.html` — SpeechRecognition (primary + secondary), grand staff clef sizing
+- `VERSION`, `package.json`, `CHANGELOG.md`, `static/index.html` header — version bump
+
+## Verification:
+1. `npx tsc` — clean compile
+2. Local test: start session, speak — user transcript should appear in English
+3. Check Gemini output transcript accumulates full sentences
+4. Join iPad as secondary, assign mic role — verify SpeechRecognition works on Safari
+5. Visual check: grand staff clefs properly sized and aligned
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/takuma/.claude/projects/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9.jsonl
+
+---
+
+deployed?
+
+---
+
+yes
+
+---
+
+# Deploy Website
+
+Guide the user through deploying a website to Docker infrastructure.
+
+## Steps
+
+1. **Ask which website** to deploy. Options: jayismocking, jworks-ai, tutoringjay, jdialogs, jaywalks, jbridge
+
+2. **Check version status** in the website source directory:
+   ```bash
+   WEBSITES_REPO="/home/takuma/Data_ubuntu/GitHub/websites"
+   # Check VERSION and CHANGELOG consistency
+   cat "$WEBSITES_REPO/{subdir}/VERSION"
+   head -20 "$WEBSITES_REPO/{subdir}/CHANGELOG.md"
+   ```
+   Subdirectory mapping:
+   - jayismocking → 0_jayhub/jayismocking_com
+   - jworks-ai → 1_jworks/jworks-ai_com
+   - tutoringjay → 2_tutoringjay/tutoringjay_com
+   - jdialogs → 3_jdialogs/jdialogs_com
+   - jaywalks → 4_jaywalks/jaywalks_com
+   - jbridge → 5_jbridge/jbridge_com
+
+3. **Offer version bump** if [Unreleased] has entries:
+   ```bash
+   cd "$WEBSITES_REPO/{subdir}" && ~/bin/ai-agents/bump-version.sh patch --no-push
+   ```
+
+4. **Run deploy**:
+   ```bash
+   ~/bin/ai-agents/deploy-website.sh {key}
+   ```
+   Add `--skip-build` if the user already built, `--codex` for codex deploy agent.
+
+5. **Report result**: Show deploy log entry, VERSION deployed, and which agent was notified.
+
+## Error Handling
+- If VERSION/CHANGELOG mismatch: offer to run bump-version.sh
+- If uncommitted changes: list them and ask user to commit first
+- If build fails: show error and suggest fixes
+
+---
+
+by the way i dont like the pistachio greenfor mezo piano (mp). ask design team at jworks:81 to pick hues that are conssitent, make sense, and aesthetically pleasing
+
+---
+
+[inbox from jworks:81]
+
+---
+
+you didnt move the 4/4 to the right. they need to show up to the ight of clefs. ask jayhub:31 to do online search of images for the grand staff and implement the rules. do online search of rules in writing these too.treble clef should be about 10% larger. move the base clef one note below; the dot should be on top of the F note
+
+---
+
+<task-notification>
+<task-id>bpr9rmfxl</task-id>
+<tool-use-id>toolu_01JN5GosD4erNXoFXdAR5J43</tool-use-id>
+<output-file>/tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/bpr9rmfxl.output</output-file>
+<status>completed</status>
+<summary>Background command "Deploy to Cloud Run" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/bpr9rmfxl.output
+
+---
+
+<task-notification>
+<task-id>a435e2b67167ecbb5</task-id>
+<tool-use-id>toolu_012ncLiXmmED5mHVtUgVD5r8</tool-use-id>
+<output-file>/tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/a435e2b67167ecbb5.output</output-file>
+<status>completed</status>
+<summary>Agent "Research music notation symbols" completed</summary>
+<result>The reference document has been written to `/home/takuma/1_jworks/A_ai/7_LiveAgents/PianoQuest_Live/docs/music-notation-reference.md`.
+
+It covers all 8 requested topics in detail:
+
+1. **Note types/durations** -- Whole through thirty-second notes with head shapes, stem direction rules (middle line threshold, attachment side, length), flag/beam conventions (grouping by beat, no crossing barlines/measure centers), dotted notes (single and double dot), and ties.
+
+2. **Rest symbols** -- All 6 rest types with visual descriptions, exact staff positioning (whole rest hangs from 4th line, half rest sits on 3rd line), and multi-voice displacement rules.
+
+3. **Expression/articulation marks** -- Staccato, legato/slur, accent, tenuto, fermata, marcato, sforzando, and portato with positioning rules relative to stems.
+
+4. **Tempo markings** -- Full table from Grave (20-40 BPM) through Prestissimo (200+), plus modifiers (molto, con brio, rubato, etc.) and change markings (accel., rit., etc.).
+
+5. **Dynamic markings** -- ppp through fff with Italian names, Unicode code points for p/m/f/crescendo/decrescendo, hairpin rendering rules, and staff positioning.
+
+6. **Ornaments** -- Trill, upper/lower mordent, turn/inverted turn, acciaccatura vs. appoggiatura (with execution differences), and tremolo (single/double note).
+
+7. **Pedal markings** -- Ped./asterisk notation, bracket notation with V-notch pedal changes, una corda/tre corde, and sostenuto pedal.
+
+8. **Other symbols** -- Repeat signs, coda, segno, D.C., D.S., Fine, volta brackets, key signatures (full sharp/flat order with staff positions and all 15 key mappings), time signatures (common/cut time Unicode), barlines, and clefs.
+
+The appendices include a Unicode quick reference table and a rendering priority guide for implementation.</result>
+<usage><total_tokens>44668</total_tokens><tool_uses>18</tool_uses><duration_ms>303985</duration_ms></usage>
+</task-notification>
+Full transcript available at: /tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/a435e2b67167ecbb5.output
+
+---
+
+i told you to add the vertical draggable handle to the left of the center panel, but that means the panel to the left of it (gemini conversation panel, etc.) should move as i drag the partition. also add a draggable partition to the left of this panel, so i can change thewidth
+
+---
+
+option B.
+
+---
+
+<task-notification>
+<task-id>b5bvtwvju</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/b5bvtwvju.output</output-file>
+<status>completed</status>
+<summary>Background command "Deploy to Cloud Run" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/b5bvtwvju.output
+
+---
+
+let me knoow when its done
+
+---
+
+<task-notification>
+<task-id>b1qz2iz0v</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/b1qz2iz0v.output</output-file>
+<status>completed</status>
+<summary>Background command "Deploy to Cloud Run with color palette + clef fixes" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /tmp/claude-1000/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/d2b0a428-b6fa-403a-832b-bb37b7aee6c9/tasks/b1qz2iz0v.output
+
+---
+
+did you bump version
+
+---
+
+what the fuck? i told you to fucking bump versions everytime you make a new change
