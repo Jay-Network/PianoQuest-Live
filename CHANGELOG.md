@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-03-16
+
+### Added
+- **iPad/Tablet primary device mode** — new `?room=CODE&mode=tablet` or auto-detected (screen >= 768px + touch). Full panel UI with Piano, Chat, Audio, Fingers, Drills, Grand Staff. Toggle panels on/off via pill toolbar. Draggable partition handles (touch + mouse) for resizing. Auto-mic activation with echo cancellation. Landscape two-column / portrait single-column responsive layout. Panel visibility and sizes persisted in localStorage.
+
 ## [3.1.11] - 2026-03-16
 
 ### Fixed
