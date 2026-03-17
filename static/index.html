@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.42</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.43</div>
       </div>
     </div>
     <div class="controls">
@@ -1645,6 +1645,22 @@ async function startSession() {
             myRoomCode = msg.room;
             var label = document.getElementById('statusLabel');
             if (label) label.textContent = 'Connected · Room: ' + msg.room;
+          } else if (msg.type === 'session_settings') {
+            // Remote settings update (e.g. from admin spectator on jayismocking.com/live)
+            if (msg.scale) {
+              var scaleEl = document.getElementById('staffScale');
+              if (scaleEl) scaleEl.value = msg.scale;
+            }
+            if (msg.bpm) {
+              var bpmEl = document.getElementById('bpmSlider');
+              var bpmValEl = document.getElementById('bpmVal');
+              if (bpmEl) bpmEl.value = String(msg.bpm);
+              if (bpmValEl) bpmValEl.textContent = String(msg.bpm);
+            }
+            if (msg.timeSignature) {
+              var tsEl = document.getElementById('staffTimeSig');
+              if (tsEl) tsEl.value = msg.timeSignature;
+            }
           } else if (msg.type === 'device_list') {
             deviceList = msg.devices || [];
             renderDeviceList();

@@ -412,6 +412,26 @@ export function createApp() {
     }, 20000);
 
     ws.on("pong", () => { alive = true; });
+
+    // Allow spectators to push session_settings back to the active room
+    ws.on("message", (raw: Buffer | string) => {
+      try {
+        const msg = JSON.parse(typeof raw === "string" ? raw : raw.toString());
+        if (msg.type === "session_settings") {
+          const room = Array.from(rooms.values())[0];
+          if (room) {
+            room.sessionSettings = {
+              scale: String(msg.scale || room.sessionSettings.scale),
+              bpm: Number(msg.bpm) || room.sessionSettings.bpm,
+              timeSignature: String(msg.timeSignature || room.sessionSettings.timeSignature),
+            };
+            console.log(`[${APP_NAME}] Spectator pushed session_settings:`, room.sessionSettings);
+            broadcastToRoom(room, JSON.stringify({ type: "session_settings", ...room.sessionSettings }));
+          }
+        }
+      } catch {}
+    });
+
     ws.on("close", () => {
       clearInterval(pingInterval);
       spectators.delete(ws);

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.43] - 2026-03-17
+
+### Added
+- **Bidirectional session settings** — spectators can now push session_settings back to PianoQuest Live (scale/bpm/timeSignature). Desktop UI updates automatically when remote settings arrive. Enables jayismocking.com/live admin controls.
+
 ## [3.2.42] - 2026-03-17
 
 ### Fixed
