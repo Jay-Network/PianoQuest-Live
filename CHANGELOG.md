@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.42] - 2026-03-17
+
+### Fixed
+- **Session settings sent on connect** — send initial session_settings to spectators immediately when primary device connects, not just on user change. Added debug logging.
+
 ## [3.2.41] - 2026-03-17
 
 ### Added

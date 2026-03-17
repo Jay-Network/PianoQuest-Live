@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.41</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.42</div>
       </div>
     </div>
     <div class="controls">
@@ -935,6 +935,7 @@ bpmSlider.addEventListener('input', function() { bpmVal.textContent = bpmSlider.
 
 // Broadcast session settings to server whenever scale/bpm/timeSig changes
 function sendSessionSettings() {
+  console.log('[PQ] sendSessionSettings called, ws open:', ws && ws.readyState === WebSocket.OPEN);
   if (typeof ws !== 'undefined' && ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({
       type: 'session_settings',
@@ -1638,6 +1639,8 @@ async function startSession() {
             document.getElementById('roomCodeDisplay').textContent = msg.room;
             updateQr(msg.room);
             startSpeechRecognition();
+            // Send initial session settings so spectators/bridge get them immediately
+            sendSessionSettings();
           } else if (msg.type === 'room_code') {
             myRoomCode = msg.room;
             var label = document.getElementById('statusLabel');
