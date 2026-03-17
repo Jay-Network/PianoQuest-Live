@@ -581,7 +581,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.40</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.41</div>
       </div>
     </div>
     <div class="controls">
@@ -932,6 +932,21 @@ var KEY_BY_MIDI = new Map(KEYBOARD.map(function(key) { return [key.midi, key]; }
 const bpmSlider = document.getElementById('bpmSlider');
 const bpmVal = document.getElementById('bpmVal');
 bpmSlider.addEventListener('input', function() { bpmVal.textContent = bpmSlider.value; });
+
+// Broadcast session settings to server whenever scale/bpm/timeSig changes
+function sendSessionSettings() {
+  if (typeof ws !== 'undefined' && ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type: 'session_settings',
+      scale: document.getElementById('staffScale').value || 'C major',
+      bpm: parseInt(document.getElementById('bpmSlider').value, 10) || 90,
+      timeSignature: document.getElementById('staffTimeSig').value || '4/4'
+    }));
+  }
+}
+bpmSlider.addEventListener('change', sendSessionSettings);
+document.getElementById('staffScale').addEventListener('change', sendSessionSettings);
+document.getElementById('staffTimeSig').addEventListener('change', sendSessionSettings);
 
 document.getElementById('midiInputSelect').addEventListener('change', function(e) {
   setMidiInput(e.target.value);

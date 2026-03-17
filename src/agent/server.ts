@@ -138,6 +138,8 @@ interface RoomSession {
   _lastGeminiFrame: number;
   /** Latest MIDI summary — injected when user speaks, not sent independently */
   lastMidiSummary: string | null;
+  /** Current session settings (scale, bpm, timeSignature) for spectator sync */
+  sessionSettings: { scale: string; bpm: number; timeSignature: string };
 }
 
 const rooms = new Map<string, RoomSession>();
@@ -387,6 +389,11 @@ export function createApp() {
       activeSession: !!activeRoom,
       room: activeRoom ? Array.from(rooms.keys())[0] : null,
     }));
+
+    // Send current session settings snapshot so spectator starts with correct values
+    if (activeRoom) {
+      ws.send(JSON.stringify({ type: "session_settings", ...activeRoom.sessionSettings }));
+    }
 
     // Keepalive ping every 20s to prevent Cloud Run timeout
     let alive = true;
@@ -780,6 +787,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             bothHandsDetected: false,
             _lastGeminiFrame: 0,
             lastMidiSummary: null,
+            sessionSettings: { scale: "C major", bpm: 90, timeSignature: "4/4" },
           };
           roomSession.devices.set(primaryDeviceId, primaryDevice);
           rooms.set(roomCode, roomSession);
@@ -965,6 +973,16 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           if (rs) {
             rs.cameraEnabled = Boolean(msg.enabled);
             broadcastToRoom(rs, JSON.stringify({ type: "camera_state", enabled: rs.cameraEnabled }));
+          }
+        } else if (msgType === "session_settings") {
+          const rs = roomSession as RoomSession | null;
+          if (rs) {
+            rs.sessionSettings = {
+              scale: String(msg.scale || rs.sessionSettings.scale),
+              bpm: Number(msg.bpm) || rs.sessionSettings.bpm,
+              timeSignature: String(msg.timeSignature || rs.sessionSettings.timeSignature),
+            };
+            broadcastToRoom(rs, JSON.stringify({ type: "session_settings", ...rs.sessionSettings }));
           }
         } else if (msgType === "hand_state") {
           const rs = roomSession as RoomSession | null;

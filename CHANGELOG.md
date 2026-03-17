@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.41] - 2026-03-17
+
+### Added
+- **Session settings broadcast** — scale, BPM, and time signature changes now broadcast to all room devices + spectators via `session_settings` event. Spectators receive a settings snapshot on connect. Requested by jayismocking.com/live viewer.
+
 ## [3.2.40] - 2026-03-16
 
 ### Changed
