@@ -353,6 +353,18 @@
   .right-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .right-tab-content { display: none; flex: 1; overflow-y: auto; min-height: 0; }
   .right-tab-content.active { display: flex; flex-direction: column; }
+  /* Stage tabs */
+  .stage-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
+  .stage-tab {
+    flex: 1; min-width: 0; padding: 5px 4px; text-align: center; cursor: pointer;
+    border-bottom: 2px solid transparent; transition: all 0.2s; user-select: none;
+  }
+  .stage-tab:hover { background: var(--bg2); }
+  .stage-tab.active { border-bottom-color: var(--accent); background: var(--bg2); }
+  .stage-tab .stage-num { font-size: 9px; font-weight: 700; color: var(--text3); letter-spacing: 0.04em; line-height: 1.3; }
+  .stage-tab.active .stage-num { color: var(--accent); }
+  .stage-tab .stage-name { font-size: 8px; color: var(--text3); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stage-tab.active .stage-name { color: var(--text2); }
   /* Drills panel */
   .drill-stage-header {
     padding: 6px 8px; font-size: 10px; font-weight: 700; color: var(--text3);
@@ -581,7 +593,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.43</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.44</div>
       </div>
     </div>
     <div class="controls">
@@ -756,14 +768,25 @@
           <div class="right-tab" onclick="switchRightTab('scores')">SCORES</div>
         </div>
 
+        <!-- Stage tabs (below DRILLS/SCORES) -->
+        <div class="stage-tabs" id="stageTabs">
+          <div class="stage-tab active" onclick="selectStage(1)"><div class="stage-num">Stage 1</div><div class="stage-name">Single Finger</div></div>
+          <div class="stage-tab" onclick="selectStage(2)"><div class="stage-num">Stage 2</div><div class="stage-name">Two Fingers</div></div>
+          <div class="stage-tab" onclick="selectStage(3)"><div class="stage-num">Stage 3</div><div class="stage-name">Five-Finger</div></div>
+          <div class="stage-tab" onclick="selectStage(4)"><div class="stage-num">Stage 4</div><div class="stage-name">Scales</div></div>
+          <div class="stage-tab" onclick="selectStage(5)"><div class="stage-num">Stage 5</div><div class="stage-name">Chords</div></div>
+          <div class="stage-tab" onclick="selectStage(6)"><div class="stage-num">Stage 6</div><div class="stage-name">Advanced</div></div>
+          <div class="stage-tab" onclick="selectStage(7)"><div class="stage-num">Stage 7</div><div class="stage-name">Musical</div></div>
+        </div>
+
         <!-- Drills tab -->
         <div class="right-tab-content active" id="drillsTab" style="overflow-y:auto;">
           <div id="drillCatalogList"></div>
           <div id="drillSettings" style="display:none;">
-            <div class="drill-settings">
-              <label>Root Note
+            <div class="drill-settings" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+              <label style="flex:1;min-width:70px;">Root Note
                 <select id="drillNote">
-                  <option value="60">C4 (Middle C)</option>
+                  <option value="60">C4</option>
                   <option value="62">D4</option>
                   <option value="64">E4</option>
                   <option value="65">F4</option>
@@ -772,10 +795,13 @@
                   <option value="71">B4</option>
                 </select>
               </label>
-              <label>BPM
+              <label style="flex:1;min-width:60px;">BPM
                 <input type="number" id="drillBpm" value="80" min="40" max="200">
               </label>
-              <label id="drillDynamicLabel" style="display:none;">Target Dynamic
+              <label style="flex:1;min-width:60px;">Measures
+                <input type="number" id="drillMeasures" value="8" min="2" max="32">
+              </label>
+              <label id="drillDynamicLabel" style="display:none;flex:1;min-width:60px;">Dynamic
                 <select id="drillDynamic">
                   <option value="32">pp</option>
                   <option value="48">p</option>
@@ -785,7 +811,7 @@
                   <option value="112">ff</option>
                 </select>
               </label>
-              <label id="drillKeyLabel" style="display:none;">Key
+              <label id="drillKeyLabel" style="display:none;flex:1;min-width:70px;">Key
                 <select id="drillKey">
                   <option value="C">C Major</option>
                   <option value="G">G Major</option>
@@ -796,9 +822,6 @@
                   <option value="Em">E Minor</option>
                   <option value="Dm">D Minor</option>
                 </select>
-              </label>
-              <label>Measures
-                <input type="number" id="drillMeasures" value="8" min="2" max="32">
               </label>
             </div>
             <div class="drill-start-btn" id="drillStartBtn" onclick="startDrill()">Start Drill</div>
@@ -3271,44 +3294,36 @@ var STAGE_NAMES = {
   7: 'STAGE 7: MUSICAL APPLICATION'
 };
 
-// Build drill catalog UI
+var selectedStage = 1;
+
+// Build drill catalog UI — filtered by selected stage
 function buildDrillCatalog() {
   var container = document.getElementById('drillCatalogList');
   if (!container) return;
   container.innerHTML = '';
-  var stages = {};
   DRILL_CATALOG.forEach(function(d) {
-    if (!stages[d.stage]) stages[d.stage] = [];
-    stages[d.stage].push(d);
+    if (d.stage !== selectedStage) return;
+    var card = document.createElement('div');
+    card.className = 'drill-card';
+    card.id = 'drill-' + d.id;
+    card.onclick = function() { selectDrill(d.id); };
+    card.innerHTML = '<div class="drill-id">' + d.id + '</div>' +
+      '<div class="drill-name">' + d.name + '</div>' +
+      '<div class="drill-desc">' + d.desc + '</div>';
+    container.appendChild(card);
   });
-  Object.keys(stages).sort().forEach(function(stageNum) {
-    var header = document.createElement('div');
-    header.className = 'drill-stage-header';
-    header.innerHTML = '<span class="caret">&#9660;</span> ' + STAGE_NAMES[stageNum];
-    var body = document.createElement('div');
-    body.className = 'drill-stage-body';
-    // Collapse stages > 1 by default
-    if (parseInt(stageNum) > 1) {
-      header.classList.add('collapsed');
-      body.classList.add('collapsed');
-    }
-    header.onclick = function() {
-      header.classList.toggle('collapsed');
-      body.classList.toggle('collapsed');
-    };
-    stages[stageNum].forEach(function(d) {
-      var card = document.createElement('div');
-      card.className = 'drill-card';
-      card.id = 'drill-' + d.id;
-      card.onclick = function() { selectDrill(d.id); };
-      card.innerHTML = '<div class="drill-id">' + d.id + '</div>' +
-        '<div class="drill-name">' + d.name + '</div>' +
-        '<div class="drill-desc">' + d.desc + '</div>';
-      body.appendChild(card);
-    });
-    container.appendChild(header);
-    container.appendChild(body);
+}
+
+function selectStage(stageNum) {
+  selectedStage = stageNum;
+  var tabs = document.querySelectorAll('.stage-tab');
+  tabs.forEach(function(t, i) {
+    if (i + 1 === stageNum) t.classList.add('active');
+    else t.classList.remove('active');
   });
+  // Hide settings when switching stages
+  document.getElementById('drillSettings').style.display = 'none';
+  buildDrillCatalog();
 }
 
 function switchRightTab(tab) {
@@ -3316,12 +3331,15 @@ function switchRightTab(tab) {
   var contents = document.querySelectorAll('.right-tab-content');
   tabs.forEach(function(t) { t.classList.remove('active'); });
   contents.forEach(function(c) { c.classList.remove('active'); });
+  var stageTabs = document.getElementById('stageTabs');
   if (tab === 'drills') {
     tabs[0].classList.add('active');
     document.getElementById('drillsTab').classList.add('active');
+    if (stageTabs) stageTabs.style.display = '';
   } else {
     tabs[1].classList.add('active');
     document.getElementById('scoresTab').classList.add('active');
+    if (stageTabs) stageTabs.style.display = 'none';
   }
 }
 

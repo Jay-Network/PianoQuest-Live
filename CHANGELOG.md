@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.44] - 2026-03-18
+
+### Changed
+- **Drill stage tabs** — 7 stage tabs displayed side-by-side below DRILLS/SCORES tabs, each showing "Stage N" + short name. Clicking a stage filters drill catalog to that stage only.
+- **Drill settings side-by-side** — Root Note, BPM, and Measures displayed in a horizontal row instead of stacked vertically.
+
 ## [3.2.43] - 2026-03-17
 
 ### Added
