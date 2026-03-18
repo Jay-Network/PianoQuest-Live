@@ -593,7 +593,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.44</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.45</div>
       </div>
     </div>
     <div class="controls">
@@ -2598,6 +2598,37 @@ function drawGrandStaff() {
     drawLedgerLines(headX, noteY);
     drawAccidental(headX, noteY, midi, color);
     drawNoteHead(headX, noteY, color, noteRadius);
+
+    // Sustained glow effect — active while finger is held down
+    if (fingerDownNotes.has(midi)) {
+      var c = dynamicsRgb(noteData.velocity);
+      var pulse = 0.6 + 0.4 * Math.sin(nowMs / 200 + midi * 0.7);
+      var glowR = noteRadius * (3 + pulse * 2);
+      // Outer glow
+      var grad = ctx.createRadialGradient(headX, noteY, noteRadius * 0.5, headX, noteY, glowR);
+      grad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.5 * pulse).toFixed(2) + ')');
+      grad.addColorStop(0.4, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (0.25 * pulse).toFixed(2) + ')');
+      grad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(headX, noteY, glowR, 0, Math.PI * 2);
+      ctx.fill();
+      // Tiny shimmer particles radiating outward
+      var shimmerCount = 3;
+      for (var si = 0; si < shimmerCount; si++) {
+        var angle = (nowMs / 600 + si * (Math.PI * 2 / shimmerCount) + midi * 0.3) % (Math.PI * 2);
+        var dist = noteRadius * (1.5 + pulse * 1.5);
+        var sx = headX + Math.cos(angle) * dist;
+        var sy = noteY + Math.sin(angle) * dist;
+        var sAlpha = 0.6 * pulse;
+        ctx.globalAlpha = sAlpha;
+        ctx.fillStyle = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+    }
   });
 
   // --- NOTE HISTORY scrolling left from play line at tempo speed ---

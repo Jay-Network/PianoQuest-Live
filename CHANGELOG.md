@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.45] - 2026-03-18
+
+### Added
+- **Grand staff sustained glow** — pulsing radial glow + orbiting shimmer particles on note heads while finger is held down. Disappears when key is released. Color matches velocity dynamics.
+
 ## [3.2.44] - 2026-03-18
 
 ### Changed
