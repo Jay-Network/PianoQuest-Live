@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.46] - 2026-03-18
+
+### Changed
+- **Grand staff glow at play line** — moved sustained glow effect to t=0 play line instead of note head position
+- **Stage tab labels** — simplified from "Stage 1" to "- 1 -"
+
 ## [3.2.45] - 2026-03-18
 
 ### Added
