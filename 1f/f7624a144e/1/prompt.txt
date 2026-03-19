@@ -1,0 +1,124 @@
+Implement the following plan:
+
+# Plan: Integrate SheetMusicReader VexFlow Viewer into PQ Live Scores Tab
+
+## Context
+
+Jay wants the PQ Live "Scores" tab to display sheet music from SheetMusicReader (port 3495). Currently the Scores tab has a basic canvas-based score preview with hardcoded Fur Elise. The new version should show production-quality VexFlow SVG renderings, toggle to original PDF, play MIDI, and browse the full SheetMusicReader library.
+
+## Architecture Decisions
+
+1. **Server-side proxy** — PQ Live server proxies `/api/smr/*` to SheetMusicReader (configurable via `SHEET_MUSIC_READER_URL` env var, default `http://localhost:3495`). Frontend stays same-origin.
+2. **Copy VexFlow code** — Port ~900 lines of rendering functions from SheetMusicReader into index.html (single-file architecture, no bundler). Prefix globals with `smr` to avoid collision.
+
+## Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/agent/server.ts` | Add 3 proxy routes (~40 lines) |
+| `static/index.html` | CDN scripts, new Scores tab HTML/CSS/JS, ported VexFlow renderer + playback |
+
+## Implementation
+
+### Phase 1: Server Proxy Routes (`server.ts`)
+
+Add env var and 3 proxy routes:
+```
+SMR_URL = process.env.SHEET_MUSIC_READER_URL || "http://localhost:3495"
+
+GET /api/smr/library        → ${SMR_URL}/api/library
+GET /api/smr/output/*       → ${SMR_URL}/output/*
+GET /api/smr/library-file/* → ${SMR_URL}/library/*
+```
+Use Node `fetch` (available in Node 18+) to proxy.
+
+### Phase 2: CDN Scripts (`index.html` head)
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.5/build/cjs/vexflow.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+```
+
+### Phase 3: Scores Tab HTML
+
+Replace `#scoresTab` contents with:
+```
+scoresTab (flex column, height 100%)
+├── score-toolbar (fixed top bar)
+│   ├── [SVG] [PDF] toggle buttons
+│   ├── [▶ Play] [⏸] [⏹] buttons
+│   └── time display (0:00 / 3:24)
+├── score-tree (collapsible, max-height 200px, overflow-y auto)
+│   └── folder hierarchy from /api/smr/library
+├── score-viewer (flex: 1, overflow-y: auto, min-height: 0)
+│   ├── score-vexflow-container (VexFlow SVG pages)
+│   └── score-pdf-container (pdf.js canvas pages, hidden by default)
+└── score-info-bar (title · key · tempo · time sig)
+```
+
+### Phase 4: CSS (~30 lines)
+
+Style toolbar, viewer, tree, info bar using existing PQ Live design language (dark theme vars, 10-11px fonts, border colors).
+
+### Phase 5: Port VexFlow Renderer (~900 lines)
+
+Copy from SheetMusicReader `static/index.html`:
+- Lookup tables: `NOTE_NAMES_SHARP/FLAT`, `KEY_SIG_SHARPS/FLATS`, etc.
+- Helpers: `keyToVexflow()`, `durToVexflow()`, `midiToVexflow()`, `getActiveKey()`, `fitRests()`
+- Voice builders: `buildVoiceNotes()`, `buildVoiceWithRests()`
+- Main renderer: `renderVexFlowInto(container)` — creates SVG pages with grand staff, beams, tuplets, annotations, pedal marks, 8va lines
+- Dark theme recolor: invert all SVG elements to white
+
+All globals prefixed with `smr` to avoid collision with existing `currentScore`, `scoreColorMode`, etc.
+
+### Phase 6: Port Playback (~200 lines)
+
+Copy from SheetMusicReader:
+- `smrPlaybackState` object (playing, startTime, pauseTime, synth, scheduledIds)
+- `smrStartPlayback()` / `smrPausePlayback()` / `smrStopPlayback()`
+- `smrAnimateCursor()` / `smrUpdateCursorPosition()` / `smrRemoveCursor()`
+- Tone.js PolySynth (triangle8 oscillator), Tone.Transport scheduling
+- Red cursor line in SVG with auto-scroll
+
+### Phase 7: Controller Functions (~100 lines)
+
+- `loadSMRLibrary()` — fetch `/api/smr/library`, render folder tree with status dots
+- `selectSMRFile(path, hasClaude)` — fetch JSON + text.json + layout.json, render VexFlow
+- `toggleScoreView(mode)` — switch between 'svg' and 'pdf' views
+- `toggleScoreTree()` — collapse/expand folder tree
+- Replace old `loadScoreTree()` init call with `loadSMRLibrary()`
+
+### Phase 8: Wire Existing Features
+
+- `loadScoreToTargets()` adapted to read from `smrCurrentJson` (compatible format: measures[].notes[] with midi/beat/dur)
+- Keep Color Mode button working with VexFlow (recolor SVG elements)
+
+## Verification
+
+1. Start SheetMusicReader: `cd SheetMusicReader && npm start` (port 3495)
+2. Build + start PQ Live: `npx tsc && npm start`
+3. Open browser → SCORES tab
+4. Folder tree shows library files with status dots
+5. Click a file → VexFlow SVG renders in viewer with scroll
+6. Click PDF → original PDF renders via pdf.js
+7. Click Play → Tone.js plays with red cursor + auto-scroll
+8. DRILLS tab still works (no broken globals)
+9. SVG scales to 560px panel width via viewBox
+
+## Risks
+
+- **Global collisions**: Mitigated by `smr` prefix on all ported variables
+- **SVG readability at 560px**: VexFlow uses viewBox scaling — 45% of original 1241px width, still readable
+- **SheetMusicReader not running**: Proxy returns error, tree shows "No sheets found" gracefully
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/takuma/.claude/projects/-home-takuma-1-jworks-A-ai-7-LiveAgents-PianoQuest-Live/153f6191-44ac-4d69-b541-6b066a2b7da5.jsonl
+
+---
+
+did you commit and deploy
+
+---
+
+i said commit and deploy
