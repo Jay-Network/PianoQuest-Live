@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.47] - 2026-03-19
+
+### Changed
+- **Stage tab labels** — single-line format "1. Single Finger", "2. Two Fingers", etc. instead of two-line "- 1 -" + name
+
+### Added
+- **Timestamp-based playback idea** — documented major idea in IDEAS.md for remote spectator audio quality fix
+
 ## [3.2.46] - 2026-03-18
 
 ### Changed

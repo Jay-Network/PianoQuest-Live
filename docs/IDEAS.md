@@ -72,3 +72,31 @@ Each idea: ID, version proposed, severity (major/minor), status, description.
 - **Severity:** minor
 - **Description:** VoiceLauncher v0.3.0 opens PianoQuest in Chrome app mode via 'Maestro' voice command. Build a dedicated desktop UI optimized for Jay's daily piano practice on Ubuntu. VoiceLauncher handles mic/audio routing; custom UI focuses on finger tracking panel, score display, and scene visuals. Competition app stays as-is — this is a separate layout for personal use. Consider: larger finger tracking panel, session history sidebar, exercise library from PianoQuest app.
 
+**IDEA: Timestamp-based MIDI playback scheduling for remote listeners**
+- **Version:** 3.2.46
+- **Status:** proposed
+- **Severity:** major
+- **Description:** Remote spectators (e.g. jayismocking.com/live via PQ Stream bridge) hear choppy audio for fast/complex pieces (Chopin Fantaisie Impromptu). Root cause: MIDI events arrive with network jitter but Tone.js plays them immediately on arrival, destroying temporal relationships between notes. Solution: use the existing `timestampMs` field on MIDI events to schedule Tone.js playback at correct relative offsets, absorbing jitter into a small buffer.
+
+  **Architecture:**
+  ```
+  Producer (PQ Live desktop) → timestampMs on each MIDI event
+  → WebSocket → PQ Stream bridge → WebSocket → Spectator browser
+  → Spectator: schedule Tone.js at (firstPlayTime + (eventTs - firstEventTs)/1000)
+  ```
+
+  **Configuration parameters:**
+  - `PLAYBACK_BUFFER_MS` (default: 150ms) — intentional delay added to all events to absorb jitter. Higher = smoother but more latency. Range: 50-500ms.
+  - `DRIFT_CORRECTION_INTERVAL_MS` (default: 10000ms) — how often to check clock drift between producer timestamps and local clock. Gradually adjust anchor to prevent cumulative drift.
+  - `MAX_DRIFT_MS` (default: 500ms) — if drift exceeds this, hard-reset the anchor (brief audio glitch but recovers sync).
+  - `ANCHOR_RESET_EVENTS`: reset `firstEventTs`/`firstPlayTs` on: WebSocket reconnect, 3+ seconds of silence (new phrase), explicit reset message from producer.
+
+  **Implementation steps:**
+  1. Spectator receives first MIDI event → stores `firstEventTs = msg.timestampMs`, `firstPlayTs = Tone.now() + PLAYBACK_BUFFER_MS/1000`
+  2. Subsequent events: `scheduledTime = firstPlayTs + (msg.timestampMs - firstEventTs) / 1000`
+  3. `playAt = Math.max(Tone.now(), scheduledTime)` — never schedule in the past
+  4. Every `DRIFT_CORRECTION_INTERVAL_MS`: measure `expectedNow = firstPlayTs + (latestTs - firstEventTs)/1000` vs `Tone.now()`. If drift > threshold, nudge anchor.
+  5. On silence gap > 3s or reconnect: reset anchors so next phrase starts fresh.
+
+  **Affects:** jayismocking.com/live (PQ Stream spectator), any future spectator clients. Does NOT affect PQ Live desktop (plays locally with no delay).
+
