@@ -610,7 +610,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.48</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.49</div>
       </div>
     </div>
     <div class="controls">
@@ -3481,12 +3481,12 @@ function smrRemoveCursor() {
 
 // Library browser
 function loadSMRLibrary() {
-  fetch('/api/smr/library').then(function(r) { return r.json(); }).then(function(data) {
+  fetch('/api/sheets').then(function(r) { return r.json(); }).then(function(data) {
     var el = document.getElementById('smrTree');
     while (el.firstChild) el.removeChild(el.firstChild);
     smrRenderTree(data, el);
   }).catch(function() {
-    document.getElementById('smrTree').textContent = 'No sheets found \u2014 is SheetMusicReader running?';
+    document.getElementById('smrTree').textContent = 'No sheets found';
   });
 }
 function smrRenderTree(items, container) {
@@ -3507,52 +3507,59 @@ function smrRenderTree(items, container) {
       var file = document.createElement('div'); file.className = 'smr-tree-file';
       file.setAttribute('data-path', item.path);
       var dots = document.createElement('span'); dots.className = 'status-dots';
-      var dotC = document.createElement('span'); dotC.className = 'status-dot ' + (item.hasClaude ? 'claude' : 'pending'); dotC.title = item.hasClaude ? 'Claude: done' : 'pending';
-      var dotG = document.createElement('span'); dotG.className = 'status-dot ' + (item.hasGemini ? 'gemini' : 'pending'); dotG.title = item.hasGemini ? 'Gemini: done' : 'pending';
-      dots.appendChild(dotC); dots.appendChild(dotG); file.appendChild(dots);
+      var dotL = document.createElement('span'); dotL.className = 'status-dot ' + (item.hasLayout ? 'claude' : 'pending'); dotL.title = item.hasLayout ? 'Layout: yes' : 'Layout: no';
+      var dotP = document.createElement('span'); dotP.className = 'status-dot ' + (item.hasPdf ? 'gemini' : 'pending'); dotP.title = item.hasPdf ? 'PDF: yes' : 'PDF: no';
+      dots.appendChild(dotL); dots.appendChild(dotP); file.appendChild(dots);
       var fn = document.createElement('span'); fn.textContent = item.name; file.appendChild(fn);
-      file.addEventListener('click', (function(p, hc) { return function() { selectSMRFile(p, hc); }; })(item.path, item.hasClaude));
+      file.addEventListener('click', (function(it) { return function() { selectSMRFile(it); }; })(item));
       container.appendChild(file);
     }
   }
 }
-function selectSMRFile(filePath, hasJson) {
+function selectSMRFile(item) {
+  var filePath = item.path;
   smrCurrentFile = filePath; smrCurrentJson = null; smrCurrentLayout = null; smrCurrentTextData = null;
   smrStopPlayback();
   document.querySelectorAll('.smr-tree-file').forEach(function(f) { f.classList.remove('active'); });
   var active = document.querySelector('.smr-tree-file[data-path="' + CSS.escape(filePath) + '"]');
   if (active) active.classList.add('active');
-  if (hasJson) {
-    var jp = filePath.replace(/\.[^.]+$/, '.json'), lp = filePath.replace(/\.[^.]+$/, '.layout.json'), tp = filePath.replace(/\.[^.]+$/, '.text.json');
-    Promise.all([
-      fetch('/api/smr/output/claude/' + jp).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
-      fetch('/api/smr/output/claude/' + lp).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
-      fetch('/api/smr/output/claude/' + tp).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; })
-    ]).then(function(results) {
-      smrCurrentJson = results[0]; smrCurrentLayout = results[1]; smrCurrentTextData = results[2];
-      if (smrCurrentJson) {
-        smrRenderVexFlowInto(document.getElementById('smrVexflowContainer'));
-        var info = document.getElementById('smrInfoBar');
-        info.textContent = (smrCurrentJson.title || filePath) + (smrCurrentJson.key ? ' \u00B7 ' + smrCurrentJson.key : '') + (smrCurrentJson.tempo ? ' \u00B7 \u266A=' + smrCurrentJson.tempo : '') + (smrCurrentJson.timeSig ? ' \u00B7 ' + smrCurrentJson.timeSig : '');
-        smrToggleView('svg');
-      }
-    });
-  } else {
-    document.getElementById('smrVexflowContainer').textContent = 'No VexFlow data \u2014 select a converted file';
-    document.getElementById('smrInfoBar').textContent = filePath;
-  }
+  // filePath is e.g. "classical/fur-elise.json" — load main JSON + optional layout/text
+  var base = filePath.replace(/\.json$/, '');
+  var fetches = [
+    fetch('/sheets/' + filePath).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
+    item.hasLayout ? fetch('/sheets/' + base + '.layout.json').then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }) : Promise.resolve(null),
+    item.hasText ? fetch('/sheets/' + base + '.text.json').then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }) : Promise.resolve(null)
+  ];
+  // Store pdf info for later
+  smrCurrentFile = item.hasPdf ? base + (item.pdfExt || '.pdf') : null;
+  Promise.all(fetches).then(function(results) {
+    smrCurrentJson = results[0]; smrCurrentLayout = results[1]; smrCurrentTextData = results[2];
+    if (smrCurrentJson) {
+      smrRenderVexFlowInto(document.getElementById('smrVexflowContainer'));
+      var info = document.getElementById('smrInfoBar');
+      info.textContent = (smrCurrentJson.title || item.name) + (smrCurrentJson.key ? ' \u00B7 ' + smrCurrentJson.key : '') + (smrCurrentJson.tempo ? ' \u00B7 \u266A=' + smrCurrentJson.tempo : '') + (smrCurrentJson.timeSig ? ' \u00B7 ' + smrCurrentJson.timeSig : '');
+      smrToggleView('svg');
+    } else {
+      document.getElementById('smrVexflowContainer').textContent = 'Failed to load score data';
+      document.getElementById('smrInfoBar').textContent = item.name;
+    }
+  });
 }
 function smrToggleView(mode) {
   smrViewMode = mode;
   var vf = document.getElementById('smrVexflowContainer'), pdf = document.getElementById('smrPdfContainer');
   var bs = document.getElementById('smrBtnSvg'), bp = document.getElementById('smrBtnPdf');
   if (mode === 'svg') { vf.style.display = ''; pdf.style.display = 'none'; bs.classList.add('active'); bp.classList.remove('active'); }
-  else { vf.style.display = 'none'; pdf.style.display = ''; bs.classList.remove('active'); bp.classList.add('active'); if (pdf.children.length === 0 && smrCurrentFile && typeof pdfjsLib !== 'undefined') smrRenderPdf(smrCurrentFile); }
+  else {
+    vf.style.display = 'none'; pdf.style.display = ''; bs.classList.remove('active'); bp.classList.add('active');
+    if (pdf.children.length === 0 && smrCurrentFile && typeof pdfjsLib !== 'undefined') smrRenderPdf(smrCurrentFile);
+    else if (!smrCurrentFile) pdf.textContent = 'No PDF available for this score';
+  }
 }
 function smrRenderPdf(filePath) {
   var container = document.getElementById('smrPdfContainer');
   container.textContent = 'Loading PDF...';
-  pdfjsLib.getDocument('/api/smr/library-file/' + filePath).promise.then(function(pdf) {
+  pdfjsLib.getDocument('/sheets/' + filePath).promise.then(function(pdf) {
     while (container.firstChild) container.removeChild(container.firstChild);
     for (var p = 1; p <= pdf.numPages; p++) {
       (function(pn) { pdf.getPage(pn).then(function(page) { var vp = page.getViewport({ scale: 1.5 }); var c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height; container.appendChild(c); page.render({ canvasContext: c.getContext('2d'), viewport: vp }); }); })(p);

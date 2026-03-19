@@ -1,0 +1,96 @@
+{
+  "_": "Text annotations with positions — title, composer, dynamics, fingerings, tempo markings",
+
+  "pageAnnotations": [
+    {
+      "type": "title",
+      "text": "Für Elise",
+      "position": { "x": 0.5, "y": 0.04 },
+      "anchor": "center",
+      "style": { "fontSize": 24, "fontWeight": "bold", "fontFamily": "serif" }
+    },
+    {
+      "type": "composer",
+      "text": "Ludwig van Beethoven",
+      "position": { "x": 0.85, "y": 0.065 },
+      "anchor": "right",
+      "style": { "fontSize": 12, "fontStyle": "normal" }
+    },
+    {
+      "type": "footer",
+      "text": "More free music at: www.pitt.edu/~deben",
+      "position": { "x": 0.5, "y": 0.96 },
+      "anchor": "center",
+      "style": { "fontSize": 10, "color": "#666" }
+    }
+  ],
+
+  "measureAnnotations": [
+    {
+      "type": "tempo",
+      "text": "Poco Moto",
+      "measure": 0,
+      "clef": "treble",
+      "position": "above",
+      "style": { "fontSize": 12, "fontStyle": "italic" }
+    },
+    {
+      "type": "dynamics",
+      "text": "pp",
+      "measure": 0,
+      "clef": "treble",
+      "position": "below",
+      "beat": 0,
+      "style": { "fontSize": 14, "fontStyle": "italic", "fontWeight": "bold" }
+    },
+    {
+      "type": "dynamics",
+      "text": "mf",
+      "measure": 11,
+      "clef": "treble",
+      "position": "below",
+      "beat": 0,
+      "style": { "fontSize": 14, "fontStyle": "italic", "fontWeight": "bold" }
+    }
+  ],
+
+  "fingerings": [
+    { "measure": 0, "clef": "treble", "beat": 2, "finger": 5, "position": "above" },
+    { "measure": 1, "clef": "treble", "beat": 2, "finger": 2, "position": "above" },
+    { "measure": 1, "clef": "treble", "beat": 2.5, "finger": 4, "position": "above" },
+    { "measure": 2, "clef": "treble", "beat": 0, "finger": 1, "position": "above" },
+    { "measure": 2, "clef": "treble", "beat": 2, "finger": 2, "position": "above" },
+    { "measure": 2, "clef": "treble", "beat": 2.5, "finger": 4, "position": "above" },
+    { "measure": 2, "clef": "bass", "beat": 0, "finger": 5, "position": "above" },
+    { "measure": 2, "clef": "bass", "beat": 1, "finger": 2, "position": "above" },
+    { "measure": 3, "clef": "treble", "beat": 2, "finger": 1, "position": "above" },
+    { "measure": 3, "clef": "treble", "beat": 2.5, "finger": 2, "position": "above" },
+    { "measure": 3, "clef": "bass", "beat": 0, "finger": 5, "position": "above" },
+    { "measure": 3, "clef": "bass", "beat": 1, "finger": 1, "position": "above" },
+    { "measure": 3, "clef": "bass", "beat": 2, "finger": 2, "position": "above" },
+    { "measure": 4, "clef": "treble", "beat": 0, "finger": 5, "position": "above" },
+    { "measure": 4, "clef": "bass", "beat": 0, "finger": 5, "position": "above" },
+    { "measure": 4, "clef": "bass", "beat": 1, "finger": 2, "position": "above" },
+    { "measure": 7, "clef": "treble", "beat": 2, "finger": 1, "position": "above" },
+    { "measure": 7, "clef": "treble", "beat": 2.5, "finger": 2, "position": "above" },
+    { "measure": 9, "clef": "treble", "beat": 0, "finger": 3, "position": "above" },
+    { "measure": 10, "clef": "treble", "beat": 0, "finger": 3, "position": "above" },
+    { "measure": 10, "clef": "treble", "beat": 1.5, "finger": 1, "position": "above" },
+    { "measure": 11, "clef": "bass", "beat": 0, "finger": 5, "position": "above" },
+    { "measure": 11, "clef": "bass", "beat": 1, "finger": 2, "position": "above" },
+    { "measure": 12, "clef": "bass", "beat": 0, "finger": 5, "position": "above" },
+    { "measure": 12, "clef": "bass", "beat": 1, "finger": 1, "position": "above" },
+    { "measure": 12, "clef": "bass", "beat": 2, "finger": 2, "position": "above" }
+  ],
+
+  "hairpins": [
+    {
+      "type": "crescendo",
+      "startMeasure": 0,
+      "startBeat": 2,
+      "endMeasure": 1,
+      "endBeat": 2,
+      "clef": "treble"
+    }
+  ]
+}

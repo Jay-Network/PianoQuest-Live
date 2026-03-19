@@ -1,0 +1,42 @@
+{
+  "_": "Auto-generated layout for Moonlight Sonata",
+  "source": "moonlight-sonata.mid",
+  "systems": [
+    4,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    4,
+    4,
+    4,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3
+  ],
+  "staveSpacing": {
+    "trebleToBassGap": 100,
+    "systemToSystemGap": 160,
+    "leftMargin": 60,
+    "rightMargin": 20
+  }
+}

@@ -22,7 +22,6 @@ import {
 const APP_NAME = "pianoquest";
 const STATIC_DIR = path.join(__dirname, "..", "..", "static");
 const SHEETS_DIR = path.join(__dirname, "..", "..", "sheets");
-const SMR_URL = process.env.SHEET_MUSIC_READER_URL || "http://localhost:3495";
 
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -295,47 +294,33 @@ export function createApp() {
   app.use("/static", express.static(STATIC_DIR));
   app.use("/sheets", express.static(SHEETS_DIR));
 
-  // ── SheetMusicReader proxy routes ──
-  app.get("/api/smr/library", async (_req, res) => {
-    try {
-      const r = await fetch(`${SMR_URL}/api/library`);
-      res.status(r.status).json(await r.json());
-    } catch { res.status(502).json({ error: "SheetMusicReader unavailable" }); }
-  });
-  app.get("/api/smr/output/*", async (req, res) => {
-    try {
-      const subpath = (req.params as any)[0] as string;
-      const r = await fetch(`${SMR_URL}/output/${subpath}`);
-      const ct = r.headers.get("content-type") || "application/octet-stream";
-      res.status(r.status).set("content-type", ct);
-      const buf = Buffer.from(await r.arrayBuffer());
-      res.send(buf);
-    } catch { res.status(502).json({ error: "SheetMusicReader unavailable" }); }
-  });
-  app.get("/api/smr/library-file/*", async (req, res) => {
-    try {
-      const subpath = (req.params as any)[0] as string;
-      const r = await fetch(`${SMR_URL}/library/${subpath}`);
-      const ct = r.headers.get("content-type") || "application/octet-stream";
-      res.status(r.status).set("content-type", ct);
-      const buf = Buffer.from(await r.arrayBuffer());
-      res.send(buf);
-    } catch { res.status(502).json({ error: "SheetMusicReader unavailable" }); }
-  });
-
-  // List sheet music files as a tree
+  // List sheet music files as a tree (with layout/text/pdf availability)
   app.get("/api/sheets", (_req, res) => {
     function walkDir(dir: string, prefix: string): any[] {
       const entries: any[] = [];
       if (!fs.existsSync(dir)) return entries;
-      for (const name of fs.readdirSync(dir).sort()) {
+      const allFiles = fs.readdirSync(dir).sort();
+      for (const name of allFiles) {
         const full = path.join(dir, name);
         const rel = prefix ? `${prefix}/${name}` : name;
         const stat = fs.statSync(full);
         if (stat.isDirectory()) {
-          entries.push({ name, path: rel, type: "folder", children: walkDir(full, rel) });
-        } else if (name.endsWith(".json")) {
-          entries.push({ name: name.replace(".json", ""), path: rel, type: "file" });
+          entries.push({ name, path: rel, type: "directory", children: walkDir(full, rel) });
+        } else if (name.endsWith(".json") && !name.endsWith(".layout.json") && !name.endsWith(".text.json")) {
+          const base = name.replace(/\.json$/, "");
+          const hasLayout = allFiles.includes(base + ".layout.json");
+          const hasText = allFiles.includes(base + ".text.json");
+          const hasPdf = allFiles.includes(base + ".pdf");
+          const hasPng = allFiles.includes(base + ".png");
+          entries.push({
+            name: base,
+            path: rel,
+            type: "file",
+            hasLayout,
+            hasText,
+            hasPdf: hasPdf || hasPng,
+            pdfExt: hasPdf ? ".pdf" : hasPng ? ".png" : null,
+          });
         }
       }
       return entries;

@@ -6,12 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.49] - 2026-03-19
+### Fixed
+- Made Scores tab fully self-contained — no SheetMusicReader dependency needed
+- Sheet music JSON/layout/text/PDF files served from local `sheets/` directory
+- Removed proxy routes to external SheetMusicReader service
+
 ## [3.2.48] - 2026-03-19
 ### Added
 - Integrated SheetMusicReader VexFlow viewer into Scores tab (production-quality SVG rendering)
-- Server proxy routes `/api/smr/*` to SheetMusicReader (configurable via `SHEET_MUSIC_READER_URL`)
 - VexFlow CDN, Tone.js CDN, pdf.js CDN for sheet music rendering + playback
-- Library browser with status dots (Claude/Gemini conversion status)
+- Library browser with status dots (layout + PDF availability)
 - PDF viewer via pdf.js for original score files
 - Tone.js playback with red cursor line + auto-scroll
 - SVG/PDF toggle, Play/Pause/Stop controls, time display

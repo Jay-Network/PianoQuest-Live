@@ -1,0 +1,40 @@
+{
+  "_": "Auto-generated layout for Clair de Lune",
+  "source": "clair-de-lune.mid",
+  "systems": [
+    4,
+    4,
+    4,
+    4,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    4,
+    2,
+    2,
+    4,
+    4,
+    2,
+    2,
+    3
+  ],
+  "staveSpacing": {
+    "trebleToBassGap": 100,
+    "systemToSystemGap": 160,
+    "leftMargin": 60,
+    "rightMargin": 20
+  }
+}
