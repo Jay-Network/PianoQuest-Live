@@ -22,6 +22,7 @@ import {
 const APP_NAME = "pianoquest";
 const STATIC_DIR = path.join(__dirname, "..", "..", "static");
 const SHEETS_DIR = path.join(__dirname, "..", "..", "sheets");
+const SMR_URL = process.env.SHEET_MUSIC_READER_URL || "http://localhost:3495";
 
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -293,6 +294,34 @@ export function createApp() {
 
   app.use("/static", express.static(STATIC_DIR));
   app.use("/sheets", express.static(SHEETS_DIR));
+
+  // ── SheetMusicReader proxy routes ──
+  app.get("/api/smr/library", async (_req, res) => {
+    try {
+      const r = await fetch(`${SMR_URL}/api/library`);
+      res.status(r.status).json(await r.json());
+    } catch { res.status(502).json({ error: "SheetMusicReader unavailable" }); }
+  });
+  app.get("/api/smr/output/*", async (req, res) => {
+    try {
+      const subpath = (req.params as any)[0] as string;
+      const r = await fetch(`${SMR_URL}/output/${subpath}`);
+      const ct = r.headers.get("content-type") || "application/octet-stream";
+      res.status(r.status).set("content-type", ct);
+      const buf = Buffer.from(await r.arrayBuffer());
+      res.send(buf);
+    } catch { res.status(502).json({ error: "SheetMusicReader unavailable" }); }
+  });
+  app.get("/api/smr/library-file/*", async (req, res) => {
+    try {
+      const subpath = (req.params as any)[0] as string;
+      const r = await fetch(`${SMR_URL}/library/${subpath}`);
+      const ct = r.headers.get("content-type") || "application/octet-stream";
+      res.status(r.status).set("content-type", ct);
+      const buf = Buffer.from(await r.arrayBuffer());
+      res.send(buf);
+    } catch { res.status(502).json({ error: "SheetMusicReader unavailable" }); }
+  });
 
   // List sheet music files as a tree
   app.get("/api/sheets", (_req, res) => {
@@ -975,10 +1004,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         } else if (msgType === "midi_event") {
           // Broadcast MIDI events to all room devices + spectators for visualization
           if (roomSession) {
-            console.log(`[${APP_NAME}] midi_event broadcast to room + ${spectators.size} spectators`);
             broadcastToRoom(roomSession, JSON.stringify(msg));
           } else {
-            console.log(`[${APP_NAME}] midi_event broadcast to ${spectators.size} spectators (no room)`);
             broadcastSpectators(JSON.stringify(msg));
           }
         } else if (msgType === "video_frame" && primaryDevice.roles.camera) {

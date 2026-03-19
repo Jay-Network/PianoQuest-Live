@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.48] - 2026-03-19
+### Added
+- Integrated SheetMusicReader VexFlow viewer into Scores tab (production-quality SVG rendering)
+- Server proxy routes `/api/smr/*` to SheetMusicReader (configurable via `SHEET_MUSIC_READER_URL`)
+- VexFlow CDN, Tone.js CDN, pdf.js CDN for sheet music rendering + playback
+- Library browser with status dots (Claude/Gemini conversion status)
+- PDF viewer via pdf.js for original score files
+- Tone.js playback with red cursor line + auto-scroll
+- SVG/PDF toggle, Play/Pause/Stop controls, time display
+- Dark theme VexFlow recoloring (white notation on dark background)
+
+### Removed
+- Old canvas-based score preview (replaced by VexFlow SVG)
+- Hardcoded Fur Elise sheet music reference
+
 ## [3.2.47] - 2026-03-19
 
 ### Changed

@@ -433,43 +433,59 @@
   .camera-preview-wrap .hand-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
   /* Score panel (right column) */
   .score-col { display: flex; flex-direction: column; gap: 0; min-height: 0; overflow: hidden; }
-  .score-browser {
-    display: flex; flex-direction: column; height: 100%;
+
+  /* SMR Scores Panel */
+  .smr-scores-panel { display: flex; flex-direction: column; height: 100%; }
+  .smr-toolbar {
+    display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
-  .score-tree {
-    flex: 1; overflow-y: auto; padding: 6px 8px; font-size: 11px;
-    max-height: 300px;
+  .smr-toolbar-left, .smr-toolbar-center, .smr-toolbar-right { display: flex; align-items: center; gap: 4px; }
+  .smr-toolbar-center { margin-left: auto; }
+  .smr-toolbar-right { margin-left: auto; }
+  .smr-tb-btn {
+    padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);
+    background: var(--bg2); color: var(--text3); font-size: 10px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
   }
-  .score-tree-folder { padding: 2px 0; }
-  .score-tree-folder-name {
-    cursor: pointer; font-weight: 700; color: var(--text2);
-    padding: 3px 4px; border-radius: 4px; display: flex; align-items: center; gap: 4px;
+  .smr-tb-btn:hover { border-color: rgba(255,255,255,0.15); color: var(--text1); }
+  .smr-tb-btn.active { border-color: var(--green); color: var(--green); background: rgba(134,239,172,0.08); }
+  .smr-tb-btn:disabled { opacity: 0.3; cursor: default; }
+  .smr-time { font-size: 10px; color: var(--text3); font-family: monospace; min-width: 80px; text-align: center; }
+  .smr-tree {
+    max-height: 180px; overflow-y: auto; padding: 4px 8px; font-size: 11px;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
-  .score-tree-folder-name:hover { background: rgba(255,255,255,0.05); }
-  .score-tree-children { padding-left: 14px; }
-  .score-tree-file {
-    cursor: pointer; padding: 3px 8px; border-radius: 4px;
+  .smr-tree.collapsed { display: none; }
+  .smr-tree-dir { padding: 1px 0; }
+  .smr-tree-dir-label {
+    cursor: pointer; font-weight: 600; color: var(--text2); padding: 2px 4px; border-radius: 4px;
+    display: flex; align-items: center; gap: 4px; font-size: 10px;
+  }
+  .smr-tree-dir-label:hover { background: rgba(255,255,255,0.05); }
+  .smr-tree-dir.collapsed > .smr-tree-children { display: none; }
+  .smr-tree-dir.collapsed > .smr-tree-dir-label .arrow { transform: rotate(-90deg); }
+  .smr-tree-children { padding-left: 12px; }
+  .smr-tree-file {
+    cursor: pointer; padding: 2px 6px; border-radius: 4px; font-size: 10px;
     color: var(--text2); display: flex; align-items: center; gap: 4px;
   }
-  .score-tree-file:hover { background: rgba(255,255,255,0.05); color: var(--text1); }
-  .score-tree-file.active { background: rgba(255,255,255,0.06); color: var(--accent); }
-  .score-preview {
-    padding: 8px; border-top: 1px solid var(--border);
+  .smr-tree-file:hover { background: rgba(255,255,255,0.05); color: var(--text1); }
+  .smr-tree-file.active { background: rgba(255,255,255,0.06); color: var(--accent); }
+  .smr-tree-file .status-dots { display: flex; gap: 2px; }
+  .smr-tree-file .status-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .smr-tree-file .status-dot.claude { background: #a78bfa; }
+  .smr-tree-file .status-dot.gemini { background: #60a5fa; }
+  .smr-tree-file .status-dot.pending { background: #333; }
+  .smr-viewer { flex: 1; overflow-y: auto; min-height: 0; padding: 0; }
+  .smr-vexflow-container { padding: 4px; }
+  .smr-vexflow-container svg { display: block; }
+  .smr-pdf-container { padding: 4px; }
+  .smr-pdf-container canvas { width: 100%; display: block; margin-bottom: 4px; border-radius: 4px; }
+  .smr-info-bar {
+    flex-shrink: 0; padding: 3px 8px; font-size: 10px; color: var(--text3);
+    border-top: 1px solid var(--border); letter-spacing: 0.03em;
   }
-  .score-info { font-size: 11px; color: var(--text2); padding: 4px 0; }
-  .score-info .title { font-size: 14px; font-weight: 700; color: var(--text1); margin-bottom: 2px; }
-  .score-info .composer { font-size: 11px; color: var(--text3); }
-  .score-info .meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
-  .score-canvas-wrap { background: #050505; border-radius: 6px; margin-top: 6px; }
-  .score-canvas-wrap canvas { width: 100%; display: block; }
-  .score-actions { display: flex; gap: 6px; padding: 6px 0; }
-  .score-actions button {
-    flex: 1; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border);
-    background: var(--bg2); color: var(--text2); font-size: 10px; font-weight: 600;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .score-actions button:hover { border-color: var(--accent); color: var(--accent); }
-  .score-actions button.active { border-color: var(--green); color: var(--green); background: rgba(134,239,172,0.08); }
 
   /* Chat / Conversation */
   .chat-area { scroll-behavior: smooth; }
@@ -582,6 +598,9 @@
   }
 </style>
 <!-- MediaPipe loaded dynamically in initDesktopMediaPipe() -->
+<script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.5/build/cjs/vexflow.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -591,7 +610,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.47</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.48</div>
       </div>
     </div>
     <div class="controls">
@@ -830,28 +849,31 @@
 
         <!-- Scores tab -->
         <div class="right-tab-content" id="scoresTab">
-          <div class="score-browser">
-            <div class="score-tree" id="scoreTree">
-              <div style="color:var(--text3);font-size:10px;">Loading sheets...</div>
-            </div>
-            <div class="sheet-music-view" id="sheetMusicView" style="display:none;flex:1;overflow:auto;padding:4px;">
-              <img src="/static/sheets/fur-elise-reference.png" alt="Fur Elise Sheet Music" style="width:100%;display:block;border-radius:4px;">
-              <div style="text-align:center;padding:4px;">
-                <a href="/static/sheets/fur-elise-full.pdf" target="_blank" style="color:#6af;font-size:11px;">Open full PDF</a>
+          <div class="smr-scores-panel">
+            <div class="smr-toolbar">
+              <div class="smr-toolbar-left">
+                <button class="smr-tb-btn active" id="smrBtnSvg" onclick="smrToggleView('svg')">SVG</button>
+                <button class="smr-tb-btn" id="smrBtnPdf" onclick="smrToggleView('pdf')">PDF</button>
+              </div>
+              <div class="smr-toolbar-center">
+                <button class="smr-tb-btn" id="smrBtnPlay" onclick="smrStartPlayback()">&#9654; Play</button>
+                <button class="smr-tb-btn" id="smrBtnPause" onclick="smrPausePlayback()" style="display:none">&#10074;&#10074;</button>
+                <button class="smr-tb-btn" id="smrBtnStop" onclick="smrStopPlayback()" disabled>&#9632; Stop</button>
+                <span class="smr-time" id="smrTime">0:00 / 0:00</span>
+              </div>
+              <div class="smr-toolbar-right">
+                <button class="smr-tb-btn" id="smrBtnTree" onclick="smrToggleTree()">Library</button>
+                <button class="smr-tb-btn" id="smrBtnLoadTargets" onclick="loadScoreToTargets()">Load Targets</button>
               </div>
             </div>
-            <div class="score-preview" id="scorePreview" style="display:none;">
-              <div class="score-info" id="scoreInfo"></div>
-              <div class="score-canvas-wrap">
-                <canvas id="scoreCanvas"></canvas>
-              </div>
-              <div class="score-actions">
-                <button id="sheetMusicBtn" onclick="toggleSheetMusicView()">Sheet Music</button>
-                <button id="scoreLoadBtn" onclick="loadScoreToTargets()">Load as Target Notes</button>
-                <button id="scoreColorBtn" onclick="toggleScoreColorMode()">Color Mode</button>
-                <button id="scorePlayBtn" onclick="toggleScorePlayback()">Play</button>
-              </div>
+            <div class="smr-tree" id="smrTree">
+              <div style="color:var(--text3);font-size:10px;padding:4px;">Loading library...</div>
             </div>
+            <div class="smr-viewer" id="smrViewer">
+              <div class="smr-vexflow-container" id="smrVexflowContainer"></div>
+              <div class="smr-pdf-container" id="smrPdfContainer" style="display:none"></div>
+            </div>
+            <div class="smr-info-bar" id="smrInfoBar"></div>
           </div>
         </div>
       </div>
@@ -2986,277 +3008,598 @@ function updateLevelMeter() {
 }
 
 // ============================================================================
-// Score Browser & Sheet Music Renderer
+// SMR Score Browser — VexFlow + Tone.js + pdf.js (ported from SheetMusicReader)
 // ============================================================================
 
-var currentScore = null;
-var scoreColorMode = false;
-var scorePlaybackTimer = null;
+var smrCurrentJson = null;
+var smrCurrentLayout = null;
+var smrCurrentTextData = null;
+var smrCurrentFile = null;
+var smrViewMode = 'svg';
+var smrMeasurePositionMap = [];
+var smrPlaybackState = { playing: false, startTime: 0, pauseTime: 0, totalBeats: 0, bpm: 120, synth: null, scheduledIds: [], animFrame: null };
 
-function loadScoreTree() {
-  fetch('/api/sheets').then(function(r) { return r.json(); }).then(function(tree) {
-    var el = document.getElementById('scoreTree');
-    el.innerHTML = '';
-    renderTree(el, tree);
-  }).catch(function() {
-    document.getElementById('scoreTree').innerHTML = '<div style="color:var(--text3);font-size:10px;">No sheets found</div>';
-  });
+var VF = typeof Vex !== 'undefined' ? Vex.Flow : null;
+var SMR_NOTE_NAMES_SHARP = ['c','c','d','d','e','f','f','g','g','a','a','b'];
+var SMR_NOTE_ACCS_SHARP  = ['','#','','#','','','#','','#','','#',''];
+var SMR_NOTE_NAMES_FLAT  = ['c','d','d','e','e','f','g','g','a','a','b','b'];
+var SMR_NOTE_ACCS_FLAT   = ['','b','','b','','','b','','b','','b',''];
+var SMR_FLAT_KEYS = ['F major','Bb major','Eb major','Ab major','Db major','Gb major','D minor','G minor','C minor','F minor','Bb minor','Eb minor'];
+function smrIsFlat(key) { return SMR_FLAT_KEYS.indexOf(key) >= 0; }
+var SMR_KEY_SIG_SHARPS = {'A':[6,1,8],'E':[6,1,8,3],'B':[6,1,8,3,10],'F#':[6,1,8,3,10,5],'D':[6,1],'G':[6],'Am':[],'Em':[6],'Bm':[6,1],'F#m':[6,1,8],'C#m':[6,1,8,3],'G#m':[6,1,8,3,10],'D#m':[6,1,8,3,10,5]};
+var SMR_KEY_SIG_FLATS = {'F':[10],'Bb':[10,3],'Eb':[10,3,8],'Ab':[10,3,8,1],'Db':[10,3,8,1,6],'Gb':[10,3,8,1,6,11],'Cb':[10,3,8,1,6,11,4],'Dm':[10],'Gm':[10,3],'Cm':[10,3,8],'Fm':[10,3,8,1],'Bbm':[10,3,8,1,6],'Ebm':[10,3,8,1,6,11]};
+var SMR_LETTER_PC = {c:0,d:2,e:4,f:5,g:7,a:9,b:11};
+var SMR_ACC_OFFSET = {'':0,'#':1,'##':2,'b':-1,'bb':-2,'n':0};
+
+function smrGetActiveKey(measureIdx, defaultKey) {
+  if (!smrCurrentTextData || !smrCurrentTextData.keyChanges) return defaultKey;
+  var kc = smrCurrentTextData.keyChanges, activeKey = defaultKey;
+  for (var ki = 0; ki < kc.length; ki++) { if (measureIdx >= kc[ki].measure) activeKey = kc[ki].key; }
+  return activeKey;
 }
-
-function renderTree(parent, items) {
-  items.forEach(function(item) {
-    if (item.type === 'folder') {
-      var folder = document.createElement('div');
-      folder.className = 'score-tree-folder';
-      var name = document.createElement('div');
-      name.className = 'score-tree-folder-name';
-      name.innerHTML = '<span style="font-size:10px;">&#128193;</span> ' + item.name;
-      var children = document.createElement('div');
-      children.className = 'score-tree-children';
-      name.onclick = function() { children.style.display = children.style.display === 'none' ? '' : 'none'; };
-      folder.appendChild(name);
-      folder.appendChild(children);
-      renderTree(children, item.children);
-      parent.appendChild(folder);
-    } else {
-      var file = document.createElement('div');
-      file.className = 'score-tree-file';
-      file.innerHTML = '<span style="font-size:10px;">&#9835;</span> ' + item.name;
-      file.onclick = function() {
-        document.querySelectorAll('.score-tree-file.active').forEach(function(f) { f.classList.remove('active'); });
-        file.classList.add('active');
-        loadScore(item.path);
-      };
-      parent.appendChild(file);
-    }
-  });
+function smrKeyToVexflow(key) {
+  if (!key) return 'C';
+  var map = {'C major':'C','G major':'G','D major':'D','A major':'A','E major':'E','B major':'B','F# major':'F#','Gb major':'Gb','F major':'F','Bb major':'Bb','Eb major':'Eb','Ab major':'Ab','Db major':'Db','Cb major':'Cb','A minor':'Am','E minor':'Em','B minor':'Bm','F# minor':'F#m','C# minor':'C#m','D minor':'Dm','G minor':'Gm','C minor':'Cm','F minor':'Fm','Bb minor':'Bbm','Eb minor':'Ebm'};
+  return map[key] || 'C';
 }
-
-function loadScore(filePath) {
-  fetch('/sheets/' + filePath).then(function(r) { return r.json(); }).then(function(score) {
-    currentScore = score;
-    var preview = document.getElementById('scorePreview');
-    preview.style.display = '';
-    var info = document.getElementById('scoreInfo');
-    info.innerHTML = '<div class="title">' + score.title + '</div>' +
-      '<div class="composer">' + score.composer + '</div>' +
-      '<div class="meta">' + score.key + ' &middot; ' + score.timeSig + ' &middot; &#9833; = ' + score.tempo + '</div>';
-    drawScorePreview(score);
-  });
+function smrDurToVexflow(dur) {
+  if (Math.abs(dur - 0.33) < 0.05 || Math.abs(dur - 1/3) < 0.01) return '8';
+  var map = [[4.0,'w'],[3.0,'hd'],[2.0,'h'],[1.5,'qd'],[1.0,'q'],[0.75,'8d'],[0.5,'8'],[0.375,'16d'],[0.25,'16'],[0.125,'32']];
+  var best = 'q', bestDiff = Infinity;
+  for (var i = 0; i < map.length; i++) { var diff = Math.abs(dur - map[i][0]); if (diff < bestDiff) { bestDiff = diff; best = map[i][1]; } }
+  return best;
 }
-
-function drawScorePreview(score) {
-  var canvas = document.getElementById('scoreCanvas');
-  var ctx = canvas.getContext('2d');
-  var dpr = window.devicePixelRatio || 1;
-  var rect = canvas.getBoundingClientRect();
-  if (!rect.width) return;
-  var measuresPerLine = 2;
-  var lineH = 90;
-  var lines = Math.ceil(score.measures.length / measuresPerLine);
-  var totalH = lines * lineH + 20;
-  canvas.width = rect.width * dpr;
-  canvas.height = totalH * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  var W = rect.width;
-
-  ctx.clearRect(0, 0, W, totalH);
-  ctx.fillStyle = '#050508';
-  ctx.fillRect(0, 0, W, totalH);
-
-  var staffSpacing = 6;
-  var measureW = (W - 20) / measuresPerLine;
-
-  for (var line = 0; line < lines; line++) {
-    var baseY = line * lineH + 20;
-
-    // Draw treble staff lines
-    ctx.strokeStyle = '#444';
-    ctx.lineWidth = 0.5;
-    for (var s = 0; s < 5; s++) {
-      var y = baseY + s * staffSpacing;
-      ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W - 10, y); ctx.stroke();
-    }
-    // Bass staff
-    var bassBaseY = baseY + 5 * staffSpacing + 10;
-    for (var s = 0; s < 5; s++) {
-      var y = bassBaseY + s * staffSpacing;
-      ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W - 10, y); ctx.stroke();
-    }
-
-    // Clef symbols
-    ctx.fillStyle = '#888';
-    ctx.font = '18px serif';
-    ctx.fillText('\uD834\uDD1E', 2, baseY + 3 * staffSpacing + 2); // treble clef
-    ctx.font = '14px serif';
-    ctx.fillText('\uD834\uDD22', 2, bassBaseY + 2 * staffSpacing + 2); // bass clef
-
-    // Draw notes for each measure in this line
-    for (var m = 0; m < measuresPerLine; m++) {
-      var mIdx = line * measuresPerLine + m;
-      if (mIdx >= score.measures.length) break;
-      var measure = score.measures[mIdx];
-      var mX = 10 + m * measureW;
-
-      // Measure bar line
-      ctx.strokeStyle = '#555';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(mX + measureW, baseY);
-      ctx.lineTo(mX + measureW, bassBaseY + 4 * staffSpacing);
-      ctx.stroke();
-
-      // Draw notes
-      var beatsInMeasure = score.beatsPerMeasure || parseInt(score.timeSig.split('/')[0]);
-      measure.notes.forEach(function(note) {
-        var noteX = mX + 16 + (note.beat / beatsInMeasure) * (measureW - 24);
-        // Use clef field to force staff, else auto by MIDI
-        var forceBass = note.clef === 'bass';
-        var noteY = forceBass
-          ? scoreNoteY(note.midi, bassBaseY - 100, bassBaseY, staffSpacing) // force bass rendering
-          : scoreNoteY(note.midi, baseY, bassBaseY, staffSpacing);
-
-        // Color mode: velocity-based coloring
-        if (scoreColorMode) {
-          var vel = note.vel || 80;
-          ctx.fillStyle = dynamicsColor(vel);
-        } else {
-          ctx.fillStyle = note.clef === 'bass' ? '#999999' : '#DDDDDD';
-        }
-
-        // Accidental symbol
-        if (note.acc) {
-          ctx.font = '10px serif';
-          ctx.fillText(note.acc === '#' ? '\u266F' : '\u266D', noteX - 10, noteY + 3);
-        }
-
-        // Note head — filled for short, hollow for long
-        ctx.beginPath();
-        ctx.ellipse(noteX, noteY, 4, 3, -0.3, 0, Math.PI * 2);
-        if (note.dur >= 2) {
-          ctx.strokeStyle = ctx.fillStyle;
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
-        } else {
-          ctx.fill();
-        }
-
-        // Stem
-        ctx.strokeStyle = ctx.fillStyle;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        if (noteY > baseY + 2 * staffSpacing) {
-          ctx.moveTo(noteX + 3.5, noteY);
-          ctx.lineTo(noteX + 3.5, noteY - 20);
-        } else {
-          ctx.moveTo(noteX - 3.5, noteY);
-          ctx.lineTo(noteX - 3.5, noteY + 20);
-        }
-        ctx.stroke();
-
-        // Ledger lines if needed
-        drawScoreLedgerLines(ctx, noteX, noteY, baseY, bassBaseY, staffSpacing);
-      });
-    }
-  }
+function smrFitRests(gap) {
+  var rests = [], sizes = [2.0,1.0,0.5,0.25,0.125], remaining = gap;
+  for (var s = 0; s < sizes.length && remaining > 0.01; s++) { while (remaining >= sizes[s] - 0.01) { rests.push(sizes[s]); remaining -= sizes[s]; } }
+  return rests;
 }
-
-function scoreNoteY(midi, trebleBaseY, bassBaseY, sp) {
-  // Map MIDI to staff Y using diatonic coordinate system
-  // Treble lines: E4(64)=bottom, F5(77)=top
-  // Bass lines: G2(43)=bottom, A3(57)=top
-  var NOTE_OFFSETS = { 0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6 }; // C,D,E,F,G,A,B
+function smrMidiToVexflow(midi, key, explicitAcc, measureIdx, clefForShift, noteBeat) {
   var pc = midi % 12;
-  var octave = Math.floor(midi / 12) - 1;
-  // Black keys map to the lower natural's diatonic position
-  var diatonic = NOTE_OFFSETS[pc] !== undefined ? NOTE_OFFSETS[pc] : NOTE_OFFSETS[pc - 1];
-  var stepsFromC4 = (octave - 4) * 7 + diatonic;
-
-  // Treble: E4 = step 2, bottom line (trebleBaseY + 4*sp)
-  if (trebleBaseY < bassBaseY && midi >= 60) {
-    return trebleBaseY + 4 * sp - (stepsFromC4 - 2) * (sp / 2);
-  }
-  // Bass: D3 = step -5, middle line (bassBaseY + 2*sp)
-  return bassBaseY + 2 * sp - (stepsFromC4 + 5) * (sp / 2);
-}
-
-function drawScoreLedgerLines(ctx, x, y, trebleBase, bassBase, sp) {
-  var trebleBottom = trebleBase + 4 * sp;
-  var bassTop = bassBase;
-  var bassBottom = bassBase + 4 * sp;
-  ctx.strokeStyle = '#666';
-  ctx.lineWidth = 0.8;
-
-  // Above treble
-  for (var ly = trebleBase - sp; ly >= y - 1; ly -= sp) {
-    ctx.beginPath(); ctx.moveTo(x - 6, ly); ctx.lineTo(x + 6, ly); ctx.stroke();
-  }
-  // Below treble / above bass (middle C area)
-  for (var ly = trebleBottom + sp; ly <= y + 1; ly += sp) {
-    if (ly < bassTop) {
-      ctx.beginPath(); ctx.moveTo(x - 6, ly); ctx.lineTo(x + 6, ly); ctx.stroke();
+  if (smrCurrentTextData && smrCurrentTextData.enharmonicOverrides && typeof measureIdx === 'number') {
+    var overrides = smrCurrentTextData.enharmonicOverrides;
+    for (var oi = 0; oi < overrides.length; oi++) {
+      var ov = overrides[oi], range = ov.measureRange;
+      if (measureIdx >= range[0] && measureIdx <= range[1]) {
+        if (ov.useFlats) {
+          var octF = Math.floor(midi / 12) - 1, nameF = SMR_NOTE_NAMES_FLAT[pc], accF = SMR_NOTE_ACCS_FLAT[pc];
+          var vfKeyF = nameF + (accF || '') + '/' + octF, visAccF = null;
+          var vfKeyLookup = smrKeyToVexflow(key), kFlats = SMR_KEY_SIG_FLATS[vfKeyLookup] || [];
+          if (accF === 'b') { var inKS = false; for (var kfi = 0; kfi < kFlats.length; kfi++) { if (kFlats[kfi] === pc) { inKS = true; break; } } if (!inKS) visAccF = 'b'; }
+          else if (accF === 'bb') { visAccF = 'bb'; }
+          else { var flatNatPCs = {10:11,3:4,8:9,1:2,6:7,11:0,4:5}; for (var fni = 0; fni < kFlats.length; fni++) { if (pc === flatNatPCs[kFlats[fni]]) { visAccF = 'n'; break; } } }
+          return { key: vfKeyF, accidental: visAccF };
+        }
+        if (ov.rules) {
+          for (var ri = 0; ri < ov.rules.length; ri++) {
+            var rule = ov.rules[ri];
+            if (pc === rule.midiPC) {
+              if (explicitAcc === 'n') break;
+              var basePC = SMR_LETTER_PC[rule.displayNote], accOff = SMR_ACC_OFFSET[rule.displayAcc] || 0;
+              var dispOct = Math.floor((midi - basePC - accOff) / 12) - 1;
+              if ((dispOct + 1) * 12 + basePC + accOff !== midi) dispOct = Math.round((midi - basePC - accOff) / 12) - 1;
+              return { key: rule.displayNote + '/' + dispOct, accidental: rule.displayAcc };
+            }
+          }
+        }
+        break;
+      }
     }
   }
-  // Below bass
-  for (var ly = bassBottom + sp; ly <= y + 1; ly += sp) {
-    ctx.beginPath(); ctx.moveTo(x - 6, ly); ctx.lineTo(x + 6, ly); ctx.stroke();
+  var displayMidi = midi;
+  if (clefForShift === 'treble' && smrCurrentTextData && smrCurrentTextData.octaveShifts && typeof measureIdx === 'number') {
+    var shifts = smrCurrentTextData.octaveShifts;
+    for (var si = 0; si < shifts.length; si++) {
+      var srange = shifts[si].measureRange, midiMin = shifts[si].midiMin || 0, startBeat = shifts[si].startBeat || 0;
+      if (srange && measureIdx >= srange[0] && measureIdx <= srange[1] && midi >= midiMin && (typeof noteBeat !== 'number' || noteBeat >= startBeat)) { displayMidi = midi - 12; break; }
+    }
+  }
+  var octave = Math.floor(displayMidi / 12) - 1; pc = displayMidi % 12;
+  var flat = smrIsFlat(key), name = flat ? SMR_NOTE_NAMES_FLAT[pc] : SMR_NOTE_NAMES_SHARP[pc], acc = flat ? SMR_NOTE_ACCS_FLAT[pc] : SMR_NOTE_ACCS_SHARP[pc];
+  var vfKey = name + (acc ? acc : '') + '/' + octave, visibleAcc = explicitAcc || null;
+  if (!visibleAcc) {
+    var vfKey2 = smrKeyToVexflow(key), keySharps = SMR_KEY_SIG_SHARPS[vfKey2] || [], keyFlats = SMR_KEY_SIG_FLATS[vfKey2] || [];
+    if (keySharps.length > 0) { var sharpLetterPCs = {6:5,1:0,8:7,3:2,10:9,5:4,0:11}; for (var si2 = 0; si2 < keySharps.length; si2++) { if (pc === sharpLetterPCs[keySharps[si2]]) { visibleAcc = 'n'; break; } } }
+    if (keyFlats.length > 0 && !visibleAcc) { var flatLetterPCs = {10:11,3:4,8:9,1:2,6:7,11:0,4:5}; for (var fi = 0; fi < keyFlats.length; fi++) { if (pc === flatLetterPCs[keyFlats[fi]]) { visibleAcc = 'n'; break; } } }
+  }
+  return { key: vfKey, accidental: visibleAcc };
+}
+
+function smrPreScanMixed(notes, key, clef, measureIdx) {
+  var sets = {}, mixed = {};
+  for (var pi = 0; pi < notes.length; pi++) {
+    var r = smrMidiToVexflow(notes[pi].midi, key, notes[pi].acc, measureIdx, clef, notes[pi].beat);
+    var id = r.key.replace(/(?<=^[a-g])(#|b)+(?=\/)/, ''), a = r.accidental;
+    if (!sets[id]) sets[id] = {};
+    sets[id][a === null ? '__null__' : a] = true;
+  }
+  for (var k in sets) { if (Object.keys(sets[k]).length > 1) mixed[k] = true; }
+  return mixed;
+}
+function smrBuildAccs(notes, key, clef, measureIdx, mixed, shown, group) {
+  var keys = [], accs = [];
+  for (var n = 0; n < group.length; n++) {
+    var r = smrMidiToVexflow(group[n].midi, key, group[n].acc, measureIdx, clef, group[n].beat);
+    keys.push(r.key);
+    var acc = r.accidental, noteId = r.key.replace(/(?<=^[a-g])(#|b)+(?=\/)/, ''), cancelAcc = null;
+    if (!acc && mixed[noteId]) {
+      var cPC = group[n].midi % 12, vfK = smrKeyToVexflow(key);
+      var ks = SMR_KEY_SIG_SHARPS[vfK] || [];
+      for (var ki = 0; ki < ks.length; ki++) { if (ks[ki] === cPC) { acc = '#'; break; } }
+      if (!acc) { var kf = SMR_KEY_SIG_FLATS[vfK] || []; for (var kj = 0; kj < kf.length; kj++) { if (kf[kj] === cPC) { acc = 'b'; break; } } }
+    }
+    if (acc) {
+      if (shown[noteId] === acc) { acc = null; }
+      else { var prev = shown[noteId]; if (prev === '##' && (acc === '#' || acc === 'n')) cancelAcc = 'n'; else if (prev === 'bb' && (acc === 'b' || acc === 'n')) cancelAcc = 'n'; shown[noteId] = acc; }
+    } else if (noteId in shown && shown[noteId] !== null) {
+      var prev2 = shown[noteId], nPC = group[n].midi % 12, vfKL = smrKeyToVexflow(key);
+      var ks2 = SMR_KEY_SIG_SHARPS[vfKL] || [], kf2 = SMR_KEY_SIG_FLATS[vfKL] || [], inKeyAcc = null;
+      for (var ki2 = 0; ki2 < ks2.length; ki2++) { if (ks2[ki2] === nPC) { inKeyAcc = '#'; break; } }
+      if (!inKeyAcc) { for (var ki3 = 0; ki3 < kf2.length; ki3++) { if (kf2[ki3] === nPC) { inKeyAcc = 'b'; break; } } }
+      if (prev2 === '##' || prev2 === 'bb') cancelAcc = 'n';
+      acc = inKeyAcc || 'n'; shown[noteId] = acc === 'n' ? null : acc;
+    }
+    accs.push({ acc: acc, cancel: cancelAcc });
+  }
+  return { keys: keys, accs: accs };
+}
+function smrBuildVoiceNotes(notes, key, clef, measureIdx) {
+  if (!VF) return [];
+  notes = notes.slice().sort(function(a, b) { return a.beat - b.beat; });
+  var groups = [], lastBeat = -1;
+  for (var i = 0; i < notes.length; i++) {
+    if (groups.length > 0 && Math.abs(notes[i].beat - lastBeat) < 0.01) groups[groups.length - 1].push(notes[i]);
+    else { groups.push([notes[i]]); lastBeat = notes[i].beat; }
+  }
+  var mixed = smrPreScanMixed(notes, key, clef, measureIdx), shown = {}, vfNotes = [];
+  for (var g = 0; g < groups.length; g++) {
+    var dur = smrDurToVexflow(groups[g][0].dur);
+    var r = smrBuildAccs(notes, key, clef, measureIdx, mixed, shown, groups[g]);
+    var sn = new VF.StaveNote({ keys: r.keys, duration: dur, clef: clef || 'treble', auto_stem: true });
+    for (var j = 0; j < r.accs.length; j++) { if (r.accs[j].acc) sn.addModifier(new VF.Accidental(r.accs[j].acc), j); if (r.accs[j].cancel) sn.addModifier(new VF.Accidental(r.accs[j].cancel), j); }
+    vfNotes.push(sn);
+  }
+  return vfNotes;
+}
+function smrBuildVoiceWithRests(notes, key, clef, totalBeats, measureIdx) {
+  if (!VF) return [];
+  notes = notes.slice().sort(function(a, b) { return a.beat - b.beat; });
+  var events = [], lastBeat = -1;
+  for (var i = 0; i < notes.length; i++) {
+    if (events.length > 0 && Math.abs(notes[i].beat - lastBeat) < 0.01) events[events.length - 1].notes.push(notes[i]);
+    else { events.push({ beat: notes[i].beat, dur: notes[i].dur, notes: [notes[i]] }); lastBeat = notes[i].beat; }
+  }
+  var filled = [], cursor = 0;
+  if (events.length > 0 && events[0].beat > 0) { var gap = events[0].beat; var rd = smrFitRests(gap); for (var r = 0; r < rd.length; r++) { filled.push({ beat: cursor, dur: rd[r], rest: true }); cursor += rd[r]; } }
+  for (var e = 0; e < events.length; e++) {
+    var ev = events[e];
+    if (ev.beat > cursor + 0.01) { var g2 = ev.beat - cursor; var rd2 = smrFitRests(g2); for (var r2 = 0; r2 < rd2.length; r2++) { filled.push({ beat: cursor, dur: rd2[r2], rest: true }); cursor += rd2[r2]; } }
+    filled.push(ev); cursor = ev.beat + ev.dur;
+  }
+  if (cursor < totalBeats - 0.01) { var g3 = totalBeats - cursor; var rd3 = smrFitRests(g3); for (var r3 = 0; r3 < rd3.length; r3++) { filled.push({ beat: cursor, dur: rd3[r3], rest: true }); cursor += rd3[r3]; } }
+  var restKey = clef === 'bass' ? 'd/3' : 'b/4';
+  var mixed = smrPreScanMixed(notes, key, clef, measureIdx), shown = {}, vfNotes = [];
+  for (var f = 0; f < filled.length; f++) {
+    var item = filled[f], dur = smrDurToVexflow(item.dur);
+    if (item.rest) { vfNotes.push(new VF.StaveNote({ keys: [restKey], duration: dur + 'r', clef: clef || 'treble' })); }
+    else {
+      var rr = smrBuildAccs(notes, key, clef, measureIdx, mixed, shown, item.notes);
+      var sn = new VF.StaveNote({ keys: rr.keys, duration: dur, clef: clef || 'treble', auto_stem: true });
+      for (var j = 0; j < rr.accs.length; j++) { if (rr.accs[j].acc) sn.addModifier(new VF.Accidental(rr.accs[j].acc), j); if (rr.accs[j].cancel) sn.addModifier(new VF.Accidental(rr.accs[j].cancel), j); }
+      vfNotes.push(sn);
+    }
+  }
+  return vfNotes;
+}
+
+function smrRenderVexFlowInto(container) {
+  if (!smrCurrentJson || !container || !VF) return;
+  while (container.firstChild) container.removeChild(container.firstChild);
+  var data = smrCurrentJson, measures = data.measures;
+  if (!measures || measures.length === 0) return;
+  var layout = smrCurrentLayout || {}, systems = layout.systems || data.systems;
+  var spacing = layout.staveSpacing || {};
+  var h_row_default = spacing.h_row || spacing.trebleToBassGap || 125;
+  var h_gap = spacing.h_gap || spacing.systemToSystemGap || 160;
+  var h_row_matrix = layout.h_row || null, lineHeight = h_row_default + h_gap;
+  var leftMargin = spacing.leftMargin || 60, firstSystemIndent = spacing.firstSystemIndent || 0, rightMargin = spacing.rightMargin || 20;
+  var timeSigParts = (data.timeSig || '4/4').split('/');
+  var beatsPerMeasure = data.beatsPerMeasure || parseInt(timeSigParts[0]) || 4;
+  var beatValue = parseInt(timeSigParts[1]) || 4;
+  var quarterBeatsPerMeasure = beatsPerMeasure * (4 / beatValue);
+  var totalBeats = beatsPerMeasure;
+  var systemLayout = [];
+  if (systems && systems.length > 0) { var idx = 0; for (var s = 0; s < systems.length; s++) { systemLayout.push({ startIdx: idx, count: systems[s] }); idx += systems[s]; } }
+  else { var apl = 4; for (var ai = 0; ai < measures.length; ai += apl) { systemLayout.push({ startIdx: ai, count: Math.min(apl, measures.length - ai) }); } }
+  var n_rows = layout.n_rows || [], n_pages = layout.n_pages || (n_rows.length || 1);
+  var pageSize = layout.pageSize || {}, w_pdf = pageSize.w_pdf || 1241, h_pdf = pageSize.h_pdf || 1754;
+  var svgWidth = w_pdf, titleOffset = pageSize.titleOffset || 279;
+  smrMeasurePositionMap = [];
+  var globalBeatCursor = 0, globalSysIdx = 0;
+
+  for (var pageIdx = 0; pageIdx < n_pages; pageIdx++) {
+    var pageRows = (n_rows.length > 0 && pageIdx < n_rows.length) ? n_rows[pageIdx] : systemLayout.length;
+    var pageSystems = systemLayout.slice(globalSysIdx, globalSysIdx + pageRows);
+    if (pageSystems.length === 0) continue;
+    var pageContainer = document.createElement('div');
+    pageContainer.style.cssText = 'margin:0;padding:0;line-height:0;font-size:0;';
+    container.appendChild(pageContainer);
+    var renderer = new VF.Renderer(pageContainer, VF.Renderer.Backends.SVG);
+    renderer.resize(svgWidth, h_pdf);
+    var context = renderer.getContext();
+    context.setFont('Arial', 10);
+    var pageTitleOffset = (pageIdx === 0) ? titleOffset : 40;
+    var pageSystemYs = (layout.systemY && layout.systemY[pageIdx]) || null;
+
+    for (var ps = 0; ps < pageSystems.length; ps++) {
+      var sys = globalSysIdx + ps, sysL = pageSystems[ps];
+      var startIdx = sysL.startIdx, endIdx = Math.min(startIdx + sysL.count, measures.length);
+      var y = pageSystemYs ? pageSystemYs[ps] : (ps * lineHeight + pageTitleOffset);
+      var trebleToBassGap = (h_row_matrix && h_row_matrix[pageIdx] && h_row_matrix[pageIdx][ps] != null) ? h_row_matrix[pageIdx][ps] : h_row_default;
+      var sysLeftMargin = (sys === 0) ? leftMargin + firstSystemIndent : leftMargin;
+      var measureXs = [], measureWidths_arr = [], w_clause = layout.w_clause || [], rowWidths = w_clause[sys] || null;
+      if (rowWidths && rowWidths.length === sysL.count) {
+        var cx = sysLeftMargin;
+        for (var wi = 0; wi < rowWidths.length; wi++) { measureXs.push(cx); measureWidths_arr.push(rowWidths[wi]); cx += rowWidths[wi]; }
+      } else {
+        var fme = 100, lse = 80, isFM = (startIdx === 0), dw = isFM ? fme : lse;
+        var avW = svgWidth - sysLeftMargin - rightMargin - dw, wts = [], twt = 0;
+        for (var wi2 = startIdx; wi2 < endIdx; wi2++) { var nc = (measures[wi2] && measures[wi2].notes) ? measures[wi2].notes.length : 0; var ww = Math.max(1, nc); wts.push(ww); twt += ww; }
+        var cx2 = sysLeftMargin;
+        for (var mw = 0; mw < wts.length; mw++) { var w2 = Math.floor(avW * wts[mw] / twt); if (mw === 0) w2 += dw; measureXs.push(cx2); measureWidths_arr.push(w2); cx2 += w2; }
+      }
+      for (var i = startIdx; i < endIdx; i++) {
+        var mi = i - startIdx, x = measureXs[mi], staveWidth = measureWidths_arr[mi];
+        var isFirst = (i === 0), isFirstInLine = (mi === 0);
+        var staveKey = smrKeyToVexflow(smrGetActiveKey(i, data.key));
+        var treble = new VF.Stave(x, y, staveWidth);
+        if (isFirst) { var dts = (data.timeSig === '4/4') ? 'C' : (data.timeSig || '4/4'); treble.addClef('treble').addKeySignature(staveKey).addTimeSignature(dts); }
+        else if (isFirstInLine) { treble.addClef('treble').addKeySignature(staveKey); }
+        treble.setContext(context).draw();
+        var bass = new VF.Stave(x, y + trebleToBassGap, staveWidth);
+        if (isFirst) { var dts2 = (data.timeSig === '4/4') ? 'C' : (data.timeSig || '4/4'); bass.addClef('bass').addKeySignature(staveKey).addTimeSignature(dts2); }
+        else if (isFirstInLine) { bass.addClef('bass').addKeySignature(staveKey); }
+        bass.setContext(context).draw();
+        if (isFirstInLine) { new VF.StaveConnector(treble, bass).setType('brace').setContext(context).draw(); new VF.StaveConnector(treble, bass).setType('singleLeft').setContext(context).draw(); }
+        new VF.StaveConnector(treble, bass).setType('singleRight').setContext(context).draw();
+        smrMeasurePositionMap.push({ measureIdx: i, x: x, width: staveWidth, y: y, startBeat: globalBeatCursor, beatsPerMeasure: totalBeats, systemIdx: sys });
+        globalBeatCursor += totalBeats;
+        var measure = measures[i];
+        if (!measure) continue;
+        var trebleNotes = measure.notes.filter(function(n) { return n.clef === 'treble'; });
+        var bassNotes = measure.notes.filter(function(n) { return n.clef === 'bass'; });
+        var isPickup = !!measure.pickup;
+        var trebleEmpty = trebleNotes.length === 0 && bassNotes.length > 0;
+        var bassEmpty = bassNotes.length === 0 && trebleNotes.length > 0;
+        var measureKey = smrGetActiveKey(i, data.key);
+        var tVN = trebleEmpty ? [] : (isPickup ? smrBuildVoiceNotes(trebleNotes, measureKey, 'treble', i) : smrBuildVoiceWithRests(trebleNotes, measureKey, 'treble', totalBeats, i));
+        var bVN = bassEmpty ? [] : (isPickup ? smrBuildVoiceNotes(bassNotes, measureKey, 'bass', i) : smrBuildVoiceWithRests(bassNotes, measureKey, 'bass', totalBeats, i));
+        try {
+          var tp = (data.timeSig || '4/4').split('/'), bd = parseInt(tp[1]) || 4;
+          var tBG = [new VF.Fraction(1, bd)], hasSext = bassNotes.length >= 6 && bassNotes.some(function(n) { return Math.abs(n.dur - 0.33) < 0.05; });
+          var bBG = [new VF.Fraction(2, 4)];
+          if (tVN.length > 0) {
+            var tB = VF.Beam.generateBeams(tVN, { groups: tBG });
+            var v1 = new VF.Voice({ num_beats: quarterBeatsPerMeasure, beat_value: 4 }).setStrict(false);
+            v1.addTickables(tVN);
+            new VF.Formatter().joinVoices([v1]).format([v1], (x + staveWidth) - treble.getNoteStartX() - 15);
+            v1.draw(context, treble);
+            for (var bi = 0; bi < tB.length; bi++) tB[bi].setContext(context).draw();
+          }
+          if (bVN.length > 0) {
+            var manBeams = [];
+            if (hasSext && bassNotes.length >= 6) {
+              var singles = [];
+              for (var tn = 0; tn < bVN.length; tn++) { var bvn = bVN[tn]; if (bvn.noteType === 'n' && bvn.getKeys().length === 1) singles.push(bvn); }
+              for (var rn = 0; rn < singles.length; rn++) singles[rn].setStemDirection(VF.Stem.DOWN);
+              var rem = singles.slice(), fg = rem.length % 6;
+              if (fg > 0 && fg < rem.length) { var pg = rem.splice(0, fg); try { manBeams.push(new VF.Beam(pg)); } catch(e) {} }
+              while (rem.length >= 6) { var grp = rem.splice(0, 6); try { new VF.Tuplet(grp, {num_notes:6,notes_occupied:4,bracketed:false,ratioed:false}); manBeams.push(new VF.Beam(grp)); } catch(e) {} }
+            }
+            var bB = manBeams.length > 0 ? manBeams : VF.Beam.generateBeams(bVN, { groups: bBG });
+            var v2 = new VF.Voice({ num_beats: quarterBeatsPerMeasure, beat_value: 4 }).setStrict(false);
+            v2.addTickables(bVN);
+            new VF.Formatter().joinVoices([v2]).format([v2], (x + staveWidth) - bass.getNoteStartX() - 15);
+            v2.draw(context, bass);
+            for (var bi2 = 0; bi2 < bB.length; bi2++) bB[bi2].setContext(context).draw();
+          }
+        } catch (e) { console.warn('VexFlow error m' + (i+1) + ':', e.message); }
+      }
+    }
+    // Text annotations
+    var svgEl = pageContainer.querySelector('svg');
+    if (svgEl && smrCurrentTextData) {
+      var ns = 'http://www.w3.org/2000/svg';
+      if (pageIdx === 0 && smrCurrentTextData.pageAnnotations) {
+        for (var pa = 0; pa < smrCurrentTextData.pageAnnotations.length; pa++) {
+          var ann = smrCurrentTextData.pageAnnotations[pa];
+          var te = document.createElementNS(ns, 'text');
+          te.setAttribute('x', Math.round(ann.x)); te.setAttribute('y', Math.round(ann.y));
+          te.setAttribute('dominant-baseline', 'hanging');
+          te.setAttribute('fill', (ann.style && ann.style.color) || 'currentColor');
+          te.setAttribute('text-anchor', ann.anchor === 'center' ? 'middle' : ann.anchor === 'right' ? 'end' : 'start');
+          te.setAttribute('font-size', Math.round(((ann.style && ann.style.fontSize) || 14) * 2));
+          te.setAttribute('font-weight', (ann.style && ann.style.fontWeight) || 'normal');
+          te.setAttribute('font-style', (ann.style && ann.style.fontStyle) || 'normal');
+          te.setAttribute('font-family', (ann.style && ann.style.fontFamily) || 'serif');
+          te.textContent = ann.text;
+          svgEl.appendChild(te);
+        }
+      }
+      var pFM = pageSystems[0].startIdx, pLM = pageSystems[pageSystems.length-1].startIdx + pageSystems[pageSystems.length-1].count - 1;
+      if (smrCurrentTextData.measureAnnotations) {
+        for (var ma = 0; ma < smrCurrentTextData.measureAnnotations.length; ma++) {
+          var mann = smrCurrentTextData.measureAnnotations[ma];
+          if (mann.measure < pFM || mann.measure > pLM || mann.type === 'tuplet') continue;
+          var te2 = document.createElementNS(ns, 'text');
+          te2.setAttribute('x', Math.round(mann.x)); te2.setAttribute('y', Math.round(mann.y));
+          te2.setAttribute('dominant-baseline', 'hanging'); te2.setAttribute('fill', 'currentColor');
+          var mfs = (mann.style && mann.style.fontSize) || 12;
+          if (mann.type === 'dynamics') mfs *= 1.6; if (mann.type === 'technique') mfs *= 2;
+          te2.setAttribute('font-size', Math.round(mfs));
+          te2.setAttribute('font-weight', mann.type === 'dynamics' ? 'normal' : ((mann.style && mann.style.fontWeight) || 'normal'));
+          te2.setAttribute('font-style', mann.type === 'dynamics' ? 'italic' : ((mann.style && mann.style.fontStyle) || 'normal'));
+          if (mann.type === 'dynamics') te2.setAttribute('font-family', "'Times New Roman','Georgia',serif");
+          te2.textContent = mann.text;
+          svgEl.appendChild(te2);
+        }
+      }
+      if (smrCurrentTextData.octaveShifts && smrCurrentTextData.measureAnnotations) {
+        for (var osi = 0; osi < smrCurrentTextData.octaveShifts.length; osi++) {
+          var osR = smrCurrentTextData.octaveShifts[osi].measureRange;
+          if (!osR) continue;
+          var eAnn = null;
+          for (var oai = 0; oai < smrCurrentTextData.measureAnnotations.length; oai++) { var oa = smrCurrentTextData.measureAnnotations[oai]; if (oa.text === '8va' && oa.measure === osR[0]) { eAnn = oa; break; } }
+          if (!eAnn || eAnn.measure < pFM || eAnn.measure > pLM) continue;
+          // find end measure position
+          var eMP = null;
+          for (var esi = 0; esi < pageSystems.length; esi++) { var esl = pageSystems[esi]; if (osR[1] >= esl.startIdx && osR[1] < esl.startIdx + esl.count) { var eri = osR[1] - esl.startIdx; var egS = globalSysIdx + esi; var erow = (w_clause[egS] || null); var eX = ((egS === 0) ? leftMargin + firstSystemIndent : leftMargin); var eW = 0; if (erow && erow.length === esl.count) { for (var ewi = 0; ewi < eri; ewi++) eX += erow[ewi]; eW = erow[eri]; } else { eX += eri * (svgWidth - eX - rightMargin) / esl.count; eW = (svgWidth - eX - rightMargin) / esl.count; } eMP = { x: eX, width: eW }; break; } }
+          if (!eMP) continue;
+          var dl = document.createElementNS(ns, 'line');
+          dl.setAttribute('x1', Math.round(eAnn.x + 50)); dl.setAttribute('y1', Math.round(eAnn.y + 5));
+          dl.setAttribute('x2', Math.round(eMP.x + eMP.width - 10)); dl.setAttribute('y2', Math.round(eAnn.y + 5));
+          dl.setAttribute('stroke', 'currentColor'); dl.setAttribute('stroke-width', '2'); dl.setAttribute('stroke-dasharray', '6,4');
+          svgEl.appendChild(dl);
+        }
+      }
+      if (smrCurrentTextData.pedalMarkings) {
+        for (var pm = 0; pm < smrCurrentTextData.pedalMarkings.length; pm++) {
+          var ped = smrCurrentTextData.pedalMarkings[pm];
+          if (ped.page !== pageIdx + 1) continue;
+          var pe = document.createElementNS(ns, 'text');
+          pe.setAttribute('x', Math.round(ped.x)); pe.setAttribute('y', Math.round(ped.y + 30));
+          pe.setAttribute('dominant-baseline', 'hanging'); pe.setAttribute('fill', 'currentColor');
+          if (ped.type === 'ped') { pe.setAttribute('font-size', 21); pe.setAttribute('font-style', 'italic'); pe.setAttribute('font-family', 'serif'); pe.textContent = 'Ped.'; }
+          else { pe.setAttribute('font-size', 24); pe.textContent = '\u273B'; }
+          svgEl.appendChild(pe);
+        }
+      }
+    }
+    // viewBox + dark theme
+    var fSvg = pageContainer.querySelector('svg');
+    if (fSvg) {
+      fSvg.setAttribute('viewBox', '0 0 ' + svgWidth + ' ' + h_pdf);
+      fSvg.removeAttribute('width'); fSvg.removeAttribute('height');
+      fSvg.style.width = '100%'; fSvg.style.height = 'auto'; fSvg.style.display = 'block'; fSvg.style.background = 'transparent';
+      var els = fSvg.querySelectorAll('path, text, line, rect');
+      for (var ei = 0; ei < els.length; ei++) {
+        var el = els[ei], stroke = el.getAttribute('stroke'), fill = el.getAttribute('fill');
+        if (stroke && stroke !== 'none' && stroke !== 'transparent') el.setAttribute('stroke', '#ffffff');
+        if (fill && fill !== 'none' && fill !== 'transparent') el.setAttribute('fill', '#ffffff');
+      }
+      fSvg.querySelectorAll('*').forEach(function(el) { var cs = getComputedStyle(el); if (cs.fill === 'rgb(0, 0, 0)') el.style.fill = '#ffffff'; if (cs.stroke === 'rgb(0, 0, 0)') el.style.stroke = '#ffffff'; });
+    }
+    globalSysIdx += pageRows;
   }
 }
+
+// Playback
+function smrStartPlayback() {
+  if (!smrCurrentJson || smrMeasurePositionMap.length === 0 || typeof Tone === 'undefined') return;
+  Tone.start();
+  var data = smrCurrentJson, bpm = data.tempo || 120;
+  smrPlaybackState.bpm = bpm; Tone.Transport.bpm.value = bpm;
+  if (smrPlaybackState.playing) return;
+  if (!smrPlaybackState.synth) {
+    smrPlaybackState.synth = new Tone.PolySynth(Tone.Synth, { maxPolyphony: 32, voice: Tone.Synth, options: { oscillator: { type: 'triangle8' }, envelope: { attack: 0.005, decay: 0.3, sustain: 0.4, release: 0.8 } } }).toDestination();
+    smrPlaybackState.synth.volume.value = -6;
+  }
+  var lastMap = smrMeasurePositionMap[smrMeasurePositionMap.length - 1];
+  smrPlaybackState.totalBeats = lastMap.startBeat + lastMap.beatsPerMeasure;
+  var spb = 60 / bpm; smrPlaybackState.scheduledIds = [];
+  for (var mi = 0; mi < data.measures.length; mi++) {
+    var m = data.measures[mi]; if (!m || !m.notes) continue;
+    var pe = null; for (var pi = 0; pi < smrMeasurePositionMap.length; pi++) { if (smrMeasurePositionMap[pi].measureIdx === mi) { pe = smrMeasurePositionMap[pi]; break; } }
+    if (!pe) continue;
+    for (var ni = 0; ni < m.notes.length; ni++) {
+      var note = m.notes[ni], at = (pe.startBeat + note.beat) * spb, ds = note.dur * spb;
+      var freq = Tone.Frequency(note.midi, 'midi').toFrequency(), vel = note.vel != null ? Math.max(0.05, note.vel / 127) : 0.7;
+      smrPlaybackState.scheduledIds.push(Tone.Transport.schedule((function(f,d,v) { return function(t) { if (smrPlaybackState.synth) smrPlaybackState.synth.triggerAttackRelease(f,d,t,v); }; })(freq, Math.min(ds,4), vel), at));
+    }
+  }
+  if (smrPlaybackState.pauseTime > 0) Tone.Transport.start('+0', smrPlaybackState.pauseTime);
+  else Tone.Transport.start('+0', 0);
+  smrPlaybackState.playing = true;
+  smrPlaybackState.startTime = Tone.now() - (smrPlaybackState.pauseTime || 0);
+  document.getElementById('smrBtnPlay').style.display = 'none';
+  document.getElementById('smrBtnPause').style.display = '';
+  document.getElementById('smrBtnStop').disabled = false;
+  smrAnimateCursor();
+  Tone.Transport.schedule(function() { smrStopPlayback(); }, smrPlaybackState.totalBeats * spb + 0.1);
+}
+function smrPausePlayback() {
+  if (!smrPlaybackState.playing) return;
+  smrPlaybackState.pauseTime = Tone.Transport.seconds; Tone.Transport.pause();
+  smrPlaybackState.playing = false;
+  document.getElementById('smrBtnPlay').style.display = ''; document.getElementById('smrBtnPause').style.display = 'none';
+  if (smrPlaybackState.animFrame) cancelAnimationFrame(smrPlaybackState.animFrame);
+}
+function smrStopPlayback() {
+  if (typeof Tone !== 'undefined') { Tone.Transport.stop(); Tone.Transport.cancel(); }
+  smrPlaybackState.playing = false; smrPlaybackState.pauseTime = 0; smrPlaybackState.scheduledIds = [];
+  document.getElementById('smrBtnPlay').style.display = ''; document.getElementById('smrBtnPause').style.display = 'none';
+  document.getElementById('smrBtnStop').disabled = true;
+  if (smrPlaybackState.animFrame) cancelAnimationFrame(smrPlaybackState.animFrame);
+  smrRemoveCursor(); smrUpdateTimeDisplay(0);
+}
+function smrAnimateCursor() {
+  if (!smrPlaybackState.playing) return;
+  var elapsed = Tone.Transport.seconds, spb = 60 / smrPlaybackState.bpm, cb = elapsed / spb;
+  smrUpdateTimeDisplay(elapsed); smrUpdateCursorPosition(cb);
+  if (cb < smrPlaybackState.totalBeats) smrPlaybackState.animFrame = requestAnimationFrame(smrAnimateCursor);
+  else smrStopPlayback();
+}
+function smrUpdateTimeDisplay(elapsed) {
+  var spb = 60 / smrPlaybackState.bpm, ts = smrPlaybackState.totalBeats * spb;
+  var el = document.getElementById('smrTime');
+  if (el) el.textContent = Math.floor(elapsed/60) + ':' + (Math.floor(elapsed%60)<10?'0':'') + Math.floor(elapsed%60) + ' / ' + Math.floor(ts/60) + ':' + (Math.floor(ts%60)<10?'0':'') + Math.floor(ts%60);
+}
+function smrUpdateCursorPosition(currentBeat) {
+  var entry = null;
+  for (var i = smrMeasurePositionMap.length - 1; i >= 0; i--) { if (currentBeat >= smrMeasurePositionMap[i].startBeat - 0.01) { entry = smrMeasurePositionMap[i]; break; } }
+  if (!entry) return;
+  var frac = Math.min(1, (currentBeat - entry.startBeat) / entry.beatsPerMeasure);
+  var cX = entry.x + frac * entry.width, cY = entry.y;
+  var sc = document.getElementById('smrVexflowContainer'); if (!sc) return;
+  var svg = sc.querySelector('svg'); if (!svg) return;
+  var ns = 'http://www.w3.org/2000/svg';
+  var cur = svg.querySelector('#smr-playback-cursor');
+  if (!cur) { cur = document.createElementNS(ns, 'line'); cur.setAttribute('id', 'smr-playback-cursor'); cur.setAttribute('stroke', '#ef4444'); cur.setAttribute('stroke-width', '2'); cur.setAttribute('stroke-opacity', '0.8'); svg.appendChild(cur); }
+  cur.setAttribute('x1', Math.round(cX)); cur.setAttribute('x2', Math.round(cX));
+  cur.setAttribute('y1', Math.round(cY - 5)); cur.setAttribute('y2', Math.round(cY + 210));
+  var viewer = document.getElementById('smrViewer');
+  if (viewer && viewer.scrollHeight > viewer.clientHeight) {
+    var sr = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal, scale = sr.height / vb.height;
+    var csY = (cY * scale) + sr.top - viewer.getBoundingClientRect().top + viewer.scrollTop;
+    if (csY > viewer.scrollTop + viewer.clientHeight - 60 || csY < viewer.scrollTop + 30) viewer.scrollTop = csY - 80;
+  }
+}
+function smrRemoveCursor() {
+  var sc = document.getElementById('smrVexflowContainer'); if (!sc) return;
+  var cur = sc.querySelector('#smr-playback-cursor'); if (cur) cur.remove();
+}
+
+// Library browser
+function loadSMRLibrary() {
+  fetch('/api/smr/library').then(function(r) { return r.json(); }).then(function(data) {
+    var el = document.getElementById('smrTree');
+    while (el.firstChild) el.removeChild(el.firstChild);
+    smrRenderTree(data, el);
+  }).catch(function() {
+    document.getElementById('smrTree').textContent = 'No sheets found \u2014 is SheetMusicReader running?';
+  });
+}
+function smrRenderTree(items, container) {
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    if (item.type === 'directory') {
+      var dir = document.createElement('div'); dir.className = 'smr-tree-dir';
+      var label = document.createElement('div'); label.className = 'smr-tree-dir-label';
+      var arrow = document.createElement('span'); arrow.className = 'arrow'; arrow.textContent = '\u25BC';
+      label.appendChild(arrow);
+      var ns2 = document.createElement('span'); ns2.textContent = ' ' + item.name; label.appendChild(ns2);
+      label.addEventListener('click', (function(d) { return function() { d.classList.toggle('collapsed'); }; })(dir));
+      dir.appendChild(label);
+      var ch = document.createElement('div'); ch.className = 'smr-tree-children';
+      if (item.children) smrRenderTree(item.children, ch);
+      dir.appendChild(ch); container.appendChild(dir);
+    } else {
+      var file = document.createElement('div'); file.className = 'smr-tree-file';
+      file.setAttribute('data-path', item.path);
+      var dots = document.createElement('span'); dots.className = 'status-dots';
+      var dotC = document.createElement('span'); dotC.className = 'status-dot ' + (item.hasClaude ? 'claude' : 'pending'); dotC.title = item.hasClaude ? 'Claude: done' : 'pending';
+      var dotG = document.createElement('span'); dotG.className = 'status-dot ' + (item.hasGemini ? 'gemini' : 'pending'); dotG.title = item.hasGemini ? 'Gemini: done' : 'pending';
+      dots.appendChild(dotC); dots.appendChild(dotG); file.appendChild(dots);
+      var fn = document.createElement('span'); fn.textContent = item.name; file.appendChild(fn);
+      file.addEventListener('click', (function(p, hc) { return function() { selectSMRFile(p, hc); }; })(item.path, item.hasClaude));
+      container.appendChild(file);
+    }
+  }
+}
+function selectSMRFile(filePath, hasJson) {
+  smrCurrentFile = filePath; smrCurrentJson = null; smrCurrentLayout = null; smrCurrentTextData = null;
+  smrStopPlayback();
+  document.querySelectorAll('.smr-tree-file').forEach(function(f) { f.classList.remove('active'); });
+  var active = document.querySelector('.smr-tree-file[data-path="' + CSS.escape(filePath) + '"]');
+  if (active) active.classList.add('active');
+  if (hasJson) {
+    var jp = filePath.replace(/\.[^.]+$/, '.json'), lp = filePath.replace(/\.[^.]+$/, '.layout.json'), tp = filePath.replace(/\.[^.]+$/, '.text.json');
+    Promise.all([
+      fetch('/api/smr/output/claude/' + jp).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
+      fetch('/api/smr/output/claude/' + lp).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
+      fetch('/api/smr/output/claude/' + tp).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; })
+    ]).then(function(results) {
+      smrCurrentJson = results[0]; smrCurrentLayout = results[1]; smrCurrentTextData = results[2];
+      if (smrCurrentJson) {
+        smrRenderVexFlowInto(document.getElementById('smrVexflowContainer'));
+        var info = document.getElementById('smrInfoBar');
+        info.textContent = (smrCurrentJson.title || filePath) + (smrCurrentJson.key ? ' \u00B7 ' + smrCurrentJson.key : '') + (smrCurrentJson.tempo ? ' \u00B7 \u266A=' + smrCurrentJson.tempo : '') + (smrCurrentJson.timeSig ? ' \u00B7 ' + smrCurrentJson.timeSig : '');
+        smrToggleView('svg');
+      }
+    });
+  } else {
+    document.getElementById('smrVexflowContainer').textContent = 'No VexFlow data \u2014 select a converted file';
+    document.getElementById('smrInfoBar').textContent = filePath;
+  }
+}
+function smrToggleView(mode) {
+  smrViewMode = mode;
+  var vf = document.getElementById('smrVexflowContainer'), pdf = document.getElementById('smrPdfContainer');
+  var bs = document.getElementById('smrBtnSvg'), bp = document.getElementById('smrBtnPdf');
+  if (mode === 'svg') { vf.style.display = ''; pdf.style.display = 'none'; bs.classList.add('active'); bp.classList.remove('active'); }
+  else { vf.style.display = 'none'; pdf.style.display = ''; bs.classList.remove('active'); bp.classList.add('active'); if (pdf.children.length === 0 && smrCurrentFile && typeof pdfjsLib !== 'undefined') smrRenderPdf(smrCurrentFile); }
+}
+function smrRenderPdf(filePath) {
+  var container = document.getElementById('smrPdfContainer');
+  container.textContent = 'Loading PDF...';
+  pdfjsLib.getDocument('/api/smr/library-file/' + filePath).promise.then(function(pdf) {
+    while (container.firstChild) container.removeChild(container.firstChild);
+    for (var p = 1; p <= pdf.numPages; p++) {
+      (function(pn) { pdf.getPage(pn).then(function(page) { var vp = page.getViewport({ scale: 1.5 }); var c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height; container.appendChild(c); page.render({ canvasContext: c.getContext('2d'), viewport: vp }); }); })(p);
+    }
+  }).catch(function() { container.textContent = 'Failed to load PDF'; });
+}
+function smrToggleTree() {
+  document.getElementById('smrTree').classList.toggle('collapsed');
+  document.getElementById('smrBtnTree').classList.toggle('active');
+}
+
+// Keep old currentScore var for backward compat with loadScoreToTargets
+var currentScore = null;
 
 function loadScoreToTargets() {
-  if (!currentScore) return;
-  // Clear existing targets
+  var score = smrCurrentJson;
+  if (!score) return;
   targetNotes.length = 0;
-
-  var tempo = currentScore.tempo;
+  var tempo = score.tempo || 120;
   var msPerBeat = 60000 / tempo;
-  var timeSigParts = currentScore.timeSig.split('/');
-  var beatsPerMeasure = parseInt(timeSigParts[0]);
-  var startMs = Date.now() + 2000; // 2 second lead-in
+  var timeSigParts = (score.timeSig || '4/4').split('/');
+  var beatsPerMeasure = parseInt(timeSigParts[0]) || 4;
+  var startMs = Date.now() + 2000;
 
-  // Set staff tempo/time sig/scale to match score
   document.getElementById('bpmSlider').value = tempo;
   document.getElementById('bpmVal').textContent = tempo;
   var timeSigSelect = document.getElementById('staffTimeSig');
   for (var i = 0; i < timeSigSelect.options.length; i++) {
-    if (timeSigSelect.options[i].value === currentScore.timeSig) {
-      timeSigSelect.selectedIndex = i; break;
-    }
+    if (timeSigSelect.options[i].value === score.timeSig) { timeSigSelect.selectedIndex = i; break; }
   }
   var scaleSelect = document.getElementById('staffScale');
   for (var i = 0; i < scaleSelect.options.length; i++) {
-    if (scaleSelect.options[i].value === currentScore.key) {
-      scaleSelect.selectedIndex = i; break;
-    }
+    if (scaleSelect.options[i].value === score.key) { scaleSelect.selectedIndex = i; break; }
   }
 
-  // Map dynamics markings to MIDI velocity
   var dynamicsToVelocity = { 'ppp': 16, 'pp': 32, 'p': 48, 'mp': 64, 'mf': 80, 'f': 96, 'ff': 112, 'fff': 127 };
-  var currentVelocity = dynamicsToVelocity[currentScore.dynamics] || 64;
-
-  currentScore.measures.forEach(function(measure, mIdx) {
-    if (measure.dynamics && dynamicsToVelocity[measure.dynamics]) {
-      currentVelocity = dynamicsToVelocity[measure.dynamics];
-    }
+  var currentVelocity = dynamicsToVelocity[score.dynamics] || 64;
+  score.measures.forEach(function(measure, mIdx) {
+    if (measure.dynamics && dynamicsToVelocity[measure.dynamics]) currentVelocity = dynamicsToVelocity[measure.dynamics];
     var measureStartMs = startMs + mIdx * beatsPerMeasure * msPerBeat;
     measure.notes.forEach(function(note) {
-      targetNotes.push({
-        midi: note.midi,
-        arriveMs: measureStartMs + note.beat * msPerBeat,
-        durationBeats: note.dur,
-        velocity: note.velocity || currentVelocity,
-        hit: false
-      });
+      targetNotes.push({ midi: note.midi, arriveMs: measureStartMs + note.beat * msPerBeat, durationBeats: note.dur, velocity: note.velocity || currentVelocity, hit: false });
     });
   });
 
-  // Update button
-  document.getElementById('scoreLoadBtn').classList.add('active');
-  document.getElementById('scoreLoadBtn').textContent = 'Loaded (' + targetNotes.length + ' notes)';
-  setTimeout(function() {
-    document.getElementById('scoreLoadBtn').classList.remove('active');
-    document.getElementById('scoreLoadBtn').textContent = 'Load as Target Notes';
-  }, 3000);
+  var btn = document.getElementById('smrBtnLoadTargets');
+  if (btn) { btn.classList.add('active'); btn.textContent = 'Loaded (' + targetNotes.length + ')'; setTimeout(function() { btn.classList.remove('active'); btn.textContent = 'Load Targets'; }, 3000); }
 }
 
 // ============================================================================
@@ -3836,43 +4179,8 @@ function analyzeRecordedPassage() {
   }
 }
 
-function toggleSheetMusicView() {
-  var sheetView = document.getElementById('sheetMusicView');
-  var scorePreview = document.getElementById('scorePreview');
-  var scoreTree = document.getElementById('scoreTree');
-  var btn = document.getElementById('sheetMusicBtn');
-  if (sheetView.style.display === 'none') {
-    sheetView.style.display = '';
-    scorePreview.style.display = 'none';
-    scoreTree.style.display = 'none';
-    btn.textContent = 'Score Browser';
-  } else {
-    sheetView.style.display = 'none';
-    scoreTree.style.display = '';
-    btn.textContent = 'Sheet Music';
-  }
-}
-
-function toggleScorePlayback() {
-  // TODO: MIDI playback of score
-  alert('Score playback coming soon');
-}
-
-function toggleScoreColorMode() {
-  scoreColorMode = !scoreColorMode;
-  var btn = document.getElementById('scoreColorBtn');
-  if (scoreColorMode) {
-    btn.classList.add('active');
-    btn.textContent = 'Color ON';
-  } else {
-    btn.classList.remove('active');
-    btn.textContent = 'Color Mode';
-  }
-  if (currentScore) drawScorePreview(currentScore);
-}
-
-// Load score tree on init
-setTimeout(loadScoreTree, 500);
+// Load SMR library on init
+setTimeout(loadSMRLibrary, 500);
 
 // ============================================================================
 // Panel resize handles (grid columns: leftCol | handle | center | handle | scoreCol)
