@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.61] - 2026-03-20
+### Added
+- "Go Live" button — only streams to spectators/live page when explicitly activated
+- Live requires password (prevents brother's session from accidentally streaming)
+- Live room auto-clears when session disconnects
+### Changed
+- Spectator broadcast gated behind liveRoomCode — no streaming unless Go Live is active
+
 ## [3.2.60] - 2026-03-20
 ### Added
 - Draggable resize handle between DRILLS/SCORES and Agent Terminal (saves position)

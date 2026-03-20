@@ -651,7 +651,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.60 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.61 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -670,6 +670,7 @@
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
+      <button id="btn-live" title="Go Live — stream to jayismocking.com/live" onclick="toggleLive()" style="padding:4px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:4px;background:transparent;color:var(--text3);cursor:pointer;font-size:12px;transition:all 0.15s;">Go Live</button>
       <button id="btn-terminal" title="Toggle Agent Terminal (Ctrl+`)">&#9638; Talk to Claude</button>
     </div>
   </div>
@@ -1621,6 +1622,46 @@ function toggleSession() {
   if (sessionActive) { stopSession(); return; }
   startSession();
 }
+
+var isLive = false;
+function toggleLive() {
+  var btn = document.getElementById('btn-live');
+  if (isLive) {
+    // Stop live
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'go_live', enabled: false, password: '' }));
+    }
+    isLive = false;
+    btn.textContent = 'Go Live';
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--text3)';
+    btn.style.borderColor = 'rgba(255,255,255,0.15)';
+  } else {
+    var pw = prompt('Enter live password:');
+    if (!pw) return;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'go_live', enabled: true, password: pw }));
+    }
+  }
+}
+
+function handleLiveStatus(msg) {
+  var btn = document.getElementById('btn-live');
+  if (msg.live) {
+    isLive = true;
+    btn.textContent = 'LIVE';
+    btn.style.background = '#ef4444';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#ef4444';
+  } else {
+    isLive = false;
+    btn.textContent = 'Go Live';
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--text3)';
+    btn.style.borderColor = 'rgba(255,255,255,0.15)';
+    if (msg.error) alert(msg.error);
+  }
+}
 async function startSession() {
   sessionActive = true;
   var btn = document.getElementById('btnStart');
@@ -1787,6 +1828,8 @@ async function startSession() {
               handleControlChange(msg.controller || msg.note, msg.value || msg.velocity, nowMs);
             }
             updateMidiStatus('MIDI (remote bridge)');
+          } else if (msg.type === 'live_status') {
+            handleLiveStatus(msg);
           }
         }
       };
@@ -1884,6 +1927,10 @@ function stopSession() {
   resetStartButton();
   resetMidiState();
   setStatus('disconnected');
+  // Reset live status
+  isLive = false;
+  var liveBtn = document.getElementById('btn-live');
+  if (liveBtn) { liveBtn.textContent = 'Go Live'; liveBtn.style.background = 'transparent'; liveBtn.style.color = 'var(--text3)'; liveBtn.style.borderColor = 'rgba(255,255,255,0.15)'; }
 }
 
 // ============================================================================

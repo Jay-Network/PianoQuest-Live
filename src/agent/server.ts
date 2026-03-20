@@ -99,6 +99,9 @@ function describeMidiSnapshot(
 
 const spectators = new Set<WebSocket>();
 
+/** Only one room streams to spectators at a time */
+let liveRoomCode: string | null = null;
+
 function broadcastSpectators(data: Buffer | string, binary = false) {
   for (const s of spectators) {
     if (s.readyState === WebSocket.OPEN) {
@@ -128,6 +131,7 @@ interface Device {
 }
 
 interface RoomSession {
+  roomCode: string;
   sendRealtimeInput: (input: any) => void;
   sendClientContent: (content: any) => void;
   primaryWs: WebSocket;
@@ -204,7 +208,10 @@ function broadcastToRoom(room: RoomSession, data: Buffer | string, binary = fals
       try { device.ws.send(data, { binary }); } catch {}
     }
   }
-  broadcastSpectators(data, binary);
+  // Only stream to spectators if this room is the live room
+  if (liveRoomCode && room.roomCode === liveRoomCode) {
+    broadcastSpectators(data, binary);
+  }
 }
 
 function sendDeviceList(room: RoomSession) {
@@ -483,19 +490,19 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
     spectators.add(ws);
     console.log(`[${APP_NAME}] Spectator connected (total: ${spectators.size})`);
 
-    // Send immediate status so bridge knows connection is live
-    const activeRoom = Array.from(rooms.values())[0];
+    // Send immediate status — only report live room, not just any active session
+    const liveRoom = liveRoomCode ? rooms.get(liveRoomCode) : null;
     ws.send(JSON.stringify({
       type: "spectator_status",
       connected: true,
       spectators: spectators.size,
-      activeSession: !!activeRoom,
-      room: activeRoom ? Array.from(rooms.keys())[0] : null,
+      activeSession: !!liveRoom,
+      room: liveRoomCode,
     }));
 
     // Send current session settings snapshot so spectator starts with correct values
-    if (activeRoom) {
-      ws.send(JSON.stringify({ type: "session_settings", ...activeRoom.sessionSettings }));
+    if (liveRoom) {
+      ws.send(JSON.stringify({ type: "session_settings", ...liveRoom.sessionSettings }));
     }
 
     // Keepalive ping every 20s to prevent Cloud Run timeout
@@ -516,12 +523,12 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
 
     ws.on("pong", () => { alive = true; });
 
-    // Allow spectators to push session_settings back to the active room
+    // Allow spectators to push session_settings back to the live room
     ws.on("message", (raw: Buffer | string) => {
       try {
         const msg = JSON.parse(typeof raw === "string" ? raw : raw.toString());
         if (msg.type === "session_settings") {
-          const room = Array.from(rooms.values())[0];
+          const room = liveRoomCode ? rooms.get(liveRoomCode) : null;
           if (room) {
             room.sessionSettings = {
               scale: String(msg.scale || room.sessionSettings.scale),
@@ -956,6 +963,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         onopen: () => {
           console.log(`[${APP_NAME}] Gemini Live connected: ${sessionId}`);
           roomSession = {
+            roomCode,
             sendRealtimeInput: (input: any) => session.sendRealtimeInput(input),
             sendClientContent: (content: any) => session.sendClientContent(content),
             primaryWs: ws,
@@ -1176,6 +1184,32 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             setDeviceRole(roomSession as RoomSession, deviceId, role, Boolean(enabled));
             console.log(`[${APP_NAME}] Role ${role}=${enabled} on device ${deviceId}`);
           }
+        } else if (msgType === "go_live") {
+          const livePassword = process.env.LIVE_PASSWORD || "chappie2026";
+          if (msg.password === livePassword) {
+            const wantLive = msg.enabled !== false;
+            if (wantLive) {
+              liveRoomCode = roomCode;
+              console.log(`[${APP_NAME}] Room ${roomCode} is now LIVE`);
+              ws.send(JSON.stringify({ type: "live_status", live: true }));
+              broadcastSpectators(JSON.stringify({
+                type: "spectator_status", connected: true, spectators: spectators.size,
+                activeSession: true, room: roomCode,
+              }));
+              const liveRs = rooms.get(roomCode);
+              if (liveRs) {
+                broadcastSpectators(JSON.stringify({ type: "session_settings", ...liveRs.sessionSettings }));
+              }
+            } else {
+              if (liveRoomCode === roomCode) {
+                liveRoomCode = null;
+                console.log(`[${APP_NAME}] Room ${roomCode} stopped live`);
+              }
+              ws.send(JSON.stringify({ type: "live_status", live: false }));
+            }
+          } else {
+            ws.send(JSON.stringify({ type: "live_status", live: false, error: "Wrong password" }));
+          }
         } else if (msgType === "close") {
           break;
         }
@@ -1203,6 +1237,10 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
     }
   }
   rooms.delete(roomCode);
+  if (liveRoomCode === roomCode) {
+    liveRoomCode = null;
+    console.log(`[${APP_NAME}] Live room ${roomCode} ended`);
+  }
   console.log(`[${APP_NAME}] Primary disconnected: ${sessionId}, room ${roomCode} removed`);
   try { ws.close(); } catch {}
 }
