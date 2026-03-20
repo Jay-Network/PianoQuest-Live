@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.65] - 2026-03-20
+### Fixed
+- Removed "Admin" label from login page — no visible distinction between login methods
+
 ## [3.2.64] - 2026-03-20
 ### Added
 - Google Sign-In for admin (jay@jayismocking.com) — gets Go Live button

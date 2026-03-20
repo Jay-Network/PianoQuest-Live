@@ -358,7 +358,6 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
 </style></head>
 <body><div class="box"><h1>PianoQuest Live</h1><p>Sign in to continue</p>
 <div class="err" id="err">Wrong password</div>
-<p style="font-size:11px;color:rgba(255,255,255,.25);margin-bottom:8px;">Admin</p>
 <div class="google-btn"><div id="g_id_onload" data-client_id="${GOOGLE_CLIENT_ID}" data-callback="handleGoogle" data-auto_prompt="false"></div>
 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signin_with" data-size="large" data-logo_alignment="center" data-width="256"></div></div>
 <div class="divider">or</div>
