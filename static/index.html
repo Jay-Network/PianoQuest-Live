@@ -597,18 +597,19 @@
     width: 3px; height: 40px; margin-left: 4px;
   }
 
-  /* Terminal panel */
+  /* Terminal panel (bottom half of right column) */
   #btn-terminal { padding: 4px 8px; border: none; border-radius: 4px; background: transparent; color: var(--text3); cursor: pointer; font-size: 14px; transition: all 0.15s; }
   #btn-terminal:hover { background: var(--bg3); color: var(--text1); }
   #btn-terminal.active { color: #22c55e; background: rgba(34,197,94,0.1); }
   #terminal-panel {
-    display: none; width: 420px; min-width: 200px;
-    flex-direction: column; flex-shrink: 0; background: #09090b;
+    display: none; flex-direction: column;
+    flex: 1; min-height: 120px;
+    background: #09090b; border-top: 1px solid var(--border);
   }
   #terminal-panel.open { display: flex; }
   .terminal-header {
     display: flex; align-items: center; gap: 8px;
-    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    padding: 6px 12px; border-bottom: 1px solid var(--border);
     background: var(--bg2); flex-shrink: 0;
   }
   .terminal-header .term-label { font-size: 12px; font-weight: 600; color: var(--text3); }
@@ -638,7 +639,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.53</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.54</div>
       </div>
     </div>
     <div class="controls">
@@ -906,18 +907,17 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Terminal drag handle + panel -->
-    <div class="grid-resize-handle" id="terminalResizeHandle" style="display:none"></div>
-    <div id="terminal-panel">
-      <div class="terminal-header">
-        <span class="term-status" id="term-status"></span>
-        <span class="term-label">Agent Terminal</span>
-        <span class="term-session">jworks:95</span>
-        <button class="term-close" id="btn-term-close">&times;</button>
+      <!-- Terminal panel (bottom half of right column) -->
+      <div id="terminal-panel">
+        <div class="terminal-header">
+          <span class="term-status" id="term-status"></span>
+          <span class="term-label">Agent Terminal</span>
+          <span class="term-session">jworks:95</span>
+          <button class="term-close" id="btn-term-close">&times;</button>
+        </div>
+        <div id="terminal-container"></div>
       </div>
-      <div id="terminal-container"></div>
     </div>
 
   </div>
@@ -5778,8 +5778,6 @@ function buildSecondaryUI(room, params) {
   var termStatusDot = document.getElementById('term-status');
   var btnTerminal = document.getElementById('btn-terminal');
   var btnTermClose = document.getElementById('btn-term-close');
-  var termResizeHandle = document.getElementById('terminalResizeHandle');
-  var mainGrid = document.querySelector('.main');
   var xterm = null;
   var fitAddon = null;
   var termWs = null;
@@ -5799,22 +5797,11 @@ function buildSecondaryUI(room, params) {
     }
   });
 
-  function updateGridColumns(open) {
-    if (!mainGrid) return;
-    if (open) {
-      mainGrid.style.gridTemplateColumns = '520px 6px 1fr 6px 560px 6px 420px';
-    } else {
-      mainGrid.style.gridTemplateColumns = '';
-    }
-  }
-
   function openTerminal() {
     termOpen = true;
     localStorage.setItem('pq-terminal', 'true');
     termPanel.classList.add('open');
     btnTerminal.classList.add('active');
-    termResizeHandle.style.display = '';
-    updateGridColumns(true);
 
     if (!xterm) {
       xterm = new window.Terminal({
@@ -5859,8 +5846,6 @@ function buildSecondaryUI(room, params) {
     localStorage.setItem('pq-terminal', 'false');
     termPanel.classList.remove('open');
     btnTerminal.classList.remove('active');
-    termResizeHandle.style.display = 'none';
-    updateGridColumns(false);
     window.removeEventListener('resize', handleTermResize);
     if (termWs) { termWs.close(); termWs = null; }
     termStatusDot.classList.remove('connected');

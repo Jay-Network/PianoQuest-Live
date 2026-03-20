@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.54] - 2026-03-20
+### Changed
+- Terminal panel moved to bottom half of right column (below DRILLS/SCORES tabs)
+
 ## [3.2.53] - 2026-03-20
 ### Fixed
 - Terminal uses tmux grouped sessions — each client gets independent view, no window switching conflicts
