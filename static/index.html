@@ -651,7 +651,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.63 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.64 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -671,7 +671,7 @@
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
       <button id="btn-live" title="Go Live — stream to jayismocking.com/live" onclick="toggleLive()" style="display:none;padding:4px 10px;border:1px solid #ef4444;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;">Go Live</button>
-      <script>if(location.search.indexOf('admin')>=0)document.getElementById('btn-live').style.display='';</script>
+      <script>fetch('/auth/me').then(function(r){return r.json()}).then(function(d){if(d.admin)document.getElementById('btn-live').style.display='';})</script>
       <button id="btn-terminal" title="Toggle Agent Terminal (Ctrl+`)">&#9638; Talk to Claude</button>
     </div>
   </div>

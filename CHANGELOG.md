@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.64] - 2026-03-20
+### Added
+- Google Sign-In for admin (jay@jayismocking.com) — gets Go Live button
+- Password login for regular users (brother) — no Go Live
+- `/auth/me` endpoint to check admin status
+- `/auth/google` endpoint verifies Google ID token
+### Changed
+- Login page shows "Admin" label above Google Sign-In, password below divider
+
 ## [3.2.63] - 2026-03-20
 ### Changed
 - Go Live button bright red when visible (admin only) — not grayed out
