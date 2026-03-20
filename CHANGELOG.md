@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.66] - 2026-03-20
+### Changed
+- Login page: password field on top, small "(admin)" link at bottom reveals Google Sign-In
+
 ## [3.2.65] - 2026-03-20
 ### Fixed
 - Removed "Admin" label from login page — no visible distinction between login methods

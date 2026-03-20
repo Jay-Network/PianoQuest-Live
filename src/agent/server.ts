@@ -358,11 +358,11 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
 </style></head>
 <body><div class="box"><h1>PianoQuest Live</h1><p>Sign in to continue</p>
 <div class="err" id="err">Wrong password</div>
-<div class="google-btn"><div id="g_id_onload" data-client_id="${GOOGLE_CLIENT_ID}" data-callback="handleGoogle" data-auto_prompt="false"></div>
-<div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signin_with" data-size="large" data-logo_alignment="center" data-width="256"></div></div>
-<div class="divider">or</div>
 <form method="POST" action="/terminal-login"><input type="password" name="password" placeholder="Password" autofocus>
-<button type="submit">Enter</button></form></div>
+<button type="submit">Enter</button></form>
+<div id="google-admin" style="display:none;margin-top:16px;"><div class="google-btn"><div id="g_id_onload" data-client_id="${GOOGLE_CLIENT_ID}" data-callback="handleGoogle" data-auto_prompt="false"></div>
+<div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signin_with" data-size="large" data-logo_alignment="center" data-width="256"></div></div></div>
+<a href="#" onclick="document.getElementById('google-admin').style.display='block';this.style.display='none';return false" style="display:inline-block;margin-top:20px;font-size:11px;color:rgba(255,255,255,.2);text-decoration:none">(admin)</a></div>
 <script>function handleGoogle(r){fetch('/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:r.credential})}).then(function(res){if(res.ok)window.location='/';else res.text().then(function(t){document.getElementById('err').textContent=t;document.getElementById('err').style.display='block';});});}</script>
 </body></html>`;
 
