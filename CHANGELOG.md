@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.59] - 2026-03-20
+### Changed
+- Header shows "INTERNAL" label to distinguish from Cloud Run hackathon version
+
 ## [3.2.58] - 2026-03-20
 ### Fixed
 - Root `/` now serves the full PianoQuest Live app (not just terminal)
