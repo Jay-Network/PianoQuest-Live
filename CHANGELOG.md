@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.60] - 2026-03-20
+### Added
+- Draggable resize handle between DRILLS/SCORES and Agent Terminal (saves position)
+- "Talk to Claude" label on terminal button
+### Removed
+- Hidden pedal status pill from header (both internal and hackathon versions)
+
 ## [3.2.59] - 2026-03-20
 ### Changed
 - Header shows "INTERNAL" label to distinguish from Cloud Run hackathon version
