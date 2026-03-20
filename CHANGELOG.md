@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.67] - 2026-03-20
+### Added
+- Sign out button (top right)
+- `/auth/signout` clears cookies and redirects to login
+### Changed
+- "Talk to Claude" button white when closed, green when open (not grayed out)
+
 ## [3.2.66] - 2026-03-20
 ### Changed
 - Login page: password field on top, small "(admin)" link at bottom reveals Google Sign-In

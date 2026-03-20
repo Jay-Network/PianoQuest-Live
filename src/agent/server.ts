@@ -408,6 +408,12 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
     }
   });
 
+  app.get("/auth/signout", (_req, res) => {
+    res.clearCookie("pq_token");
+    res.clearCookie("pq_admin");
+    res.redirect("/");
+  });
+
   app.get("/auth/me", (req, res) => {
     res.json({ admin: isAdmin(req), authed: isTerminalAuthed(req) });
   });
