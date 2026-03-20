@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.63] - 2026-03-20
+### Changed
+- Go Live button bright red when visible (admin only) — not grayed out
+
 ## [3.2.62] - 2026-03-20
 ### Changed
 - Go Live button hidden by default — only visible with `?admin` in URL
