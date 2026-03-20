@@ -283,7 +283,15 @@ export function createApp() {
 
   // --- Password gate for terminal access ---
   const TERMINAL_PASSWORD = process.env.TERMINAL_PASSWORD || "chappie2026";
-  const TOKEN_SECRET = crypto.randomBytes(32).toString("hex");
+  // Persist secret so cookies survive server restarts
+  const SECRET_FILE = path.join(process.env.HOME || "/tmp", ".pianoquest-token-secret");
+  let TOKEN_SECRET: string;
+  try {
+    TOKEN_SECRET = fs.readFileSync(SECRET_FILE, "utf-8").trim();
+  } catch {
+    TOKEN_SECRET = crypto.randomBytes(32).toString("hex");
+    fs.writeFileSync(SECRET_FILE, TOKEN_SECRET, { mode: 0o600 });
+  }
   const TOKEN_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
 
   function makeToken(ts: number): string {
@@ -354,6 +362,11 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
   });
 
   app.get("/", (req, res) => {
+    if (!isTerminalAuthed(req)) return res.send(LOGIN_PAGE);
+    res.sendFile(path.join(STATIC_DIR, "index.html"));
+  });
+
+  app.get("/terminal", (req, res) => {
     if (!isTerminalAuthed(req)) return res.send(LOGIN_PAGE);
     res.sendFile(path.join(STATIC_DIR, "terminal.html"));
   });
