@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PianoQuest — Agent Terminal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@6.0.0/css/xterm.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@6.0.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.11.0/lib/addon-fit.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; background: #09090b; color: #fafafa; font-family: system-ui, sans-serif; }
+  #header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; background: #0a0a0a; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  #header .dot { width: 8px; height: 8px; border-radius: 50%; background: #52525b; flex-shrink: 0; }
+  #header .dot.connected { background: #22c55e; }
+  #header .title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
+  #header .session { font-size: 11px; color: rgba(255,255,255,0.35); }
+  #header .reconnect-btn {
+    margin-left: auto; background: none; border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.5); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;
+  }
+  #header .reconnect-btn:hover { background: rgba(255,255,255,0.05); color: #fafafa; }
+  #terminal { flex: 1; padding: 4px; }
+  body { display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+<div id="header">
+  <span class="dot" id="status-dot"></span>
+  <span class="title">Agent Terminal</span>
+  <span class="session" id="session-label">jworks:95</span>
+  <button class="reconnect-btn" id="btn-reconnect">Reconnect</button>
+</div>
+<div id="terminal"></div>
+<script>
+(function() {
+  var container = document.getElementById('terminal');
+  var dot = document.getElementById('status-dot');
+  var btnReconnect = document.getElementById('btn-reconnect');
+
+  var xterm = new window.Terminal({
+    cursorBlink: true,
+    cursorStyle: 'block',
+    fontSize: 14,
+    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+    scrollback: 10000,
+    convertEol: true,
+    theme: {
+      background: '#09090b',
+      foreground: '#fafafa',
+      cursor: '#22c55e',
+      selectionBackground: '#3b82f640',
+      black: '#09090b', red: '#ef4444', green: '#22c55e', yellow: '#eab308',
+      blue: '#3b82f6', magenta: '#a855f7', cyan: '#06b6d4', white: '#fafafa',
+      brightBlack: '#52525b', brightRed: '#f87171', brightGreen: '#4ade80',
+      brightYellow: '#facc15', brightBlue: '#60a5fa', brightMagenta: '#c084fc',
+      brightCyan: '#22d3ee', brightWhite: '#ffffff'
+    }
+  });
+  var fitAddon = new window.FitAddon.FitAddon();
+  xterm.loadAddon(fitAddon);
+  xterm.open(container);
+  setTimeout(function() { fitAddon.fit(); xterm.focus(); }, 50);
+
+  var ws = null;
+  var reconnectTimer = null;
+  var reconnectDelay = 1000;
+
+  xterm.onData(function(data) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'input', data: data }));
+    }
+  });
+
+  function connect() {
+    if (ws) { try { ws.close(); } catch(e) {} ws = null; }
+    var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(proto + '//' + location.host + '/ws/terminal');
+
+    ws.onopen = function() {
+      dot.classList.add('connected');
+      reconnectDelay = 1000;
+      ws.send(JSON.stringify({ type: 'resize', cols: xterm.cols, rows: xterm.rows }));
+    };
+
+    ws.onmessage = function(ev) {
+      try {
+        var msg = JSON.parse(ev.data);
+        if (msg.type === 'data') xterm.write(msg.data);
+        else if (msg.type === 'exit') {
+          dot.classList.remove('connected');
+          scheduleReconnect();
+        }
+      } catch(e) {}
+    };
+
+    ws.onclose = function() {
+      dot.classList.remove('connected');
+      scheduleReconnect();
+    };
+
+    ws.onerror = function() {
+      dot.classList.remove('connected');
+    };
+  }
+
+  function scheduleReconnect() {
+    if (reconnectTimer) return;
+    reconnectTimer = setTimeout(function() {
+      reconnectTimer = null;
+      connect();
+      reconnectDelay = Math.min(reconnectDelay * 1.5, 15000);
+    }, reconnectDelay);
+  }
+
+  btnReconnect.addEventListener('click', function() {
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+    reconnectDelay = 1000;
+    if (xterm) xterm.clear();
+    connect();
+  });
+
+  window.addEventListener('resize', function() {
+    fitAddon.fit();
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'resize', cols: xterm.cols, rows: xterm.rows }));
+    }
+  });
+
+  connect();
+})();
+</script>
+</body>
+</html>

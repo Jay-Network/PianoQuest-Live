@@ -294,6 +294,10 @@ export function createApp() {
     res.sendFile(path.join(STATIC_DIR, "index.html"));
   });
 
+  app.get("/terminal.html", (_req, res) => {
+    res.sendFile(path.join(STATIC_DIR, "terminal.html"));
+  });
+
   app.use("/static", express.static(STATIC_DIR));
   app.use("/sheets", express.static(SHEETS_DIR));
 

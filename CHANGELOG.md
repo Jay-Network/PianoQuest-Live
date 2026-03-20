@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.55] - 2026-03-20
+### Added
+- Standalone `/terminal.html` page — bookmarkable, auto-reconnecting terminal
+- Cloudflare named tunnel: `terminal.jayismocking.com` (replaces flaky serveo.net)
+- systemd service `pianoquest-tunnel` with auto-restart for tunnel persistence
+
 ## [3.2.54] - 2026-03-20
 ### Changed
 - Terminal panel moved to bottom half of right column (below DRILLS/SCORES tabs)
