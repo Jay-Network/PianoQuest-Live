@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.52] - 2026-03-20
+### Removed
+- Hidden pedal status pill from header
+
 ## [3.2.51] - 2026-03-20
 ### Changed
 - Removed agent terminal panel from hackathon submission (moved to dev-terminal branch)
