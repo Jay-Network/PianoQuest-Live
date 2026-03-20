@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.53] - 2026-03-20
+### Fixed
+- Terminal uses tmux grouped sessions — each client gets independent view, no window switching conflicts
+
 ## [3.2.52] - 2026-03-20
 ### Added
 - Score playback feeds MIDI notes into waterfall piano roll + grand staff visualization

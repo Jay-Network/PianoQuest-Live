@@ -8,6 +8,7 @@ import express from "express";
 import { createServer } from "http";
 import path from "path";
 import fs from "fs";
+import { execFile } from "child_process";
 import { WebSocketServer, WebSocket } from "ws";
 import type { IncomingMessage } from "http";
 import * as pty from "node-pty";
@@ -560,11 +561,16 @@ export function createApp() {
   const TMUX_SESSION = process.env.TMUX_SESSION || "jworks";
   const TMUX_WINDOW = process.env.TMUX_WINDOW || "95";
 
+  let terminalCounter = 0;
+
   wssTerminal.on("connection", (ws: WebSocket) => {
-    console.log(`[${APP_NAME}] Terminal client connected`);
+    terminalCounter++;
+    const groupName = `${TMUX_SESSION}-terminal-${TMUX_WINDOW}-${terminalCounter}`;
+    console.log(`[${APP_NAME}] Terminal client connected (group: ${groupName})`);
 
     const shell = process.env.SHELL || "/bin/bash";
-    const term = pty.spawn(shell, ["-c", `tmux attach-session -t "${TMUX_SESSION}:${TMUX_WINDOW}"`], {
+    const tmuxCmd = `tmux new-session -d -t ${TMUX_SESSION} -s ${groupName} 2>/dev/null; tmux select-window -t ${groupName}:${TMUX_WINDOW}; tmux attach-session -t ${groupName}`;
+    const term = pty.spawn(shell, ["-c", tmuxCmd], {
       name: "xterm-256color",
       cols: 80,
       rows: 24,
@@ -580,6 +586,7 @@ export function createApp() {
 
     term.onExit(({ exitCode }: { exitCode: number }) => {
       console.log(`[${APP_NAME}] Terminal PTY exited with code ${exitCode}`);
+      execFile("tmux", ["kill-session", "-t", groupName], () => {});
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: "exit", code: exitCode }));
         ws.close();
@@ -598,8 +605,9 @@ export function createApp() {
     });
 
     ws.on("close", () => {
-      console.log(`[${APP_NAME}] Terminal client disconnected`);
+      console.log(`[${APP_NAME}] Terminal client disconnected (group: ${groupName})`);
       term.kill();
+      execFile("tmux", ["kill-session", "-t", groupName], () => {});
     });
   });
 
