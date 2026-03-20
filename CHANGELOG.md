@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.50] - 2026-03-20
+### Added
+- Agent terminal panel (xterm.js + node-pty) — collapsible right sidebar showing jworks:95 tmux session
+- Toggle via header button or Ctrl+backtick, state persisted in localStorage
+- Dark theme terminal with drag-to-resize handle
+
 ## [3.2.49] - 2026-03-19
 ### Fixed
 - Made Scores tab fully self-contained — no SheetMusicReader dependency needed
