@@ -5,6 +5,7 @@
  */
 
 import express from "express";
+import crypto from "crypto";
 import { createServer } from "http";
 import path from "path";
 import fs from "fs";
@@ -280,6 +281,68 @@ export function createApp() {
   const wssSession = new WebSocketServer({ noServer: true });
   const wssTerminal = new WebSocketServer({ noServer: true });
 
+  // --- Password gate for terminal access ---
+  const TERMINAL_PASSWORD = process.env.TERMINAL_PASSWORD || "chappie2026";
+  const TOKEN_SECRET = crypto.randomBytes(32).toString("hex");
+  const TOKEN_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
+
+  function makeToken(ts: number): string {
+    return crypto.createHmac("sha256", TOKEN_SECRET).update(String(ts)).digest("hex") + "." + ts;
+  }
+
+  function verifyToken(token: string): boolean {
+    const dot = token.lastIndexOf(".");
+    if (dot < 0) return false;
+    const ts = parseInt(token.slice(dot + 1), 10);
+    if (isNaN(ts) || (Date.now() / 1000 - ts) > TOKEN_MAX_AGE) return false;
+    const expected = crypto.createHmac("sha256", TOKEN_SECRET).update(String(ts)).digest("hex") + "." + ts;
+    return token === expected;
+  }
+
+  function parseCookie(header: string | undefined, name: string): string | null {
+    if (!header) return null;
+    const match = header.match(new RegExp(`(?:^|;)\\s*${name}=([^;]+)`));
+    return match ? match[1] : null;
+  }
+
+  function isTerminalAuthed(req: express.Request | IncomingMessage): boolean {
+    const cookieHeader = req.headers.cookie;
+    const token = parseCookie(cookieHeader, "pq_token");
+    if (token && verifyToken(token)) return true;
+    // Also check query param ?token= for WebSocket auth
+    const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+    const qToken = url.searchParams.get("token");
+    return !!(qToken && verifyToken(qToken));
+  }
+
+  // Login page HTML
+  const LOGIN_PAGE = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PianoQuest Terminal — Login</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#09090b;color:#fafafa;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh}
+.box{background:#111;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:32px;width:320px;text-align:center}
+h1{font-size:18px;margin-bottom:4px}p{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:24px}
+input{width:100%;padding:10px 14px;background:#1a1a1a;border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#fafafa;font-size:14px;outline:none;margin-bottom:12px}
+input:focus{border-color:#22c55e}button{width:100%;padding:10px;background:#22c55e;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:8px;display:none}</style></head>
+<body><div class="box"><h1>PianoQuest Terminal</h1><p>Enter password to continue</p>
+<div class="err" id="err">Wrong password</div>
+<form method="POST" action="/terminal-login"><input type="password" name="password" placeholder="Password" autofocus>
+<button type="submit">Enter</button></form></div></body></html>`;
+
+  app.use(express.urlencoded({ extended: false }));
+
+  app.post("/terminal-login", (req, res) => {
+    if (req.body?.password === TERMINAL_PASSWORD) {
+      const ts = Math.floor(Date.now() / 1000);
+      const token = makeToken(ts);
+      res.cookie("pq_token", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: TOKEN_MAX_AGE * 1000 });
+      const redirect = (req.query.next as string) || "/terminal.html";
+      res.redirect(redirect);
+    } else {
+      res.status(401).send(LOGIN_PAGE.replace('display:none', ''));
+    }
+  });
+
   app.get("/health", (_req, res) => {
     res.json({
       status: "ok",
@@ -294,7 +357,8 @@ export function createApp() {
     res.sendFile(path.join(STATIC_DIR, "index.html"));
   });
 
-  app.get("/terminal.html", (_req, res) => {
+  app.get("/terminal.html", (req, res) => {
+    if (!isTerminalAuthed(req)) return res.send(LOGIN_PAGE);
     res.sendFile(path.join(STATIC_DIR, "terminal.html"));
   });
 
@@ -359,6 +423,11 @@ export function createApp() {
         wssMidi.emit("connection", ws, request);
       });
     } else if (url.pathname === "/ws/terminal") {
+      if (!isTerminalAuthed(request)) {
+        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+        socket.destroy();
+        return;
+      }
       wssTerminal.handleUpgrade(request, socket, head, (ws) => {
         wssTerminal.emit("connection", ws, request);
       });

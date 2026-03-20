@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.56] - 2026-03-20
+### Added
+- Password gate on terminal access — cookie-based auth, 30-day session
+- Login page at `/terminal.html` when not authenticated
+- WebSocket `/ws/terminal` rejects unauthenticated connections
+### Changed
+- URL shortened to `pianoquest.jayismocking.com`
+
 ## [3.2.55] - 2026-03-20
 ### Added
 - Standalone `/terminal.html` page — bookmarkable, auto-reconnecting terminal
