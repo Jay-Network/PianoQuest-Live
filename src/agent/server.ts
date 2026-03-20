@@ -336,7 +336,7 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
       const ts = Math.floor(Date.now() / 1000);
       const token = makeToken(ts);
       res.cookie("pq_token", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: TOKEN_MAX_AGE * 1000 });
-      const redirect = (req.query.next as string) || "/terminal.html";
+      const redirect = (req.query.next as string) || "/";
       res.redirect(redirect);
     } else {
       res.status(401).send(LOGIN_PAGE.replace('display:none', ''));
@@ -353,11 +353,7 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
     });
   });
 
-  app.get("/", (_req, res) => {
-    res.sendFile(path.join(STATIC_DIR, "index.html"));
-  });
-
-  app.get("/terminal.html", (req, res) => {
+  app.get("/", (req, res) => {
     if (!isTerminalAuthed(req)) return res.send(LOGIN_PAGE);
     res.sendFile(path.join(STATIC_DIR, "terminal.html"));
   });

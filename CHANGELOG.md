@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.57] - 2026-03-20
+### Changed
+- Root URL `/` now serves terminal (with password gate) — no need for `/terminal.html`
+
 ## [3.2.56] - 2026-03-20
 ### Added
 - Password gate on terminal access — cookie-based auth, 30-day session
