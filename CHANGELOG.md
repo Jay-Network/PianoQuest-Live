@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.62] - 2026-03-20
+### Changed
+- Go Live button hidden by default — only visible with `?admin` in URL
+- Removed password prompt from Go Live — just a toggle now
+- Brother sees no Go Live button, can't accidentally stream
+
 ## [3.2.61] - 2026-03-20
 ### Added
 - "Go Live" button — only streams to spectators/live page when explicitly activated

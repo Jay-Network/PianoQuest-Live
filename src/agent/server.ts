@@ -1185,30 +1185,25 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
             console.log(`[${APP_NAME}] Role ${role}=${enabled} on device ${deviceId}`);
           }
         } else if (msgType === "go_live") {
-          const livePassword = process.env.LIVE_PASSWORD || "chappie2026";
-          if (msg.password === livePassword) {
-            const wantLive = msg.enabled !== false;
-            if (wantLive) {
-              liveRoomCode = roomCode;
-              console.log(`[${APP_NAME}] Room ${roomCode} is now LIVE`);
-              ws.send(JSON.stringify({ type: "live_status", live: true }));
-              broadcastSpectators(JSON.stringify({
-                type: "spectator_status", connected: true, spectators: spectators.size,
-                activeSession: true, room: roomCode,
-              }));
-              const liveRs = rooms.get(roomCode);
-              if (liveRs) {
-                broadcastSpectators(JSON.stringify({ type: "session_settings", ...liveRs.sessionSettings }));
-              }
-            } else {
-              if (liveRoomCode === roomCode) {
-                liveRoomCode = null;
-                console.log(`[${APP_NAME}] Room ${roomCode} stopped live`);
-              }
-              ws.send(JSON.stringify({ type: "live_status", live: false }));
+          const wantLive = msg.enabled !== false;
+          if (wantLive) {
+            liveRoomCode = roomCode;
+            console.log(`[${APP_NAME}] Room ${roomCode} is now LIVE`);
+            ws.send(JSON.stringify({ type: "live_status", live: true }));
+            broadcastSpectators(JSON.stringify({
+              type: "spectator_status", connected: true, spectators: spectators.size,
+              activeSession: true, room: roomCode,
+            }));
+            const liveRs = rooms.get(roomCode);
+            if (liveRs) {
+              broadcastSpectators(JSON.stringify({ type: "session_settings", ...liveRs.sessionSettings }));
             }
           } else {
-            ws.send(JSON.stringify({ type: "live_status", live: false, error: "Wrong password" }));
+            if (liveRoomCode === roomCode) {
+              liveRoomCode = null;
+              console.log(`[${APP_NAME}] Room ${roomCode} stopped live`);
+            }
+            ws.send(JSON.stringify({ type: "live_status", live: false }));
           }
         } else if (msgType === "close") {
           break;
