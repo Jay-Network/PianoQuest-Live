@@ -10,7 +10,6 @@ import path from "path";
 import fs from "fs";
 import { WebSocketServer, WebSocket } from "ws";
 import type { IncomingMessage } from "http";
-import * as pty from "node-pty";
 import { GoogleGenAI, Modality, type Session } from "@google/genai";
 import {
   LIVE_MODEL,
@@ -277,7 +276,6 @@ export function createApp() {
   const wssSpectator = new WebSocketServer({ noServer: true });
   const wssMidi = new WebSocketServer({ noServer: true });
   const wssSession = new WebSocketServer({ noServer: true });
-  const wssTerminal = new WebSocketServer({ noServer: true });
 
   app.get("/health", (_req, res) => {
     res.json({
@@ -352,10 +350,6 @@ export function createApp() {
       wssMidi.handleUpgrade(request, socket, head, (ws) => {
         (ws as any)._room = room;
         wssMidi.emit("connection", ws, request);
-      });
-    } else if (url.pathname === "/ws/terminal") {
-      wssTerminal.handleUpgrade(request, socket, head, (ws) => {
-        wssTerminal.emit("connection", ws, request);
       });
     } else {
       socket.destroy();
@@ -551,55 +545,6 @@ export function createApp() {
         roomSession.midiFlushTimer = null;
         flushMidiToGemini(roomSession);
       }
-    });
-  });
-
-  // -----------------------------------------------------------------
-  // /ws/terminal — xterm.js ↔ node-pty ↔ tmux attach
-  // -----------------------------------------------------------------
-  const TMUX_SESSION = process.env.TMUX_SESSION || "jworks";
-  const TMUX_WINDOW = process.env.TMUX_WINDOW || "95";
-
-  wssTerminal.on("connection", (ws: WebSocket) => {
-    console.log(`[${APP_NAME}] Terminal client connected`);
-
-    const shell = process.env.SHELL || "/bin/bash";
-    const term = pty.spawn(shell, ["-c", `tmux attach-session -t "${TMUX_SESSION}:${TMUX_WINDOW}"`], {
-      name: "xterm-256color",
-      cols: 80,
-      rows: 24,
-      cwd: process.env.HOME || "/home/takuma",
-      env: { ...process.env, TERM: "xterm-256color", COLORTERM: "truecolor" } as Record<string, string>,
-    });
-
-    term.onData((data: string) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: "data", data }));
-      }
-    });
-
-    term.onExit(({ exitCode }: { exitCode: number }) => {
-      console.log(`[${APP_NAME}] Terminal PTY exited with code ${exitCode}`);
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: "exit", code: exitCode }));
-        ws.close();
-      }
-    });
-
-    ws.on("message", (msg: Buffer) => {
-      try {
-        const parsed = JSON.parse(msg.toString());
-        if (parsed.type === "input") {
-          term.write(parsed.data);
-        } else if (parsed.type === "resize") {
-          term.resize(parsed.cols, parsed.rows);
-        }
-      } catch {}
-    });
-
-    ws.on("close", () => {
-      console.log(`[${APP_NAME}] Terminal client disconnected`);
-      term.kill();
     });
   });
 

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.51] - 2026-03-20
+### Changed
+- Removed agent terminal panel from hackathon submission (moved to dev-terminal branch)
+
 ## [3.2.50] - 2026-03-20
 ### Added
 - Agent terminal panel (xterm.js + node-pty) — collapsible right sidebar showing jworks:95 tmux session

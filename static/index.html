@@ -597,35 +597,8 @@
     width: 3px; height: 40px; margin-left: 4px;
   }
 
-  /* Terminal panel */
-  #btn-terminal { padding: 4px 8px; border: none; border-radius: 4px; background: transparent; color: var(--text3); cursor: pointer; font-size: 14px; transition: all 0.15s; }
-  #btn-terminal:hover { background: var(--bg3); color: var(--text1); }
-  #btn-terminal.active { color: #22c55e; background: rgba(34,197,94,0.1); }
-  #terminal-panel {
-    display: none; width: 420px; min-width: 200px;
-    flex-direction: column; flex-shrink: 0; background: #09090b;
-  }
-  #terminal-panel.open { display: flex; }
-  .terminal-header {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 12px; border-bottom: 1px solid var(--border);
-    background: var(--bg2); flex-shrink: 0;
-  }
-  .terminal-header .term-label { font-size: 12px; font-weight: 600; color: var(--text3); }
-  .terminal-header .term-session { font-size: 11px; color: var(--text3); opacity: 0.6; }
-  .terminal-header .term-status { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
-  .terminal-header .term-status.connected { background: #22c55e; }
-  .terminal-header .term-close {
-    margin-left: auto; background: none; border: none;
-    color: var(--text3); cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 4px;
-  }
-  .terminal-header .term-close:hover { background: var(--bg3); color: var(--text1); }
-  #terminal-container { flex: 1; overflow: hidden; padding: 4px; }
 </style>
 <!-- MediaPipe loaded dynamically in initDesktopMediaPipe() -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@6.0.0/css/xterm.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@6.0.0/lib/xterm.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.11.0/lib/addon-fit.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.5/build/cjs/vexflow.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
@@ -638,7 +611,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.50</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.51</div>
       </div>
     </div>
     <div class="controls">
@@ -657,7 +630,6 @@
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
-      <button id="btn-terminal" title="Toggle Agent Terminal (Ctrl+`)">&#9638;</button>
     </div>
   </div>
 
@@ -906,18 +878,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Terminal drag handle + panel -->
-    <div class="grid-resize-handle" id="terminalResizeHandle" style="display:none"></div>
-    <div id="terminal-panel">
-      <div class="terminal-header">
-        <span class="term-status" id="term-status"></span>
-        <span class="term-label">Agent Terminal</span>
-        <span class="term-session">jworks:95</span>
-        <button class="term-close" id="btn-term-close">&times;</button>
-      </div>
-      <div id="terminal-container"></div>
     </div>
 
   </div>
@@ -5749,141 +5709,6 @@ function buildSecondaryUI(room, params) {
   specWs.onclose = function() {
     setStatus('disconnected');
   };
-})();
-
-// ============================================================================
-// Terminal Panel
-// ============================================================================
-(function() {
-  var termPanel = document.getElementById('terminal-panel');
-  var termContainer = document.getElementById('terminal-container');
-  var termStatusDot = document.getElementById('term-status');
-  var btnTerminal = document.getElementById('btn-terminal');
-  var btnTermClose = document.getElementById('btn-term-close');
-  var termResizeHandle = document.getElementById('terminalResizeHandle');
-  var mainGrid = document.querySelector('.main');
-  var xterm = null;
-  var fitAddon = null;
-  var termWs = null;
-  var termOpen = localStorage.getItem('pq-terminal') === 'true';
-
-  if (termOpen) openTerminal();
-
-  btnTerminal.addEventListener('click', function() {
-    if (termOpen) closeTerminal(); else openTerminal();
-  });
-  btnTermClose.addEventListener('click', closeTerminal);
-
-  document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.key === '`') {
-      e.preventDefault();
-      if (termOpen) closeTerminal(); else openTerminal();
-    }
-  });
-
-  function updateGridColumns(open) {
-    if (!mainGrid) return;
-    if (open) {
-      mainGrid.style.gridTemplateColumns = '520px 6px 1fr 6px 560px 6px 420px';
-    } else {
-      mainGrid.style.gridTemplateColumns = '';
-    }
-  }
-
-  function openTerminal() {
-    termOpen = true;
-    localStorage.setItem('pq-terminal', 'true');
-    termPanel.classList.add('open');
-    btnTerminal.classList.add('active');
-    termResizeHandle.style.display = '';
-    updateGridColumns(true);
-
-    if (!xterm) {
-      xterm = new window.Terminal({
-        cursorBlink: true,
-        cursorStyle: 'block',
-        fontSize: 13,
-        fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-        scrollback: 5000,
-        convertEol: true,
-        theme: {
-          background: '#09090b',
-          foreground: '#fafafa',
-          cursor: '#22c55e',
-          selectionBackground: '#3b82f640',
-          black: '#09090b', red: '#ef4444', green: '#22c55e', yellow: '#eab308',
-          blue: '#3b82f6', magenta: '#a855f7', cyan: '#06b6d4', white: '#fafafa',
-          brightBlack: '#52525b', brightRed: '#f87171', brightGreen: '#4ade80',
-          brightYellow: '#facc15', brightBlue: '#60a5fa', brightMagenta: '#c084fc',
-          brightCyan: '#22d3ee', brightWhite: '#ffffff'
-        }
-      });
-      fitAddon = new window.FitAddon.FitAddon();
-      xterm.loadAddon(fitAddon);
-      xterm.open(termContainer);
-      setTimeout(function() { fitAddon.fit(); xterm.focus(); }, 50);
-
-      xterm.onData(function(data) {
-        if (termWs && termWs.readyState === WebSocket.OPEN) {
-          termWs.send(JSON.stringify({ type: 'input', data: data }));
-        }
-      });
-    } else {
-      setTimeout(function() { fitAddon.fit(); xterm.focus(); }, 50);
-    }
-
-    connectTerminal();
-    window.addEventListener('resize', handleTermResize);
-  }
-
-  function closeTerminal() {
-    termOpen = false;
-    localStorage.setItem('pq-terminal', 'false');
-    termPanel.classList.remove('open');
-    btnTerminal.classList.remove('active');
-    termResizeHandle.style.display = 'none';
-    updateGridColumns(false);
-    window.removeEventListener('resize', handleTermResize);
-    if (termWs) { termWs.close(); termWs = null; }
-    termStatusDot.classList.remove('connected');
-  }
-
-  function connectTerminal() {
-    if (termWs) { termWs.close(); termWs = null; }
-    var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    termWs = new WebSocket(proto + '//' + location.host + '/ws/terminal');
-
-    termWs.onopen = function() {
-      termStatusDot.classList.add('connected');
-      if (xterm) {
-        termWs.send(JSON.stringify({ type: 'resize', cols: xterm.cols, rows: xterm.rows }));
-      }
-    };
-
-    termWs.onmessage = function(ev) {
-      try {
-        var msg = JSON.parse(ev.data);
-        if (msg.type === 'data' && xterm) {
-          xterm.write(msg.data);
-        } else if (msg.type === 'exit') {
-          termStatusDot.classList.remove('connected');
-        }
-      } catch(e) {}
-    };
-
-    termWs.onclose = function() {
-      termStatusDot.classList.remove('connected');
-    };
-  }
-
-  function handleTermResize() {
-    if (fitAddon && termOpen) {
-      fitAddon.fit();
-      if (termWs && termWs.readyState === WebSocket.OPEN && xterm) {
-        termWs.send(JSON.stringify({ type: 'resize', cols: xterm.cols, rows: xterm.rows }));
-      }
-    }
-  }
 })();
 
 </script>
