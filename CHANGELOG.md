@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.52] - 2026-03-20
+### Added
+- Score playback feeds MIDI notes into waterfall piano roll + grand staff visualization
+- Draw loop runs during score playback even without active Gemini session
+
 ## [3.2.50] - 2026-03-20
 ### Added
 - Agent terminal panel (xterm.js + node-pty) — collapsible right sidebar showing jworks:95 tmux session

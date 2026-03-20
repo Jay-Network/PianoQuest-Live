@@ -638,7 +638,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.50</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.52</div>
       </div>
     </div>
     <div class="controls">
@@ -1931,7 +1931,7 @@ function sizeMidiStack() {
 }
 
 function drawLoop() {
-  if (!sessionActive) return;
+  if (!sessionActive && !(smrPlaybackState && smrPlaybackState.playing)) return;
   sizeMidiStack();
   drawPianoRoll();
   drawGrandStaff();
@@ -3058,7 +3058,7 @@ var smrCurrentTextData = null;
 var smrCurrentFile = null;
 var smrViewMode = 'svg';
 var smrMeasurePositionMap = [];
-var smrPlaybackState = { playing: false, startTime: 0, pauseTime: 0, totalBeats: 0, bpm: 120, synth: null, scheduledIds: [], animFrame: null };
+var smrPlaybackState = { playing: false, startTime: 0, pauseTime: 0, totalBeats: 0, bpm: 120, synth: null, scheduledIds: [], animFrame: null, vizTimers: [] };
 
 var VF = typeof Vex !== 'undefined' ? Vex.Flow : null;
 var SMR_NOTE_NAMES_SHARP = ['c','c','d','d','e','f','f','g','g','a','a','b'];
@@ -3448,6 +3448,8 @@ function smrStartPlayback() {
   var lastMap = smrMeasurePositionMap[smrMeasurePositionMap.length - 1];
   smrPlaybackState.totalBeats = lastMap.startBeat + lastMap.beatsPerMeasure;
   var spb = 60 / bpm; smrPlaybackState.scheduledIds = [];
+  smrPlaybackState.vizTimers = [];
+  var resumeOffset = smrPlaybackState.pauseTime || 0;
   for (var mi = 0; mi < data.measures.length; mi++) {
     var m = data.measures[mi]; if (!m || !m.notes) continue;
     var pe = null; for (var pi = 0; pi < smrMeasurePositionMap.length; pi++) { if (smrMeasurePositionMap[pi].measureIdx === mi) { pe = smrMeasurePositionMap[pi]; break; } }
@@ -3456,12 +3458,22 @@ function smrStartPlayback() {
       var note = m.notes[ni], at = (pe.startBeat + note.beat) * spb, ds = note.dur * spb;
       var freq = Tone.Frequency(note.midi, 'midi').toFrequency(), vel = note.vel != null ? Math.max(0.05, note.vel / 127) : 0.7;
       smrPlaybackState.scheduledIds.push(Tone.Transport.schedule((function(f,d,v) { return function(t) { if (smrPlaybackState.synth) smrPlaybackState.synth.triggerAttackRelease(f,d,t,v); }; })(freq, Math.min(ds,4), vel), at));
+      // Schedule waterfall + grand staff visualization via wall-clock timers
+      var vizOnMs = (at - resumeOffset) * 1000;
+      var vizOffMs = vizOnMs + ds * 1000;
+      var midiNote = note.midi, midiVel = note.vel != null ? note.vel : 90;
+      if (vizOnMs >= 0) {
+        smrPlaybackState.vizTimers.push(setTimeout((function(n,v) { return function() { handleNoteOn(n, v, Date.now()); }; })(midiNote, midiVel), vizOnMs));
+        smrPlaybackState.vizTimers.push(setTimeout((function(n) { return function() { handleNoteOff(n, Date.now()); }; })(midiNote), vizOffMs));
+      }
     }
   }
   if (smrPlaybackState.pauseTime > 0) Tone.Transport.start('+0', smrPlaybackState.pauseTime);
   else Tone.Transport.start('+0', 0);
   smrPlaybackState.playing = true;
   smrPlaybackState.startTime = Tone.now() - (smrPlaybackState.pauseTime || 0);
+  // Start draw loop if not already running (no active session)
+  if (!sessionActive && !animFrame) drawLoop();
   document.getElementById('smrBtnPlay').style.display = 'none';
   document.getElementById('smrBtnPause').style.display = '';
   document.getElementById('smrBtnStop').disabled = false;
@@ -3472,12 +3484,18 @@ function smrPausePlayback() {
   if (!smrPlaybackState.playing) return;
   smrPlaybackState.pauseTime = Tone.Transport.seconds; Tone.Transport.pause();
   smrPlaybackState.playing = false;
+  (smrPlaybackState.vizTimers || []).forEach(function(t) { clearTimeout(t); });
+  smrPlaybackState.vizTimers = [];
   document.getElementById('smrBtnPlay').style.display = ''; document.getElementById('smrBtnPause').style.display = 'none';
   if (smrPlaybackState.animFrame) cancelAnimationFrame(smrPlaybackState.animFrame);
 }
 function smrStopPlayback() {
   if (typeof Tone !== 'undefined') { Tone.Transport.stop(); Tone.Transport.cancel(); }
   smrPlaybackState.playing = false; smrPlaybackState.pauseTime = 0; smrPlaybackState.scheduledIds = [];
+  (smrPlaybackState.vizTimers || []).forEach(function(t) { clearTimeout(t); });
+  smrPlaybackState.vizTimers = [];
+  // Clear all active notes from visualization
+  activeNotes.clear(); fingerDownNotes.clear(); pedalSustainedNotes.clear();
   document.getElementById('smrBtnPlay').style.display = ''; document.getElementById('smrBtnPause').style.display = 'none';
   document.getElementById('smrBtnStop').disabled = true;
   if (smrPlaybackState.animFrame) cancelAnimationFrame(smrPlaybackState.animFrame);
