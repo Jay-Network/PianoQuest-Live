@@ -653,7 +653,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.72 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.73 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -934,11 +934,9 @@
           <span class="term-label">Agent Terminal</span>
           <span class="term-session">jworks:95</span>
           <span style="display:flex;align-items:center;gap:2px;margin-left:auto;margin-right:8px;">
-            <span style="font-size:9px;color:rgba(255,255,255,0.4);">A</span>
-            <input type="range" id="termFontSlider" min="8" max="24" value="13" step="1"
-              style="width:50px;accent-color:#22c55e;"
-              oninput="setTermFontSize(this.value)">
-            <span style="font-size:14px;color:rgba(255,255,255,0.4);">A</span>
+            <button onclick="setTermFontSize(parseInt(document.getElementById('termFontInput').value,10)-1)" style="width:20px;height:20px;padding:0;border:1px solid rgba(255,255,255,0.2);border-radius:3px;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;line-height:1;">&minus;</button>
+            <input type="number" id="termFontInput" value="13" min="8" max="24" step="1" style="width:36px;height:20px;padding:0 2px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;background:#1a1a1a;color:#fafafa;font-size:11px;text-align:center;-moz-appearance:textfield;" onchange="setTermFontSize(this.value)">
+            <button onclick="setTermFontSize(parseInt(document.getElementById('termFontInput').value,10)+1)" style="width:20px;height:20px;padding:0;border:1px solid rgba(255,255,255,0.2);border-radius:3px;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;line-height:1;">+</button>
           </span>
           <button class="term-close" id="btn-term-close">&times;</button>
         </div>
@@ -5866,7 +5864,9 @@ function buildSecondaryUI(room, params) {
   });
 
   function setTermFontSize(size) {
-    size = parseInt(size, 10);
+    size = Math.max(8, Math.min(24, parseInt(size, 10) || 13));
+    var input = document.getElementById('termFontInput');
+    if (input) input.value = size;
     if (xterm) {
       xterm.options.fontSize = size;
       if (fitAddon) fitAddon.fit();
@@ -5882,7 +5882,7 @@ function buildSecondaryUI(room, params) {
 
     if (!xterm) {
       var savedTermFont = parseInt(localStorage.getItem('pq-term-font') || '13', 10);
-      document.getElementById('termFontSlider').value = savedTermFont;
+      document.getElementById('termFontInput').value = savedTermFont;
       xterm = new window.Terminal({
         cursorBlink: true,
         cursorStyle: 'block',

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.73] - 2026-03-22
+### Changed
+- Terminal font size: replaced slider with −/input/+ controls
+
 ## [3.2.72] - 2026-03-22
 ### Added
 - Font size slider (A—A) in Claude terminal header, persisted to localStorage
