@@ -653,7 +653,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.75 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.76 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -3581,9 +3581,12 @@ function smrUpdateCursorPosition(currentBeat) {
   cur.setAttribute('y1', Math.round(cY - 5)); cur.setAttribute('y2', Math.round(cY + 210));
   var viewer = document.getElementById('smrViewer');
   if (viewer && viewer.scrollHeight > viewer.clientHeight) {
-    var sr = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal, scale = sr.height / vb.height;
-    var csY = (cY * scale) + sr.top - viewer.getBoundingClientRect().top + viewer.scrollTop;
-    if (csY > viewer.scrollTop + viewer.clientHeight - 60 || csY < viewer.scrollTop + 30) viewer.scrollTop = csY - 80;
+    var curRect = cur.getBoundingClientRect();
+    var viewerRect = viewer.getBoundingClientRect();
+    var curTopInViewer = curRect.top - viewerRect.top + viewer.scrollTop;
+    if (curTopInViewer > viewer.scrollTop + viewer.clientHeight - 60 || curTopInViewer < viewer.scrollTop + 30) {
+      viewer.scrollTop = curTopInViewer - 80;
+    }
   }
 }
 function smrRemoveCursor() {

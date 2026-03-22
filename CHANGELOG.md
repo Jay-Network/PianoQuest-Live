@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.76] - 2026-03-22
+### Fixed
+- Scores playback: page scrolls correctly when cursor crosses page boundaries
+
 ## [3.2.75] - 2026-03-22
 ### Changed
 - Terminal default font size: 11 (was 13)
