@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.71] - 2026-03-22
+### Fixed
+- BUG-017: Room/session setup no longer depends on Gemini API key — Go Live, MIDI, device management all work without AI
+- Go Live button works independently of Gemini connection
+
 ## [3.2.70] - 2026-03-22
 ### Changed
 - Go Live button: red when inactive, green when live

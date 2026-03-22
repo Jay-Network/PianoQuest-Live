@@ -352,3 +352,11 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: MediaPipe HandLandmarker GPU delegate fails silently on some iPhones, leaving hand tracking non-functional with no error shown to user.
 - Fix: Added GPU→CPU fallback chain. If GPU delegate creation fails, retry with `delegate: 'CPU'` using the saved fileset reference.
 - Prevention: Always provide CPU fallback for WebGL/GPU-dependent features on mobile.
+
+## BUG-045
+- Version found: `3.2.67`
+- Severity: Critical
+- Status: Fixed (v3.2.71)
+- Root cause: Room setup, device registration, and Go Live handler were all inside the Gemini Live API `onopen` callback. Without a Gemini API key (or if connection failed), no room was created, so Go Live, MIDI routing, and device management were completely non-functional. The WebSocket would immediately close, causing the status dot to flicker between Connected/Disconnected as the client auto-reconnected into the same failing path.
+- Fix: Moved room setup, device registration, and client messaging out of the Gemini callback. Gemini connection is now optional — the app works fully without AI (MIDI, Go Live, devices, spectators). Guarded all `session.*` calls with null checks.
+- Prevention: Never gate core infrastructure (rooms, devices, networking) behind optional service connections. AI features should degrade gracefully, not take down the entire session.

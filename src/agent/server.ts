@@ -958,11 +958,6 @@ async function handleSecondaryWebSocket(
 
 async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   const apiKey = process.env.GOOGLE_API_KEY ?? process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    ws.send(JSON.stringify({ type: "error", message: "No API key configured" }));
-    ws.close();
-    return;
-  }
 
   const sessionId = randomHex(4);
   const roomCode = generateRoomCode();
@@ -988,73 +983,77 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   console.log(`[${APP_NAME}] Primary connected: ${sessionId}, room: ${roomCode}, device: ${primaryDeviceId}`);
 
   // ---------------------------------------------------------------------------
-  // Gemini Live API via @google/genai SDK
+  // Room setup — independent of Gemini
   // ---------------------------------------------------------------------------
-  const client = new GoogleGenAI({ apiKey });
-  let session: Session;
-  let roomSession: RoomSession | null = null;
-  let audioMsgCount = 0;
+  let roomSession: RoomSession = {
+    roomCode,
+    sendRealtimeInput: () => {},
+    sendClientContent: () => {},
+    primaryWs: ws,
+    devices: new Map(),
+    midiBuffer: [],
+    midiFlushTimer: null,
+    cameraEnabled: false,
+    bothHandsDetected: false,
+    _lastGeminiFrame: 0,
+    lastMidiSummary: null,
+    sessionSettings: { scale: "C major", bpm: 90, timeSignature: "4/4" },
+  };
+  roomSession.devices.set(primaryDeviceId, primaryDevice);
+  rooms.set(roomCode, roomSession);
+
+  ws.send(JSON.stringify({ type: "you_are_primary", room: roomCode, deviceId: primaryDeviceId }));
+  ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
+  sendDeviceList(roomSession);
 
   const sendAll = (data: Buffer | string, binary = false) => {
-    if (roomSession) broadcastToRoom(roomSession, data, binary);
+    broadcastToRoom(roomSession, data, binary);
   };
 
-  try {
-    session = await client.live.connect({
-      model: LIVE_MODEL,
-      config: {
-        responseModalities: [Modality.AUDIO],
-        systemInstruction: STORYTELLER_INSTRUCTION,
-        speechConfig: {
-          languageCode: "en-US",
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: "Puck" },
-          },
-        },
-        outputAudioTranscription: {},
-        realtimeInputConfig: {
-          automaticActivityDetection: {
-            disabled: false,
-          },
-        },
-        tools: buildToolDeclarations() as any,
-      },
-      callbacks: {
-        onopen: () => {
-          console.log(`[${APP_NAME}] Gemini Live connected: ${sessionId}`);
-          roomSession = {
-            roomCode,
-            sendRealtimeInput: (input: any) => session.sendRealtimeInput(input),
-            sendClientContent: (content: any) => session.sendClientContent(content),
-            primaryWs: ws,
-            devices: new Map(),
-            midiBuffer: [],
-            midiFlushTimer: null,
-            cameraEnabled: false,
-            bothHandsDetected: false,
-            _lastGeminiFrame: 0,
-            lastMidiSummary: null,
-            sessionSettings: { scale: "C major", bpm: 90, timeSignature: "4/4" },
-          };
-          roomSession.devices.set(primaryDeviceId, primaryDevice);
-          rooms.set(roomCode, roomSession);
+  // ---------------------------------------------------------------------------
+  // Gemini Live API via @google/genai SDK (optional — works without it)
+  // ---------------------------------------------------------------------------
+  let session: Session | null = null;
+  let audioMsgCount = 0;
 
-          ws.send(JSON.stringify({ type: "you_are_primary", room: roomCode, deviceId: primaryDeviceId }));
-          ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
-          sendDeviceList(roomSession);
-
-          // No greeting — Gemini stays silent until user speaks
+  if (apiKey) {
+    const client = new GoogleGenAI({ apiKey });
+    try {
+      session = await client.live.connect({
+        model: LIVE_MODEL,
+        config: {
+          responseModalities: [Modality.AUDIO],
+          systemInstruction: STORYTELLER_INSTRUCTION,
+          speechConfig: {
+            languageCode: "en-US",
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: "Puck" },
+            },
+          },
+          outputAudioTranscription: {},
+          realtimeInputConfig: {
+            automaticActivityDetection: {
+              disabled: false,
+            },
+          },
+          tools: buildToolDeclarations() as any,
         },
-        onerror: (e: unknown) => {
-          console.error(`[${APP_NAME}] Gemini error: ${sessionId}`, e);
-          try { ws.send(JSON.stringify({ type: "gemini_error", error: String(e) })); } catch {}
-        },
-        onclose: () => {
-          console.error(`[${APP_NAME}] *** Gemini closed: session=${sessionId}`);
-          closed = true;
-          try { ws.send(JSON.stringify({ type: "gemini_error", code: 1000, reason: "Session ended" })); } catch {}
-          try { ws.close(); } catch {}
-        },
+        callbacks: {
+          onopen: () => {
+            console.log(`[${APP_NAME}] Gemini Live connected: ${sessionId}`);
+            roomSession.sendRealtimeInput = (input: any) => session!.sendRealtimeInput(input);
+            roomSession.sendClientContent = (content: any) => session!.sendClientContent(content);
+          },
+          onerror: (e: unknown) => {
+            console.error(`[${APP_NAME}] Gemini error: ${sessionId}`, e);
+            try { ws.send(JSON.stringify({ type: "gemini_error", error: String(e) })); } catch {}
+          },
+          onclose: () => {
+            console.error(`[${APP_NAME}] *** Gemini closed: session=${sessionId}`);
+            closed = true;
+            try { ws.send(JSON.stringify({ type: "gemini_error", code: 1000, reason: "Session ended" })); } catch {}
+            try { ws.close(); } catch {}
+          },
         onmessage: (msg: unknown) => {
           if (closed || !roomSession) return;
           const message = msg as Record<string, unknown>;
@@ -1087,7 +1086,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
                   if (visualEvent) sendAll(JSON.stringify(visualEvent));
                   const result = executeToolLocally(name, args);
                   const id = functionCall.id as string;
-                  session.sendToolResponse({ functionResponses: [{ id, name, response: result }] });
+                  session!.sendToolResponse({ functionResponses: [{ id, name, response: result }] });
                   console.log(`[${APP_NAME}] ${sessionId} tool: ${name}`);
                 }
               }
@@ -1131,21 +1130,22 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
               const visualEvent = toolCallToVisualEvent(name, args);
               if (visualEvent) sendAll(JSON.stringify(visualEvent));
               const result = executeToolLocally(name, args);
-              session.sendToolResponse({ functionResponses: [{ id, name, response: result }] });
+              session!.sendToolResponse({ functionResponses: [{ id, name, response: result }] });
               console.log(`[${APP_NAME}] ${sessionId} toolCall: ${name}`);
             }
           }
         },
       },
     });
-  } catch (err) {
-    console.error(`[${APP_NAME}] Failed to connect Gemini Live:`, err);
-    ws.send(JSON.stringify({ type: "error", message: "Failed to connect to Gemini" }));
-    ws.close(1011, "Failed to connect to Gemini");
-    return;
-  }
+    } catch (err) {
+      console.error(`[${APP_NAME}] Failed to connect Gemini Live:`, err);
+      try { ws.send(JSON.stringify({ type: "error", message: "Failed to connect to Gemini (continuing without AI)" })); } catch {}
+    }
 
-  console.log(`[${APP_NAME}] Gemini session ready: ${sessionId}, room: ${roomCode}`);
+    console.log(`[${APP_NAME}] Gemini session ready: ${sessionId}, room: ${roomCode}`);
+  } else {
+    console.log(`[${APP_NAME}] No API key — room ${roomCode} running without Gemini`);
+  }
 
   // Keepalive ping every 20s to prevent Cloud Run from killing the connection
   let primaryAlive = true;
@@ -1165,7 +1165,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
       if (closed) break;
 
       if (rawMsg instanceof Buffer || rawMsg instanceof ArrayBuffer) {
-        if (!primaryDevice.roles.mic) continue;
+        if (!primaryDevice.roles.mic || !session) continue;
         const data = rawMsg instanceof ArrayBuffer ? new Uint8Array(rawMsg) : rawMsg;
         session.sendRealtimeInput({
           audio: { data: Buffer.from(data).toString("base64"), mimeType: "audio/pcm;rate=16000" },
@@ -1176,7 +1176,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
 
 
         if (msgType === "text") {
-          session.sendClientContent({
+          if (session) session.sendClientContent({
             turns: [{ role: "user", parts: [{ text: msg.content }] }],
             turnComplete: true,
           });
@@ -1186,7 +1186,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           const summary = describeMidiSnapshot(msg);
           if (summary && roomSession) {
             (roomSession as RoomSession).lastMidiSummary = summary;
-            session.sendClientContent({
+            if (session) session.sendClientContent({
               turns: [{ role: "user", parts: [{ text: summary }] }],
               turnComplete: false,
             });
@@ -1208,7 +1208,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           }
         } else if (msgType === "video_frame" && primaryDevice.roles.camera) {
           const data = msg.data as string;
-          if (data) {
+          if (data && session) {
             session.sendRealtimeInput({
               media: { data, mimeType: "image/jpeg" },
             });
@@ -1276,7 +1276,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
 
   closed = true;
   clearInterval(primaryPingInterval);
-  try { session.close(); } catch {}
+  try { if (session) session.close(); } catch {}
 
   // Cleanup
   const rs = rooms.get(roomCode);
