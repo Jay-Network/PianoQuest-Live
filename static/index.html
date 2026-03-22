@@ -653,7 +653,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.73 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.74 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -5863,7 +5863,7 @@ function buildSecondaryUI(room, params) {
     }
   });
 
-  function setTermFontSize(size) {
+  window.setTermFontSize = function(size) {
     size = Math.max(8, Math.min(24, parseInt(size, 10) || 13));
     var input = document.getElementById('termFontInput');
     if (input) input.value = size;
@@ -5872,7 +5872,7 @@ function buildSecondaryUI(room, params) {
       if (fitAddon) fitAddon.fit();
     }
     localStorage.setItem('pq-term-font', String(size));
-  }
+  };
 
   function openTerminal() {
     termOpen = true;

@@ -718,7 +718,7 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
     console.log(`[${APP_NAME}] Terminal client connected (group: ${groupName})`);
 
     const shell = process.env.SHELL || "/bin/bash";
-    const tmuxCmd = `tmux new-session -d -t ${TMUX_SESSION} -s ${groupName} 2>/dev/null; tmux select-window -t ${groupName}:${TMUX_WINDOW}; tmux attach-session -t ${groupName}`;
+    const tmuxCmd = `tmux new-session -d -t ${TMUX_SESSION} -s ${groupName} 2>/dev/null; tmux select-window -t ${groupName}:${TMUX_WINDOW}; tmux set-option -t ${groupName} mouse off; tmux attach-session -t ${groupName}`;
     const term = pty.spawn(shell, ["-c", tmuxCmd], {
       name: "xterm-256color",
       cols: 80,
