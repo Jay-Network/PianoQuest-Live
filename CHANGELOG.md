@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.75] - 2026-03-22
+### Changed
+- Terminal default font size: 11 (was 13)
+
 ## [3.2.74] - 2026-03-22
 ### Fixed
 - Terminal font size −/+/input buttons now work (function was scoped, moved to window global)
