@@ -653,7 +653,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.71 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.72 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -933,6 +933,13 @@
           <span class="term-status" id="term-status"></span>
           <span class="term-label">Agent Terminal</span>
           <span class="term-session">jworks:95</span>
+          <span style="display:flex;align-items:center;gap:2px;margin-left:auto;margin-right:8px;">
+            <span style="font-size:9px;color:rgba(255,255,255,0.4);">A</span>
+            <input type="range" id="termFontSlider" min="8" max="24" value="13" step="1"
+              style="width:50px;accent-color:#22c55e;"
+              oninput="setTermFontSize(this.value)">
+            <span style="font-size:14px;color:rgba(255,255,255,0.4);">A</span>
+          </span>
           <button class="term-close" id="btn-term-close">&times;</button>
         </div>
         <div id="terminal-container"></div>
@@ -5858,6 +5865,15 @@ function buildSecondaryUI(room, params) {
     }
   });
 
+  function setTermFontSize(size) {
+    size = parseInt(size, 10);
+    if (xterm) {
+      xterm.options.fontSize = size;
+      if (fitAddon) fitAddon.fit();
+    }
+    localStorage.setItem('pq-term-font', String(size));
+  }
+
   function openTerminal() {
     termOpen = true;
     localStorage.setItem('pq-terminal', 'true');
@@ -5865,10 +5881,12 @@ function buildSecondaryUI(room, params) {
     btnTerminal.classList.add('active');
 
     if (!xterm) {
+      var savedTermFont = parseInt(localStorage.getItem('pq-term-font') || '13', 10);
+      document.getElementById('termFontSlider').value = savedTermFont;
       xterm = new window.Terminal({
         cursorBlink: true,
         cursorStyle: 'block',
-        fontSize: 13,
+        fontSize: savedTermFont,
         fontFamily: 'Menlo, Monaco, "Courier New", monospace',
         scrollback: 5000,
         convertEol: true,
