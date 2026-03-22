@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.69] - 2026-03-22
+### Changed
+- Default port changed from 8080 to 8090 (matches port registry)
+- Go Live button: subtle white when off, green when live (was red/red)
+
 ## [3.2.68] - 2026-03-22
 ### Fixed
 - Status dot no longer flickers between Connected/Disconnected during brief WebSocket reconnects (2s debounce)

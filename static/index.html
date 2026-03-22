@@ -653,7 +653,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.68 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.69 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -672,7 +672,7 @@
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
-      <button id="btn-live" title="Go Live — stream to jayismocking.com/live" onclick="toggleLive()" style="display:none;padding:4px 10px;border:1px solid #ef4444;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;">Go Live</button>
+      <button id="btn-live" title="Go Live — stream to jayismocking.com/live" onclick="toggleLive()" style="display:none;padding:4px 10px;border:1px solid rgba(255,255,255,0.2);border-radius:4px;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;">Go Live</button>
       <script>fetch('/auth/me').then(function(r){return r.json()}).then(function(d){if(d.admin)document.getElementById('btn-live').style.display='';})</script>
       <button id="btn-terminal" title="Toggle Agent Terminal (Ctrl+`)">&#9638; Talk to Claude</button>
       <button id="btn-signout" onclick="location.href='/auth/signout'" title="Sign out">Sign out</button>
@@ -1639,14 +1639,14 @@ function handleLiveStatus(msg) {
   isLive = !!msg.live;
   if (isLive) {
     btn.textContent = 'LIVE';
-    btn.style.background = '#ef4444';
+    btn.style.background = '#22c55e';
     btn.style.color = '#fff';
-    btn.style.borderColor = '#ef4444';
+    btn.style.borderColor = '#22c55e';
   } else {
     btn.textContent = 'Go Live';
-    btn.style.background = 'rgba(239,68,68,0.15)';
-    btn.style.color = '#ef4444';
-    btn.style.borderColor = '#ef4444';
+    btn.style.background = 'transparent';
+    btn.style.color = 'rgba(255,255,255,0.6)';
+    btn.style.borderColor = 'rgba(255,255,255,0.2)';
   }
 }
 async function startSession() {
@@ -1917,7 +1917,7 @@ function stopSession() {
   // Reset live status
   isLive = false;
   var liveBtn = document.getElementById('btn-live');
-  if (liveBtn) { liveBtn.textContent = 'Go Live'; liveBtn.style.background = 'rgba(239,68,68,0.15)'; liveBtn.style.color = '#ef4444'; liveBtn.style.borderColor = '#ef4444'; }
+  if (liveBtn) { liveBtn.textContent = 'Go Live'; liveBtn.style.background = 'transparent'; liveBtn.style.color = 'rgba(255,255,255,0.6)'; liveBtn.style.borderColor = 'rgba(255,255,255,0.2)'; }
 }
 
 // ============================================================================
