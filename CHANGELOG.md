@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.70] - 2026-03-22
+### Changed
+- Go Live button: red when inactive, green when live
+
 ## [3.2.69] - 2026-03-22
 ### Changed
 - Default port changed from 8080 to 8090 (matches port registry)
