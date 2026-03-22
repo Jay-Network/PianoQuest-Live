@@ -653,7 +653,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.67 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.68 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -4361,14 +4361,27 @@ setTimeout(loadSMRLibrary, 500);
 // ============================================================================
 // UI Helpers
 // ============================================================================
+var _statusDebounce = null;
 function setStatus(state) {
   var dot = document.getElementById('statusDot');
   var label = document.getElementById('statusLabel');
-  dot.className = 'status-dot';
-  if (state === 'connected') { dot.classList.add('connected'); label.textContent = 'Connected'; }
-  else if (state === 'connecting') { label.textContent = 'Connecting...'; }
-  else if (state === 'error') { dot.classList.add('error'); label.textContent = 'Error'; }
-  else { label.textContent = 'Disconnected'; }
+  if (_statusDebounce) { clearTimeout(_statusDebounce); _statusDebounce = null; }
+  if (state === 'connected') {
+    dot.className = 'status-dot connected';
+    label.textContent = 'Connected';
+  } else if (state === 'connecting') {
+    dot.className = 'status-dot';
+    label.textContent = 'Connecting...';
+  } else if (state === 'error') {
+    dot.className = 'status-dot error';
+    label.textContent = 'Error';
+  } else {
+    // Debounce disconnected — don't flash during brief reconnects
+    _statusDebounce = setTimeout(function() {
+      dot.className = 'status-dot';
+      label.textContent = 'Disconnected';
+    }, 2000);
+  }
 }
 
 function addTranscript(role, text) {

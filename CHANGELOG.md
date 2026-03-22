@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.68] - 2026-03-22
+### Fixed
+- Status dot no longer flickers between Connected/Disconnected during brief WebSocket reconnects (2s debounce)
+
 ## [3.2.67] - 2026-03-20
 ### Added
 - Sign out button (top right)
