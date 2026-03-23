@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.89] - 2026-03-22
+### Fixed
+- Spectator MIDI noteOn logic — removed erroneous `msg.type === 'midi'` check in noteOn condition
+
 ## [3.2.88] - 2026-03-22
 ### Changed
 - Remote viewer: percentage-based grid (30%/1fr/30%) instead of fixed pixel widths — fits any screen

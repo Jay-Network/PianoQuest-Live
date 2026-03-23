@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.88 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.89 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -5892,7 +5892,7 @@ function buildSecondaryUI(room, params) {
         handleToolEvent(msg);
       } else if (msg.type === 'midi_event' || msg.type === 'midi') {
         var nowMs = msg.timestampMs || Date.now();
-        if ((msg.event === 'noteOn' || msg.type === 'midi') && msg.velocity > 0) {
+        if (msg.event === 'noteOn' && msg.velocity > 0) {
           handleNoteOn(msg.note, msg.velocity, nowMs);
         } else if (msg.event === 'noteOff' || (msg.event === 'noteOn' && msg.velocity === 0)) {
           handleNoteOff(msg.note, nowMs);
