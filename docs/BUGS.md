@@ -360,3 +360,11 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: Room setup, device registration, and Go Live handler were all inside the Gemini Live API `onopen` callback. Without a Gemini API key (or if connection failed), no room was created, so Go Live, MIDI routing, and device management were completely non-functional. The WebSocket would immediately close, causing the status dot to flicker between Connected/Disconnected as the client auto-reconnected into the same failing path.
 - Fix: Moved room setup, device registration, and client messaging out of the Gemini callback. Gemini connection is now optional — the app works fully without AI (MIDI, Go Live, devices, spectators). Guarded all `session.*` calls with null checks.
 - Prevention: Never gate core infrastructure (rooms, devices, networking) behind optional service connections. AI features should degrade gracefully, not take down the entire session.
+
+## BUG-046
+- Version found: `3.2.77`
+- Severity: High
+- Status: Fixed (v3.2.78)
+- Root cause: Spectator/Remote viewer displayed the full 3-column desktop layout (520px + 1fr + 560px grid), causing the UI to overflow and appear magnified/cropped on iPad. Additionally, spectator mode didn't process incoming MIDI events for visualization — only tool events and audio were handled.
+- Fix: In spectator mode, hide left/right columns and resize handles, set grid to single column. Added MIDI event handling (noteOn, noteOff, controlChange) to spectator onmessage. Start draw loop on spectator WS connect.
+- Prevention: Always test spectator/remote mode on mobile/tablet viewport. Ensure all visualization data streams are handled in spectator mode, not just audio.

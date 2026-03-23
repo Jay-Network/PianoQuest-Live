@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.78] - 2026-03-22
+### Fixed
+- Spectator/Remote viewer: single-column layout (hides left/right panels), fits iPad screen
+- Spectator now receives and renders MIDI events (waterfall + keyboard visualization)
+- Spectator draw loop starts on WebSocket connect
+
 ## [3.2.77] - 2026-03-22
 ### Added
 - PWA manifest for "PianoQuest Remote" (iPad home screen install)

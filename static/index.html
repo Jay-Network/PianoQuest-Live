@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.77 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.78 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -5790,9 +5790,19 @@ function buildSecondaryUI(room, params) {
   var params = new URLSearchParams(window.location.search);
   if (params.get('spectator') !== '1') return;
 
-  // Hide controls that spectators don't need
+  // Hide controls and side columns — spectator only needs the middle panel
   var controls = document.querySelector('.controls');
   if (controls) controls.style.display = 'none';
+  var leftCol = document.querySelector('.left-col');
+  if (leftCol) leftCol.style.display = 'none';
+  var rightCol = document.querySelector('.right-col');
+  if (rightCol) rightCol.style.display = 'none';
+  // Hide resize handles
+  var handles = document.querySelectorAll('.resize-handle');
+  for (var hi = 0; hi < handles.length; hi++) handles[hi].style.display = 'none';
+  // Make main grid single column
+  var main = document.querySelector('.main');
+  if (main) main.style.gridTemplateColumns = '1fr';
 
   // Update header and title for remote viewer mode
   document.title = 'PianoQuest Remote';
@@ -5823,6 +5833,10 @@ function buildSecondaryUI(room, params) {
 
   specWs.onopen = function() {
     setStatus('connected');
+    // Start draw loop for spectator visualization
+    sessionActive = true;
+    sizeMidiStack();
+    if (!animFrame) drawLoop();
   };
 
   specWs.onmessage = function(event) {
@@ -5846,6 +5860,19 @@ function buildSecondaryUI(room, params) {
           msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
           msg.type === 'technique_report') {
         handleToolEvent(msg);
+      } else if (msg.type === 'midi_event' || msg.type === 'midi') {
+        var nowMs = msg.timestampMs || Date.now();
+        if ((msg.event === 'noteOn' || msg.type === 'midi') && msg.velocity > 0) {
+          handleNoteOn(msg.note, msg.velocity, nowMs);
+        } else if (msg.event === 'noteOff' || (msg.event === 'noteOn' && msg.velocity === 0)) {
+          handleNoteOff(msg.note, nowMs);
+        } else if (msg.event === 'controlChange') {
+          handleControlChange(msg.controller || msg.note, msg.value || msg.velocity, nowMs);
+        }
+      } else if (msg.type === 'session_settings') {
+        // Update settings from live session
+        if (msg.scale) { var scaleEl = document.getElementById('staffScale'); if (scaleEl) scaleEl.value = msg.scale; }
+        if (msg.bpm) { var bpmEl = document.getElementById('bpmSlider'); if (bpmEl) bpmEl.value = String(msg.bpm); }
       }
     }
   };
