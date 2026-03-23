@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.3.2] - 2026-03-23
+### Added
+- Server-side MIDI bridge client — PQ Live server connects to PQ Desktop :3490/ws directly
+- No browser needed for MIDI to flow to spectators (iPad, jayismocking.com/live)
+- Auto-reconnect with exponential backoff if PQ Desktop restarts
+- MIDI events piped into HOME room and broadcast to all spectators
+
 ## [3.3.1] - 2026-03-23
 ### Changed
 - Server creates persistent default room ("HOME") on startup — no browser needed

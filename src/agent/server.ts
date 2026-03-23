@@ -797,6 +797,75 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
   // Create default persistent room on startup — no browser needed
   ensureDefaultRoom();
 
+  // ---------------------------------------------------------------------------
+  // Server-side MIDI bridge — connect to PQ Desktop :3490/ws and pipe into HOME room
+  // No browser needed. Auto-reconnect if PQ Desktop restarts.
+  // ---------------------------------------------------------------------------
+  const PQ_DESKTOP_URL = process.env.PQ_DESKTOP_URL || "ws://127.0.0.1:3490/ws";
+  let desktopBridgeWs: WebSocket | null = null;
+  let desktopBridgeReconnectDelay = 1000;
+
+  function connectDesktopBridge() {
+    try {
+      desktopBridgeWs = new WebSocket(PQ_DESKTOP_URL);
+
+      desktopBridgeWs.on("open", () => {
+        console.log(`[${APP_NAME}] Desktop bridge connected to ${PQ_DESKTOP_URL}`);
+        desktopBridgeReconnectDelay = 1000;
+        const room = ensureDefaultRoom();
+        broadcastToRoom(room, JSON.stringify({ type: "midi_source", source: "bridge" }));
+      });
+
+      desktopBridgeWs.on("message", (data: Buffer | string) => {
+        try {
+          const msg = JSON.parse(typeof data === "string" ? data : data.toString());
+          if (msg.type === "heartbeat") return; // PQ Desktop sends heartbeats
+
+          // Forward MIDI events to the HOME room + spectators
+          if (msg.type === "midi" || msg.event === "noteOn" || msg.event === "noteOff" || msg.event === "controlChange" || msg.event === "pitchBend") {
+            const midiMsg = { type: "midi", ...msg };
+            const room = ensureDefaultRoom();
+            broadcastToRoom(room, JSON.stringify(midiMsg));
+
+            // Buffer for Gemini
+            if (msg.event === "noteOn" || msg.event === "noteOff") {
+              room.midiBuffer.push({
+                note: msg.note ?? 0,
+                velocity: msg.velocity ?? 0,
+                event: msg.event,
+                timestampMs: msg.timestampMs ?? Date.now(),
+              });
+              if (!room.midiFlushTimer) {
+                room.midiFlushTimer = setTimeout(() => {
+                  room.midiFlushTimer = null;
+                  flushMidiToGemini(room);
+                }, 2000);
+              }
+            }
+          }
+        } catch {}
+      });
+
+      desktopBridgeWs.on("close", () => {
+        console.log(`[${APP_NAME}] Desktop bridge disconnected, reconnecting in ${desktopBridgeReconnectDelay}ms`);
+        desktopBridgeWs = null;
+        const room = rooms.get(DEFAULT_ROOM);
+        if (room) broadcastToRoom(room, JSON.stringify({ type: "midi_source", source: "direct" }));
+        setTimeout(connectDesktopBridge, desktopBridgeReconnectDelay);
+        desktopBridgeReconnectDelay = Math.min(desktopBridgeReconnectDelay * 2, 30000);
+      });
+
+      desktopBridgeWs.on("error", () => {
+        // Error triggers close event — reconnect handled there
+      });
+    } catch {
+      setTimeout(connectDesktopBridge, desktopBridgeReconnectDelay);
+      desktopBridgeReconnectDelay = Math.min(desktopBridgeReconnectDelay * 2, 30000);
+    }
+  }
+
+  connectDesktopBridge();
+
   return server;
 }
 
