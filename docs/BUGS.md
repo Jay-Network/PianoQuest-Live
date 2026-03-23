@@ -361,6 +361,14 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Fix: Moved room setup, device registration, and client messaging out of the Gemini callback. Gemini connection is now optional — the app works fully without AI (MIDI, Go Live, devices, spectators). Guarded all `session.*` calls with null checks.
 - Prevention: Never gate core infrastructure (rooms, devices, networking) behind optional service connections. AI features should degrade gracefully, not take down the entire session.
 
+## BUG-047
+- Version found: `3.2.82`
+- Severity: High
+- Status: Fixed (v3.2.83)
+- Root cause: PQ Live receives MIDI from two independent sources: (1) direct Web MIDI API (browser reads USB keyboard) and (2) bridge MIDI from PQ Desktop via `/ws/midi`. Both paths call the same `handleNoteOn`/`handleNoteOff` functions with no deduplication. When PQ Desktop is running alongside PQ Live on the same machine, every note fires twice — double waterfall notes, double velocity tracking.
+- Fix: Added `bridgeMidiActive` flag. When bridge MIDI arrives, flag is set to true and direct Web MIDI `handleMidiMessage` returns early. Bridge MIDI takes priority since PQ Desktop is the authoritative MIDI source when running.
+- Prevention: When multiple data sources feed the same visualization, implement source priority or deduplication. Never allow parallel unguarded paths to the same renderer.
+
 ## BUG-046
 - Version found: `3.2.77`
 - Severity: High

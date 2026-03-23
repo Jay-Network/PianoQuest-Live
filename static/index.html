@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.82 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.83 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -1001,6 +1001,7 @@ let cameraStaleTimer = null;
 
 let midiAccess = null;
 let midiInput = null;
+let bridgeMidiActive = false;
 let midiSnapshotTimer = null;
 let lastMidiSnapshotAt = 0;
 let sessionStartTime = 0;
@@ -1471,6 +1472,7 @@ function setMidiInput(inputId) {
 }
 
 function handleMidiMessage(event) {
+  if (bridgeMidiActive) return; // Bridge MIDI takes priority — skip direct Web MIDI to avoid duplicates
   var data = event.data;
   if (!data || data.length < 2) return;
 
@@ -1823,7 +1825,8 @@ async function startSession() {
           } else if (msg.type === 'output_transcript') {
             if (msg.text) addMessage(msg.text, 'output');
           } else if (msg.type === 'midi') {
-            // Remote MIDI from Ubuntu bridge — feed into existing visualization
+            // Remote MIDI from Ubuntu bridge — takes priority over direct Web MIDI
+            bridgeMidiActive = true;
             var nowMs = msg.timestampMs || Date.now();
             if (msg.event === 'noteOn' && msg.velocity > 0) {
               handleNoteOn(msg.note, msg.velocity, nowMs);

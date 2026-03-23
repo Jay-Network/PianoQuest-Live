@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.83] - 2026-03-22
+### Fixed
+- BUG-047: Duplicate MIDI notes when PQ Desktop and PQ Live run simultaneously — bridge MIDI now takes priority, disabling direct Web MIDI to prevent double rendering
+
 ## [3.2.82] - 2026-03-22
 ### Fixed
 - Start Session crash when mic unavailable — audio processor setup now guarded behind mic availability check
