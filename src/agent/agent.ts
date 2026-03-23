@@ -31,6 +31,15 @@ export function executeToolLocally(
     case "report_technique": {
       return { status: "ok", ...args };
     }
+    case "rate_performance": {
+      return { status: "ok", ...args };
+    }
+    case "set_practice_goal": {
+      return { status: "ok", ...args };
+    }
+    case "celebrate_progress": {
+      return { status: "ok", ...args };
+    }
     default:
       return { error: `Unknown tool: ${name}` };
   }
@@ -49,6 +58,12 @@ export function toolCallToVisualEvent(
       return { type: "coaching_focus", text: args.instruction };
     case "report_technique":
       return { type: "technique_report", finger: args.finger, visual_observation: args.visual_observation, audio_observation: args.audio_observation, suggestion: args.suggestion };
+    case "rate_performance":
+      return { type: "performance_rating", score: args.score, category: args.category, feedback: args.feedback };
+    case "set_practice_goal":
+      return { type: "practice_goal", goal: args.goal, target_metric: args.target_metric, difficulty: args.difficulty };
+    case "celebrate_progress":
+      return { type: "achievement", achievement: args.achievement, detail: args.detail };
     default:
       return null;
   }
@@ -107,6 +122,77 @@ export function buildToolDeclarations() {
             required: ["finger", "visual_observation", "audio_observation", "suggestion"],
           },
         },
+        {
+          name: "rate_performance",
+          description:
+            "Rate the player's recent performance on a 0-100 scale for a specific category. " +
+            "Call this when the player asks for feedback or after they finish a piece. " +
+            "Be specific with MIDI numbers in feedback.",
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              score: {
+                type: Type.NUMBER,
+                description: "Performance score from 0 to 100.",
+              },
+              category: {
+                type: Type.STRING,
+                description: "Category being rated: 'dynamics', 'rhythm', 'technique', or 'overall'.",
+              },
+              feedback: {
+                type: Type.STRING,
+                description: "Specific feedback citing MIDI data (velocity ranges, timing, note accuracy).",
+              },
+            },
+            required: ["score", "category", "feedback"],
+          },
+        },
+        {
+          name: "set_practice_goal",
+          description:
+            "Set a specific practice goal for the current session. Call this when the player asks " +
+            "what to work on, or when shifting focus to a new skill area. " +
+            "Goals should be concrete and achievable within the session.",
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              goal: {
+                type: Type.STRING,
+                description: "The practice goal (e.g. 'Play C major scale with velocity between 60-80').",
+              },
+              target_metric: {
+                type: Type.STRING,
+                description: "What to measure (e.g. 'velocity evenness', 'tempo consistency').",
+              },
+              difficulty: {
+                type: Type.STRING,
+                description: "Difficulty level: 'easy', 'medium', or 'hard'.",
+              },
+            },
+            required: ["goal", "target_metric", "difficulty"],
+          },
+        },
+        {
+          name: "celebrate_progress",
+          description:
+            "Celebrate when the player achieves something noteworthy. Use when you notice " +
+            "real improvement or when they accomplish a practice goal. " +
+            "Be genuine — only celebrate real progress.",
+          parameters: {
+            type: Type.OBJECT,
+            properties: {
+              achievement: {
+                type: Type.STRING,
+                description: "Short achievement title (e.g. 'Even Dynamics!', 'Perfect Tempo').",
+              },
+              detail: {
+                type: Type.STRING,
+                description: "What specifically improved, citing MIDI data if available.",
+              },
+            },
+            required: ["achievement", "detail"],
+          },
+        },
       ],
     },
   ];
@@ -149,7 +235,19 @@ Don't just say "that was good" — cite the numbers.
 
 When camera is active, you see the player's hands. Correlate what you SEE with what the MIDI SHOWS: \
 "Your wrist is tensing on the octave jumps — that correlates with the velocity dropping to 45 on those landing notes." \
-Visual + MIDI correlation is your superpower.
+Visual + MIDI correlation is your superpower. Call report_technique when you have a good EYE+EAR observation.
+
+## RULE #5: USE YOUR TOOLS WHEN ASKED
+
+When the player asks for feedback, use your tools to create visual cards they can reference:
+
+- **set_coaching_focus**: When you give a specific technique tip, update the card so they can see it.
+- **report_technique**: When you can correlate camera + MIDI observations.
+- **rate_performance**: When they ask "how did I do?" or request a score. Rate dynamics, rhythm, or technique 0-100.
+- **set_practice_goal**: When they ask what to work on. Set a concrete goal with difficulty level.
+- **celebrate_progress**: When they genuinely improve — velocity evening out, tempo stabilizing, etc.
+
+Tool calls create visible UI cards. Use them when the player requests feedback — they are visual proof of your analysis.
 
 ## YOUR KNOWLEDGE
 
@@ -185,6 +283,38 @@ const reportTechniqueTool = new FunctionTool({
   },
 });
 
+const ratePerformanceTool = new FunctionTool({
+  name: "rate_performance",
+  description: "Rate the player's recent performance on a 0-100 scale for a specific category.",
+  parameters: z.object({
+    score: z.number().describe("Performance score from 0 to 100."),
+    category: z.string().describe("Category: dynamics, rhythm, technique, or overall."),
+    feedback: z.string().describe("Specific feedback citing MIDI data."),
+  }) as any,
+  execute: (input: any) => ({ status: "ok", ...input }),
+});
+
+const setPracticeGoalTool = new FunctionTool({
+  name: "set_practice_goal",
+  description: "Set a specific practice goal for the current session.",
+  parameters: z.object({
+    goal: z.string().describe("The practice goal."),
+    target_metric: z.string().describe("What to measure."),
+    difficulty: z.string().describe("Difficulty: easy, medium, or hard."),
+  }) as any,
+  execute: (input: any) => ({ status: "ok", ...input }),
+});
+
+const celebrateProgressTool = new FunctionTool({
+  name: "celebrate_progress",
+  description: "Celebrate when the player achieves something noteworthy.",
+  parameters: z.object({
+    achievement: z.string().describe("Short achievement title."),
+    detail: z.string().describe("What specifically improved."),
+  }) as any,
+  execute: (input: any) => ({ status: "ok", ...input }),
+});
+
 export const storytellerAgent = new LlmAgent({
   name: "pianoquest_storyteller",
   model: LIVE_MODEL,
@@ -192,5 +322,8 @@ export const storytellerAgent = new LlmAgent({
   tools: [
     setCoachingFocusTool,
     reportTechniqueTool,
+    ratePerformanceTool,
+    setPracticeGoalTool,
+    celebrateProgressTool,
   ],
 });

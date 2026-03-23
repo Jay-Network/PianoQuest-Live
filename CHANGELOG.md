@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [3.3.8] - 2026-03-23
+## [3.3.9] - 2026-03-23
 ### Added
 - `rate_performance` tool — Gemini rates playing 0-100 by category (dynamics/rhythm/technique/overall)
 - `set_practice_goal` tool — Gemini sets concrete session goals with difficulty level
@@ -14,12 +14,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - Performance score panel with color-coded bars and per-category tracking
 - Practice goal panel with difficulty badge (easy/medium/hard)
 - Achievement toast overlay with entrance/exit animations
+- Rule #5: "Use your tools when asked" — tool usage guidance in system instruction
 
 ### Changed
-- System instruction rewritten: Rule #2 changed from "only speak when asked" to "smart commentary"
-- Added Rule #5: "Use your tools actively" with guidance for each tool
-- Agent identity now emphasizes 3 superpowers (HEAR + READ + SEE)
 - Tool count: 2 → 5 (matches devpost claims + exceeds)
+- Rule #2 stays "only speak when asked" — no unsolicited commentary until agent is fully autonomous
+
+## [3.3.8] - 2026-03-23
+### Added
+- Frontend UI for new tool events (score bars, goal card, achievement toast CSS/HTML)
 
 ## [3.3.7] - 2026-03-23
 ### Changed
