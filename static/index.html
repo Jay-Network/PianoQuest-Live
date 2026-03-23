@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.86 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.87 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -5966,15 +5966,12 @@ function buildSecondaryUI(room, params) {
       setTimeout(function() { fitAddon.fit(); xterm.focus(); }, 50);
 
       // Intercept wheel events — scroll xterm buffer locally instead of sending to PTY
-      var xtermViewport = termContainer.querySelector('.xterm-screen');
-      if (xtermViewport) {
-        xtermViewport.addEventListener('wheel', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          var lines = Math.round(e.deltaY / 30) || (e.deltaY > 0 ? 3 : -3);
-          xterm.scrollLines(lines);
-        }, { passive: false, capture: true });
-      }
+      termContainer.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        var lines = e.deltaY > 0 ? 3 : -3;
+        xterm.scrollLines(lines);
+      }, { passive: false, capture: true });
 
       xterm.onData(function(data) {
         if (termWs && termWs.readyState === WebSocket.OPEN) {

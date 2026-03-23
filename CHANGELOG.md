@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.87] - 2026-03-22
+### Fixed
+- Terminal scrollback: attach wheel handler on container with capture + stopImmediatePropagation to prevent xterm.js from forwarding to PTY
+
 ## [3.2.86] - 2026-03-22
 ### Fixed
 - Terminal: mouse wheel now scrolls xterm buffer instead of sending to PTY (bash history)
