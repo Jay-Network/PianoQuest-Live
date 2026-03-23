@@ -6,6 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.3.7] - 2026-03-23
+### Changed
+- Gemini connects on-demand via Start Coaching (no longer connects on page load)
+- Added `connectGemini()` / `disconnectGemini()` server functions
+- Stop Coaching now sends `stop_coaching` to server, properly disconnects Gemini session
+- Added `coaching_status` message for server→client coaching state sync
+- Browser disconnect cleanup uses `disconnectGemini()` instead of raw session.close()
+
+### Fixed
+- TypeScript compilation error from session variable narrowing (getSession() helper)
+
+## [3.3.6] - 2026-03-23
+### Fixed
+- Coaching focus card now visible in desktop layout (was hidden/broken since v1.5.0)
+- Added COACHING FOCUS panel to left column with border flash on new tips
+- Gemini model confirmed as latest (gemini-2.5-flash-native-audio-preview-12-2025)
+
+## [3.3.5] - 2026-03-23
+### Changed
+- Removed Go Live button — HOME room is always live, streaming automatic
+- Start Coaching visible to all users (not admin-only)
+- UI now identical between admin and non-admin (except Sign out)
+
+### Removed
+- `toggleLive()`, `handleLiveStatus()` functions
+- `isLive` state variable
+- Admin gate for Start Coaching button
+
+## [3.3.4] - 2026-03-23
+### Changed
+- Rewrote CLAUDE.md to reflect correct architecture: PQ Desktop is primary, PQ Live browser is optional
+- Updated signal flow diagram, scope table, and component descriptions
+- Added status monitoring section to docs
+
+## [3.3.3] - 2026-03-23
+### Added
+- Backend status tracking system with `/status` endpoint (detailed JSON) and enhanced `/health`
+- Tracks: desktop bridge connection, MIDI event flow, Gemini session, coaching state, spectators, room state
+- Periodic console status log every 60s — one-line health summary in agent terminal
+- Documentation: `docs/STATUS-TRACKING.md`
+
 ## [3.3.2] - 2026-03-23
 ### Added
 - Server-side MIDI bridge client — PQ Live server connects to PQ Desktop :3490/ws directly

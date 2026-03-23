@@ -11,31 +11,43 @@ Interactive musical storytelling where the user's piano playing drives an AI nar
 The agent listens to piano audio, watches hands via camera, reads MIDI data, and coaches
 the user through natural voice conversation with real-time visual feedback.
 
+## Primary Flow (no browser needed)
+
+```
+Piano (CASIO USB) → PQ Desktop (always on) → PQ Live server (systemd) → iPad / jayismocking.com/live
+```
+
+**PQ Desktop is the primary app.** It's always running on Ubuntu.
+**PQ Live server** runs as a systemd service (`pianoquest-terminal.service`) in the background.
+**PQ Live browser** (pianoquest.jayismocking.com) is **optional** — only for coaching or brother's access.
+
+The server-side MIDI bridge connects PQ Live server → PQ Desktop :3490/ws automatically.
+A persistent "HOME" room is created on server startup and is always live.
+No browser, no clicks, no manual steps.
+
 ## Architecture
 
 - **Backend:** TypeScript (Google ADK + Express + WebSocket)
 - **Frontend:** HTML/JS with Web Audio API + Web MIDI API + MediaPipe HandLandmarker
-- **Deployment:** Google Cloud Run via Cloud Build
+- **Deployment:** Google Cloud Run via Cloud Build (hackathon branch), systemd locally (dev-terminal)
 - **API:** Gemini Live API (native audio model) via @google/genai SDK
 
-### Multimodal Input Pipeline
+### Signal Flow
 
 ```
-Phone (secondary)                Desktop (primary)
-├── Camera → JPEG 1fps ──┐      ├── MIDI USB keyboard ──┐
-├── MediaPipe hands ─────┤      │                       │
-└── Mic audio (PCM) ─────┤      │                       │
-                         ▼      │                       ▼
-                    WebSocket (/ws/session)          WebSocket
-                         │                              │
-                         ▼                              ▼
-                   Express Server (server.ts)
-                         │
-              ┌──────────┼──────────┐
-              ▼          ▼          ▼
-         Gemini Live   Broadcast   Spectators
-         (audio+video  to room     (/ws/spectator)
-          +MIDI text)  devices
+Piano (CASIO USB)
+    │
+    ▼
+PQ Desktop (:3490/ws)          Browser (optional)
+    │                           ├── Web MIDI (fallback)
+    │                           ├── Camera/MediaPipe
+    │                           └── Mic → Gemini coaching
+    ▼                               │
+PQ Live server (systemd :8090)  ◄───┘
+    │
+    ├── HOME room (persistent, auto-live)
+    ├── /ws/spectator → iPad (PQ Remote)
+    └── /ws/spectator → jayismocking.com/live (PQ Stream)
 ```
 
 ### Key Files
@@ -62,28 +74,38 @@ Phone (secondary)                Desktop (primary)
 | `camera` | Phone (secondary) | Sends JPEG frames to Gemini, runs MediaPipe hand skeleton |
 | `midi` | Desktop (primary) | Sends MIDI events + snapshots |
 
-## App Scope — PQ Live vs PQ Desktop
+## App Scope — PQ Desktop vs PQ Live
 
-| Responsibility | PQ Live | PQ Desktop |
-|---------------|---------|------------|
-| MIDI input (Web MIDI API) | Yes (direct, fallback) | Yes (primary source) |
-| MIDI bridge streaming | Receives via `/ws/midi` | Sends via `:3490/ws` |
-| MIDI recording/playback | No | Yes |
-| Gemini AI coaching | Yes (sole owner) | No |
-| Room/session management | Yes (sole owner) | No |
-| Go Live / spectator broadcast | Yes (sole owner) | No |
-| Remote viewer (spectator PWA) | Yes | No |
-| Camera / MediaPipe | Yes | No |
-| Agent terminal (tmux) | Yes | No |
+**PQ Desktop is the primary app. PQ Live browser is optional.**
 
-**PQ Desktop** is a thin, always-on MIDI bridge + recorder:
-1. Read USB MIDI keyboard
-2. Stream raw MIDI events to PQ Live via `/ws` bridge
-3. Record/playback MIDI sessions
+| Responsibility | PQ Desktop | PQ Live server | PQ Live browser |
+|---------------|------------|----------------|-----------------|
+| MIDI input (USB keyboard) | **Primary source** | — | Fallback (Web MIDI) |
+| MIDI bridge | Serves on `:3490/ws` | Connects as client | — |
+| MIDI recording/playback | Yes | No | No |
+| Waterfall visualization | Yes | — | Yes |
+| Room management | No | Yes (HOME room, persistent) | — |
+| Spectator broadcast | No | Yes (auto-live) | — |
+| Gemini AI coaching | No | — | Yes (optional) |
+| Camera / MediaPipe | No | — | Yes (optional) |
+| Agent terminal (tmux) | No | — | Yes (admin) |
 
-**PQ Live** is the hub — AI coaching, rooms, live broadcast, visualization, remote viewers.
+### What runs where
 
-When both run on the same machine, PQ Live auto-detects the bridge and disables direct Web MIDI to prevent duplicate notes (BUG-047).
+| Component | How it runs | Required? |
+|-----------|------------|-----------|
+| PQ Desktop | Kotlin app on Ubuntu | **Yes — always on** |
+| PQ Live server | `systemctl --user start pianoquest-terminal` | **Yes — always on** |
+| PQ Live browser | pianoquest.jayismocking.com | **No — optional** |
+| PQ Remote | iPad PWA (spectator) | No — optional viewer |
+| PQ Stream | jayismocking.com/live | No — public viewer |
+
+### Status monitoring
+
+- `GET /health` — lightweight health check
+- `GET /status` — detailed system status (bridge, room, Gemini, spectators)
+- Console logs health summary every 60s
+- See `docs/STATUS-TRACKING.md` for details
 
 ## Development
 

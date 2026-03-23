@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.3.2 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.3.7 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -677,9 +677,8 @@
       </div>
       <div class="status-dot" id="statusDot"></div>
       <span class="status-label" id="statusLabel">Disconnected</span>
-      <button id="btn-live" title="Go Live — stream to jayismocking.com/live" onclick="toggleLive()" style="display:none;padding:4px 10px;border:1px solid #ef4444;border-radius:4px;background:rgba(239,68,68,0.15);color:#ef4444;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;">Go Live</button>
-      <button id="btn-coaching" title="Start Gemini AI coaching (mic + voice)" onclick="toggleCoaching()" style="display:none;padding:4px 10px;border:1px solid rgba(255,255,255,0.2);border-radius:4px;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;">Start Coaching</button>
-      <script>fetch('/auth/me').then(function(r){return r.json()}).then(function(d){if(d.admin){document.getElementById('btn-live').style.display='';document.getElementById('btn-coaching').style.display='';document.getElementById('btn-signout').style.display='';}})</script>
+      <button id="btn-coaching" title="Start Gemini AI coaching (mic + voice)" onclick="toggleCoaching()" style="padding:4px 10px;border:1px solid rgba(255,255,255,0.2);border-radius:4px;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;">Start Coaching</button>
+      <script>fetch('/auth/me').then(function(r){return r.json()}).then(function(d){if(d.admin){document.getElementById('btn-signout').style.display='';}})</script>
       <button id="btn-terminal" title="Toggle Agent Terminal (Ctrl+`)">&#9638; Talk to Claude</button>
       <button id="btn-signout" onclick="location.href='/auth/signout'" title="Sign out" style="display:none;">Sign out</button>
     </div>
@@ -720,6 +719,15 @@
           <span style="font-size:9px;color:var(--text3);min-width:38px;">Gemini</span>
           <div class="level-bar-bg"><div class="level-bar" id="geminiVolFill" style="background:var(--gemini);"></div></div>
           <span id="geminiSpeakLabel" style="font-size:9px;color:var(--text3);min-width:38px;text-align:right;">Silent</span>
+        </div>
+      </div>
+
+      <div class="panel coaching-card" id="coachingCard">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--gemini)"></div>COACHING FOCUS
+        </div>
+        <div class="coaching-focus">
+          <div id="coachingText" style="padding:8px 12px;font-size:12px;color:var(--text3);line-height:1.5;min-height:36px;">Click "Start Coaching" to activate AI coach</div>
         </div>
       </div>
 
@@ -1319,7 +1327,15 @@ function addMessage(text, type) {
 // ============================================================================
 function handleToolEvent(msg) {
   if (msg.type === 'coaching_focus') {
-    document.getElementById('coachingText').textContent = msg.text;
+    var el = document.getElementById('coachingText');
+    el.textContent = msg.text;
+    el.style.color = 'var(--text1)';
+    // Flash the card border to draw attention
+    var card = document.getElementById('coachingCard');
+    if (card) {
+      card.style.borderColor = 'var(--gemini)';
+      setTimeout(function() { card.style.borderColor = ''; }, 2000);
+    }
   } else if (msg.type === 'technique_report') {
     showTechniqueReport(msg);
   }
@@ -1636,32 +1652,9 @@ function sendMidiSnapshot(force) {
 // Session management — auto-connect on page load
 // ============================================================================
 
-var isLive = false;
 var isCoaching = false;
 
-function toggleLive() {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: 'go_live', enabled: !isLive }));
-  }
-}
-
-function handleLiveStatus(msg) {
-  var btn = document.getElementById('btn-live');
-  isLive = !!msg.live;
-  if (isLive) {
-    btn.textContent = 'LIVE';
-    btn.style.background = '#22c55e';
-    btn.style.color = '#fff';
-    btn.style.borderColor = '#22c55e';
-  } else {
-    btn.textContent = 'Go Live';
-    btn.style.background = 'rgba(239,68,68,0.15)';
-    btn.style.color = '#ef4444';
-    btn.style.borderColor = '#ef4444';
-  }
-}
-
-// --- Coaching (mic + Gemini) — admin-only, optional ---
+// --- Coaching (mic + Gemini) — available to all users ---
 async function toggleCoaching() {
   if (isCoaching) { stopCoaching(); return; }
   startCoaching();
@@ -1738,6 +1731,11 @@ function stopCoaching() {
   if (analyser) { analyser.disconnect(); analyser = null; }
   if (audioCtx) { audioCtx.close(); audioCtx = null; }
   if (mediaStream) { mediaStream.getTracks().forEach(function(t) { t.stop(); }); mediaStream = null; }
+
+  // Tell server to disconnect Gemini
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'stop_coaching' }));
+  }
 
   var btn = document.getElementById('btn-coaching');
   if (btn) {
@@ -1879,8 +1877,11 @@ function connectWebSocket(isReconnect) {
               bridgeMidiActive = false;
               updateMidiStatus(midiInput ? 'MIDI: ' + (midiInput.name || 'Connected') : 'MIDI not connected');
             }
-          } else if (msg.type === 'live_status') {
-            handleLiveStatus(msg);
+          } else if (msg.type === 'coaching_status') {
+            // Server reports Gemini coaching state (e.g. Gemini closed on its own)
+            if (!msg.active && isCoaching) {
+              stopCoaching();
+            }
           }
         }
       };
@@ -1955,10 +1956,6 @@ function stopSession() {
   if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
   resetMidiState();
   setStatus('disconnected');
-  // Reset live status
-  isLive = false;
-  var liveBtn = document.getElementById('btn-live');
-  if (liveBtn) { liveBtn.textContent = 'Go Live'; liveBtn.style.background = 'rgba(239,68,68,0.15)'; liveBtn.style.color = '#ef4444'; liveBtn.style.borderColor = '#ef4444'; }
 }
 
 // ============================================================================

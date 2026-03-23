@@ -102,6 +102,68 @@ const spectators = new Set<WebSocket>();
 /** Only one room streams to spectators at a time */
 let liveRoomCode: string | null = null;
 
+// =========================================================================
+// Status tracking — proactive health monitoring for all connections
+// =========================================================================
+
+interface SystemStatus {
+  desktopBridge: {
+    connected: boolean;
+    url: string;
+    connectedAt: number | null;
+    disconnectedAt: number | null;
+    lastMidiEvent: number | null;
+    midiEventCount: number;
+    reconnectAttempts: number;
+  };
+  room: {
+    code: string;
+    live: boolean;
+    deviceCount: number;
+    primaryConnected: boolean;
+    primaryConnectedAt: number | null;
+  };
+  gemini: {
+    connected: boolean;
+    connectedAt: number | null;
+    sessionId: string | null;
+    audioChunksSent: number;
+  };
+  coaching: {
+    active: boolean;
+    startedAt: number | null;
+  };
+  spectators: {
+    count: number;
+  };
+  uptime: number;
+}
+
+const serverStartTime = Date.now();
+
+const statusTracker = {
+  desktopBridge: {
+    connected: false,
+    url: "",
+    connectedAt: null as number | null,
+    disconnectedAt: null as number | null,
+    lastMidiEvent: null as number | null,
+    midiEventCount: 0,
+    reconnectAttempts: 0,
+  },
+  gemini: {
+    connected: false,
+    connectedAt: null as number | null,
+    sessionId: null as string | null,
+    audioChunksSent: 0,
+  },
+  coaching: {
+    active: false,
+    startedAt: null as number | null,
+  },
+  primaryConnectedAt: null as number | null,
+};
+
 function broadcastSpectators(data: Buffer | string, binary = false) {
   for (const s of spectators) {
     if (s.readyState === WebSocket.OPEN) {
@@ -451,7 +513,29 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
       modes: ["storyteller"],
       spectators: spectators.size,
       rooms: rooms.size,
+      desktopBridge: statusTracker.desktopBridge.connected,
+      gemini: statusTracker.gemini.connected,
     });
+  });
+
+  app.get("/status", (_req, res) => {
+    const room = rooms.get(DEFAULT_ROOM);
+    const now = Date.now();
+    const status: SystemStatus = {
+      desktopBridge: { ...statusTracker.desktopBridge },
+      room: {
+        code: DEFAULT_ROOM,
+        live: liveRoomCode === DEFAULT_ROOM,
+        deviceCount: room ? room.devices.size : 0,
+        primaryConnected: !!(room && room.primaryWs && room.primaryWs.readyState === WebSocket.OPEN),
+        primaryConnectedAt: statusTracker.primaryConnectedAt,
+      },
+      gemini: { ...statusTracker.gemini },
+      coaching: { ...statusTracker.coaching },
+      spectators: { count: spectators.size },
+      uptime: Math.floor((now - serverStartTime) / 1000),
+    };
+    res.json(status);
   });
 
   app.get("/", (req, res) => {
@@ -802,6 +886,7 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
   // No browser needed. Auto-reconnect if PQ Desktop restarts.
   // ---------------------------------------------------------------------------
   const PQ_DESKTOP_URL = process.env.PQ_DESKTOP_URL || "ws://127.0.0.1:3490/ws";
+  statusTracker.desktopBridge.url = PQ_DESKTOP_URL;
   let desktopBridgeWs: WebSocket | null = null;
   let desktopBridgeReconnectDelay = 1000;
 
@@ -812,6 +897,10 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
       desktopBridgeWs.on("open", () => {
         console.log(`[${APP_NAME}] Desktop bridge connected to ${PQ_DESKTOP_URL}`);
         desktopBridgeReconnectDelay = 1000;
+        statusTracker.desktopBridge.connected = true;
+        statusTracker.desktopBridge.connectedAt = Date.now();
+        statusTracker.desktopBridge.disconnectedAt = null;
+        statusTracker.desktopBridge.reconnectAttempts = 0;
         const room = ensureDefaultRoom();
         broadcastToRoom(room, JSON.stringify({ type: "midi_source", source: "bridge" }));
       });
@@ -823,6 +912,8 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
 
           // Forward MIDI events to the HOME room + spectators
           if (msg.type === "midi" || msg.event === "noteOn" || msg.event === "noteOff" || msg.event === "controlChange" || msg.event === "pitchBend") {
+            statusTracker.desktopBridge.lastMidiEvent = Date.now();
+            statusTracker.desktopBridge.midiEventCount++;
             const midiMsg = { type: "midi", ...msg };
             const room = ensureDefaultRoom();
             broadcastToRoom(room, JSON.stringify(midiMsg));
@@ -849,6 +940,9 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
       desktopBridgeWs.on("close", () => {
         console.log(`[${APP_NAME}] Desktop bridge disconnected, reconnecting in ${desktopBridgeReconnectDelay}ms`);
         desktopBridgeWs = null;
+        statusTracker.desktopBridge.connected = false;
+        statusTracker.desktopBridge.disconnectedAt = Date.now();
+        statusTracker.desktopBridge.reconnectAttempts++;
         const room = rooms.get(DEFAULT_ROOM);
         if (room) broadcastToRoom(room, JSON.stringify({ type: "midi_source", source: "direct" }));
         setTimeout(connectDesktopBridge, desktopBridgeReconnectDelay);
@@ -865,6 +959,27 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
   }
 
   connectDesktopBridge();
+
+  // Periodic status log — one-line health summary every 60s
+  setInterval(() => {
+    const room = rooms.get(DEFAULT_ROOM);
+    const bridge = statusTracker.desktopBridge.connected ? "UP" : "DOWN";
+    const gemini = statusTracker.gemini.connected ? "UP" : "OFF";
+    const coaching = statusTracker.coaching.active ? "ON" : "OFF";
+    const primary = room && room.primaryWs && room.primaryWs.readyState === WebSocket.OPEN ? "YES" : "NO";
+    const devices = room ? room.devices.size : 0;
+    const specs = spectators.size;
+    const live = liveRoomCode === DEFAULT_ROOM ? "LIVE" : "OFF";
+    const midiAge = statusTracker.desktopBridge.lastMidiEvent
+      ? `${Math.floor((Date.now() - statusTracker.desktopBridge.lastMidiEvent) / 1000)}s ago`
+      : "never";
+    const uptime = Math.floor((Date.now() - serverStartTime) / 1000);
+    console.log(
+      `[${APP_NAME}] STATUS | bridge:${bridge} midi:${midiAge}(${statusTracker.desktopBridge.midiEventCount}) | ` +
+      `gemini:${gemini} coaching:${coaching} | primary:${primary} devices:${devices} spectators:${specs} | ` +
+      `stream:${live} | uptime:${uptime}s`
+    );
+  }, 60000);
 
   return server;
 }
@@ -1087,6 +1202,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   };
 
   console.log(`[${APP_NAME}] Primary connected: ${sessionId}, room: ${DEFAULT_ROOM}, device: ${primaryDeviceId}`);
+  statusTracker.primaryConnectedAt = Date.now();
 
   // ---------------------------------------------------------------------------
   // Room setup — join the default persistent room
@@ -1106,12 +1222,20 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   };
 
   // ---------------------------------------------------------------------------
-  // Gemini Live API via @google/genai SDK (optional — works without it)
+  // Gemini Live API via @google/genai SDK — on-demand via Start Coaching
   // ---------------------------------------------------------------------------
   let session: Session | null = null;
   let audioMsgCount = 0;
+  /** Helper to avoid TypeScript narrowing issues with mutable session var */
+  function getSession(): Session | null { return session; }
 
-  if (apiKey) {
+  async function connectGemini() {
+    if (session) return; // already connected
+    if (!apiKey) {
+      console.log(`[${APP_NAME}] No API key — cannot start coaching`);
+      try { ws.send(JSON.stringify({ type: "error", message: "No Gemini API key configured" })); } catch {}
+      return;
+    }
     const client = new GoogleGenAI({ apiKey });
     try {
       session = await client.live.connect({
@@ -1136,18 +1260,26 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         callbacks: {
           onopen: () => {
             console.log(`[${APP_NAME}] Gemini Live connected: ${sessionId}`);
+            statusTracker.gemini.connected = true;
+            statusTracker.gemini.connectedAt = Date.now();
+            statusTracker.gemini.sessionId = sessionId;
             roomSession.sendRealtimeInput = (input: any) => session!.sendRealtimeInput(input);
             roomSession.sendClientContent = (content: any) => session!.sendClientContent(content);
+            try { ws.send(JSON.stringify({ type: "coaching_status", active: true })); } catch {}
           },
           onerror: (e: unknown) => {
             console.error(`[${APP_NAME}] Gemini error: ${sessionId}`, e);
             try { ws.send(JSON.stringify({ type: "gemini_error", error: String(e) })); } catch {}
           },
           onclose: () => {
-            console.error(`[${APP_NAME}] *** Gemini closed: session=${sessionId}`);
-            closed = true;
-            try { ws.send(JSON.stringify({ type: "gemini_error", code: 1000, reason: "Session ended" })); } catch {}
-            try { ws.close(); } catch {}
+            console.log(`[${APP_NAME}] Gemini session closed: ${sessionId}`);
+            statusTracker.gemini.connected = false;
+            statusTracker.gemini.sessionId = null;
+            session = null;
+            roomSession.sendRealtimeInput = () => {};
+            roomSession.sendClientContent = () => {};
+            statusTracker.coaching.active = false;
+            try { ws.send(JSON.stringify({ type: "coaching_status", active: false })); } catch {}
           },
         onmessage: (msg: unknown) => {
           if (closed || !roomSession) return;
@@ -1169,6 +1301,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
                 const inlineData = part.inlineData as Record<string, unknown> | undefined;
                 if (inlineData?.data) {
                   audioMsgCount++;
+                  statusTracker.gemini.audioChunksSent = audioMsgCount;
                   if (audioMsgCount <= 3) console.log(`[${APP_NAME}] ${sessionId} audio chunk #${audioMsgCount}`);
                   sendAll(Buffer.from(inlineData.data as string, "base64"), true);
                 }
@@ -1235,12 +1368,28 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
     } catch (err) {
       console.error(`[${APP_NAME}] Failed to connect Gemini Live:`, err);
       try { ws.send(JSON.stringify({ type: "error", message: "Failed to connect to Gemini (continuing without AI)" })); } catch {}
+      session = null;
     }
 
     console.log(`[${APP_NAME}] Gemini session ready: ${sessionId}, room: ${roomCode}`);
-  } else {
-    console.log(`[${APP_NAME}] No API key — room ${roomCode} running without Gemini`);
   }
+
+  function disconnectGemini() {
+    if (!session) return;
+    try { session.close(); } catch {}
+    session = null;
+    roomSession.sendRealtimeInput = () => {};
+    roomSession.sendClientContent = () => {};
+    statusTracker.gemini.connected = false;
+    statusTracker.gemini.sessionId = null;
+    statusTracker.gemini.audioChunksSent = 0;
+    statusTracker.coaching.active = false;
+    console.log(`[${APP_NAME}] Gemini disconnected on demand: ${sessionId}`);
+    try { ws.send(JSON.stringify({ type: "coaching_status", active: false })); } catch {}
+  }
+
+  // Gemini is NOT connected on page load — user must click Start Coaching
+  console.log(`[${APP_NAME}] Room ${roomCode} ready (coaching available on demand)`);
 
   // Keepalive ping every 20s to prevent Cloud Run from killing the connection
   let primaryAlive = true;
@@ -1260,9 +1409,10 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
       if (closed) break;
 
       if (rawMsg instanceof Buffer || rawMsg instanceof ArrayBuffer) {
-        if (!primaryDevice.roles.mic || !session) continue;
+        const s = getSession();
+        if (!primaryDevice.roles.mic || !s) continue;
         const data = rawMsg instanceof ArrayBuffer ? new Uint8Array(rawMsg) : rawMsg;
-        session.sendRealtimeInput({
+        s.sendRealtimeInput({
           audio: { data: Buffer.from(data).toString("base64"), mimeType: "audio/pcm;rate=16000" },
         });
       } else if (typeof rawMsg === "string") {
@@ -1271,7 +1421,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
 
 
         if (msgType === "text") {
-          if (session) session.sendClientContent({
+          const s = getSession();
+          if (s) s.sendClientContent({
             turns: [{ role: "user", parts: [{ text: msg.content }] }],
             turnComplete: true,
           });
@@ -1281,7 +1432,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           const summary = describeMidiSnapshot(msg);
           if (summary && roomSession) {
             (roomSession as RoomSession).lastMidiSummary = summary;
-            if (session) session.sendClientContent({
+            const s2 = getSession();
+            if (s2) s2.sendClientContent({
               turns: [{ role: "user", parts: [{ text: summary }] }],
               turnComplete: false,
             });
@@ -1295,7 +1447,13 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         } else if (msgType === "set_mode") {
           // Single agent — mode is always storyteller
         } else if (msgType === "start_coaching") {
-          console.log(`[${APP_NAME}] Coaching started for room ${roomCode}`);
+          statusTracker.coaching.active = true;
+          statusTracker.coaching.startedAt = Date.now();
+          console.log(`[${APP_NAME}] Coaching requested for room ${roomCode}`);
+          connectGemini();
+        } else if (msgType === "stop_coaching") {
+          console.log(`[${APP_NAME}] Coaching stopped for room ${roomCode}`);
+          disconnectGemini();
         } else if (msgType === "midi_event") {
           // Broadcast MIDI events to all room devices + spectators for visualization
           if (roomSession) {
@@ -1305,8 +1463,9 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           }
         } else if (msgType === "video_frame" && primaryDevice.roles.camera) {
           const data = msg.data as string;
-          if (data && session) {
-            session.sendRealtimeInput({
+          const s3 = getSession();
+          if (data && s3) {
+            s3.sendRealtimeInput({
               media: { data, mimeType: "image/jpeg" },
             });
           }
@@ -1373,7 +1532,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
 
   closed = true;
   clearInterval(primaryPingInterval);
-  try { if (session) session.close(); } catch {}
+  disconnectGemini();
+  statusTracker.primaryConnectedAt = null;
 
   // Cleanup — remove this device from the default room but keep the room alive
   const rs = rooms.get(roomCode);
