@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.83 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.84 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -1836,6 +1836,14 @@ async function startSession() {
               handleControlChange(msg.controller || msg.note, msg.value || msg.velocity, nowMs);
             }
             updateMidiStatus('MIDI (remote bridge)');
+          } else if (msg.type === 'midi_source') {
+            if (msg.source === 'bridge') {
+              bridgeMidiActive = true;
+              updateMidiStatus('MIDI (bridge from PQ Desktop)');
+            } else {
+              bridgeMidiActive = false;
+              updateMidiStatus(midiInput ? 'MIDI: ' + (midiInput.name || 'Connected') : 'MIDI not connected');
+            }
           } else if (msg.type === 'live_status') {
             handleLiveStatus(msg);
           }

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.84] - 2026-03-22
+### Added
+- MIDI source indicator: shows "MIDI (bridge from PQ Desktop)" or "MIDI: [device name]"
+- Auto-detect PQ Desktop bridge — when bridge connects, direct Web MIDI is disabled automatically; when bridge disconnects, falls back to direct
+
 ## [3.2.83] - 2026-03-22
 ### Fixed
 - BUG-047: Duplicate MIDI notes when PQ Desktop and PQ Live run simultaneously — bridge MIDI now takes priority, disabling direct Web MIDI to prevent double rendering

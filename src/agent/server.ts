@@ -668,6 +668,8 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
 
     console.log(`[${APP_NAME}] MIDI bridge connected to room "${room}"`);
     ws.send(JSON.stringify({ type: "midi_connected", room }));
+    // Notify room clients that bridge MIDI is active
+    broadcastToRoom(roomSession, JSON.stringify({ type: "midi_source", source: "bridge" }));
 
     ws.on("message", (data: Buffer | string) => {
       if (typeof data !== "string") return;
@@ -699,6 +701,8 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
 
     ws.on("close", () => {
       console.log(`[${APP_NAME}] MIDI bridge disconnected from room "${room}"`);
+      // Notify room clients that bridge MIDI is gone — fall back to direct
+      broadcastToRoom(roomSession, JSON.stringify({ type: "midi_source", source: "direct" }));
       if (roomSession.midiFlushTimer) {
         clearTimeout(roomSession.midiFlushTimer);
         roomSession.midiFlushTimer = null;
