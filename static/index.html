@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.80 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.81 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -1668,26 +1668,31 @@ async function startSession() {
   setStatus('connecting');
 
   try {
-    mediaStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-        channelCount: 1
-      },
-      video: false
-    });
+    // Mic is optional — session can work with MIDI-only
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          channelCount: 1
+        },
+        video: false
+      });
 
-    audioCtx = new AudioContext();
-    var nativeRate = audioCtx.sampleRate;
-    var source = audioCtx.createMediaStreamSource(mediaStream);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048;
-    analyser.smoothingTimeConstant = 0.8;
-    source.connect(analyser);
-    processor = audioCtx.createScriptProcessor(4096, 1, 1);
-    source.connect(processor);
-    processor.connect(audioCtx.destination);
+      audioCtx = new AudioContext();
+      var nativeRate = audioCtx.sampleRate;
+      var source = audioCtx.createMediaStreamSource(mediaStream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.8;
+      source.connect(analyser);
+      processor = audioCtx.createScriptProcessor(4096, 1, 1);
+      source.connect(processor);
+      processor.connect(audioCtx.destination);
+    } catch (micErr) {
+      console.warn('Mic not available, continuing without audio input:', micErr.message);
+    }
 
     playbackCtx = new AudioContext({ sampleRate: 24000 });
     nextPlayTime = 0;
