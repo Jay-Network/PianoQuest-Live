@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.77] - 2026-03-22
+### Added
+- PWA manifest for "PianoQuest Remote" (iPad home screen install)
+- iOS meta tags (apple-mobile-web-app-capable, status bar, touch icon)
+- App icons (192x192, 512x512)
+- Spectator mode shows "PianoQuest Remote" title and "REMOTE VIEWER" header
+
 ## [3.2.76] - 2026-03-22
 ### Fixed
 - Scores playback: page scrolls correctly when cursor crosses page boundaries

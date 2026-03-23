@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#000"/>
+  <text x="256" y="180" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-weight="bold" font-size="128" fill="#22c55e">PQ</text>
+  <text x="256" y="280" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-weight="400" font-size="48" fill="rgba(255,255,255,0.5)">Remote</text>
+  <g transform="translate(56,340)">
+    <rect x="0" y="0" width="55" height="140" rx="4" fill="#fff"/>
+    <rect x="58" y="0" width="55" height="140" rx="4" fill="#fff"/>
+    <rect x="116" y="0" width="55" height="140" rx="4" fill="#fff"/>
+    <rect x="174" y="0" width="55" height="140" rx="4" fill="#fff"/>
+    <rect x="232" y="0" width="55" height="140" rx="4" fill="#fff"/>
+    <rect x="290" y="0" width="55" height="140" rx="4" fill="#fff"/>
+    <rect x="348" y="0" width="55" height="140" rx="4" fill="#fff"/>
+    <rect x="36" y="0" width="36" height="85" rx="3" fill="#000"/>
+    <rect x="94" y="0" width="36" height="85" rx="3" fill="#000"/>
+    <rect x="210" y="0" width="36" height="85" rx="3" fill="#000"/>
+    <rect x="268" y="0" width="36" height="85" rx="3" fill="#000"/>
+    <rect x="326" y="0" width="36" height="85" rx="3" fill="#000"/>
+  </g>
+</svg>

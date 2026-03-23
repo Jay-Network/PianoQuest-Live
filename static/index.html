@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>PianoQuest Live</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PQ Remote">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <style>
   :root {
     --bg: #000000;
@@ -653,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.76 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.77 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -5788,9 +5794,20 @@ function buildSecondaryUI(room, params) {
   var controls = document.querySelector('.controls');
   if (controls) controls.style.display = 'none';
 
-  // Update header to show spectator mode
+  // Update header and title for remote viewer mode
+  document.title = 'PianoQuest Remote';
+  var headerTitle = document.querySelector('.header-left h1');
+  if (headerTitle) {
+    headerTitle.textContent = '';
+    var t1 = document.createTextNode('Piano');
+    var sp = document.createElement('span');
+    sp.textContent = 'Quest';
+    headerTitle.appendChild(t1);
+    headerTitle.appendChild(sp);
+    headerTitle.appendChild(document.createTextNode(' Remote'));
+  }
   var headerSub = document.querySelector('.header-sub');
-  if (headerSub) headerSub.textContent = 'SPECTATOR MODE';
+  if (headerSub) headerSub.textContent = 'REMOTE VIEWER';
 
   // Auto-connect to /ws/spectator
   setStatus('connecting');

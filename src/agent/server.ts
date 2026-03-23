@@ -440,6 +440,9 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
 
   app.use("/static", express.static(STATIC_DIR));
   app.use("/sheets", express.static(SHEETS_DIR));
+  // PWA manifest and icons at root
+  app.get("/manifest.json", (_req, res) => res.sendFile(path.join(STATIC_DIR, "manifest.json")));
+  app.use("/icons", express.static(path.join(STATIC_DIR, "icons")));
 
   // List sheet music files as a tree (with layout/text/pdf availability)
   app.get("/api/sheets", (_req, res) => {
