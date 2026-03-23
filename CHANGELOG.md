@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.82] - 2026-03-22
+### Fixed
+- Start Session crash when mic unavailable — audio processor setup now guarded behind mic availability check
+
 ## [3.2.81] - 2026-03-22
 ### Fixed
 - Start Session no longer fails when microphone is unavailable or blocked — mic is now optional (MIDI-only sessions work)
