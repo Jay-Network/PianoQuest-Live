@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.88] - 2026-03-22
+### Changed
+- Remote viewer: percentage-based grid (30%/1fr/30%) instead of fixed pixel widths — fits any screen
+- Remote viewer: hide terminal panel and resize handles
+- Remote viewer: enable pinch-to-zoom (user-scalable=yes)
+
 ## [3.2.87] - 2026-03-22
 ### Fixed
 - Terminal scrollback: attach wheel handler on container with capture + stopImmediatePropagation to prevent xterm.js from forwarding to PTY

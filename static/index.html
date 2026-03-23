@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.87 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.88 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -5811,9 +5811,28 @@ function buildSecondaryUI(room, params) {
   // Hide controls that spectators don't need (Start Session, Go Live, etc.)
   var controls = document.querySelector('.controls');
   if (controls) controls.style.display = 'none';
+  // Hide terminal panel — spectators don't need agent terminal
+  var termPanel = document.getElementById('terminalPanel');
+  if (termPanel) termPanel.style.display = 'none';
+  var termHandle = document.querySelectorAll('.resize-handle');
+  // Hide the last resize handle (terminal divider)
+  if (termHandle.length > 1) termHandle[termHandle.length - 1].style.display = 'none';
+
+  // Scale the layout to fit the viewport width
+  var mainGrid = document.querySelector('.main');
+  if (mainGrid) {
+    // Remove fixed column widths — use percentage-based layout
+    mainGrid.style.gridTemplateColumns = '30% 0 1fr 0 30%';
+    // Hide resize handles in spectator mode
+    var handles = document.querySelectorAll('.resize-handle');
+    for (var h = 0; h < handles.length; h++) handles[h].style.display = 'none';
+  }
   // Allow scrolling/zooming on smaller screens
   document.body.style.overflow = 'auto';
   document.documentElement.style.overflow = 'auto';
+  // Enable pinch-to-zoom
+  var vp = document.querySelector('meta[name="viewport"]');
+  if (vp) vp.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=yes');
 
   // Update header and title for remote viewer mode
   document.title = 'PianoQuest Remote';
