@@ -694,7 +694,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.3.9 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.3.10 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -1376,6 +1376,21 @@ function addMessage(text, type) {
   chat.scrollTop = chat.scrollHeight;
 }
 
+function addToolMessage(icon, text) {
+  var chat = document.getElementById('chatArea');
+  if (!chat) return;
+  var sys = chat.querySelector('.system-msg');
+  if (sys) sys.remove();
+  var row = document.createElement('div');
+  row.style.cssText = 'text-align:center;padding:2px 0;';
+  var span = document.createElement('span');
+  span.style.cssText = 'font-size:10px;color:var(--text3);background:rgba(255,255,255,0.03);padding:2px 8px;border-radius:4px;';
+  span.textContent = icon + ' ' + text;
+  row.appendChild(span);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
 // ============================================================================
 // Tool-driven events — coaching focus + technique reports
 // ============================================================================
@@ -1389,14 +1404,19 @@ function handleToolEvent(msg) {
       card.style.borderColor = 'var(--gemini)';
       setTimeout(function() { card.style.borderColor = ''; }, 2000);
     }
+    addToolMessage('\uD83C\uDFAF', 'Focus: ' + msg.text);
   } else if (msg.type === 'technique_report') {
     showTechniqueReport(msg);
+    addToolMessage('\uD83D\uDC41', 'Technique: ' + (msg.finger || '') + ' \u2014 ' + (msg.suggestion || ''));
   } else if (msg.type === 'performance_rating') {
     showPerformanceRating(msg);
+    addToolMessage('\uD83C\uDFBC', 'Score: ' + (msg.category || '') + ' ' + (msg.score || 0) + '/100');
   } else if (msg.type === 'practice_goal') {
     showPracticeGoal(msg);
+    addToolMessage('\uD83C\uDFAF', 'Goal: ' + (msg.goal || ''));
   } else if (msg.type === 'achievement') {
     showAchievement(msg);
+    addToolMessage('\uD83C\uDFC6', (msg.achievement || 'Achievement!'));
   }
 }
 

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.3.10] - 2026-03-23
+### Added
+- Inline tool call messages in conversation panel (shows icon + summary for each tool event)
+- Tool calls now visible in chat: coaching focus, technique reports, scores, goals, achievements
+
 ## [3.3.9] - 2026-03-23
 ### Added
 - `rate_performance` tool — Gemini rates playing 0-100 by category (dynamics/rhythm/technique/overall)
