@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.85] - 2026-03-22
+### Fixed
+- Terminal mouse wheel scrolling through bash history instead of scrollback — set mouse off at both session and window level in grouped tmux session
+
 ## [3.2.84] - 2026-03-22
 ### Added
 - MIDI source indicator: shows "MIDI (bridge from PQ Desktop)" or "MIDI: [device name]"
