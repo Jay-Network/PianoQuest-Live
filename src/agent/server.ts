@@ -150,6 +150,32 @@ interface RoomSession {
 }
 
 const rooms = new Map<string, RoomSession>();
+const DEFAULT_ROOM = "HOME";
+
+/** Create the default persistent room — always exists, no browser needed */
+function ensureDefaultRoom(): RoomSession {
+  let room = rooms.get(DEFAULT_ROOM);
+  if (!room) {
+    room = {
+      roomCode: DEFAULT_ROOM,
+      sendRealtimeInput: () => {},
+      sendClientContent: () => {},
+      primaryWs: null as any,
+      devices: new Map(),
+      midiBuffer: [],
+      midiFlushTimer: null,
+      cameraEnabled: false,
+      bothHandsDetected: false,
+      _lastGeminiFrame: 0,
+      lastMidiSummary: null,
+      sessionSettings: { scale: "C major", bpm: 90, timeSignature: "4/4" },
+    };
+    rooms.set(DEFAULT_ROOM, room);
+    liveRoomCode = DEFAULT_ROOM;
+    console.log(`[${APP_NAME}] Default room "${DEFAULT_ROOM}" created (auto-live)`);
+  }
+  return room;
+}
 
 function generateRoomCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -657,8 +683,9 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
   }
 
   wssMidi.on("connection", (ws: WebSocket) => {
-    const room = (ws as any)._room as string;
-    const roomSession = rooms.get(room);
+    const room = (ws as any)._room as string || DEFAULT_ROOM;
+    // Auto-create default room if MIDI bridge connects without a browser session
+    const roomSession = rooms.get(room) || (room === DEFAULT_ROOM ? ensureDefaultRoom() : null);
     if (!roomSession) {
       console.log(`[${APP_NAME}] MIDI rejected — room "${room}" not found`);
       ws.send(JSON.stringify({ type: "error", message: `Room "${room}" not found` }));
@@ -766,6 +793,9 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
       execFile("tmux", ["kill-session", "-t", groupName], () => {});
     });
   });
+
+  // Create default persistent room on startup — no browser needed
+  ensureDefaultRoom();
 
   return server;
 }
@@ -967,7 +997,7 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   const apiKey = process.env.GOOGLE_API_KEY ?? process.env.GEMINI_API_KEY;
 
   const sessionId = randomHex(4);
-  const roomCode = generateRoomCode();
+  const roomCode = DEFAULT_ROOM;
   let closed = false;
 
   // Transcription buffers
@@ -987,27 +1017,16 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
     connectedAt: Date.now(),
   };
 
-  console.log(`[${APP_NAME}] Primary connected: ${sessionId}, room: ${roomCode}, device: ${primaryDeviceId}`);
+  console.log(`[${APP_NAME}] Primary connected: ${sessionId}, room: ${DEFAULT_ROOM}, device: ${primaryDeviceId}`);
 
   // ---------------------------------------------------------------------------
-  // Room setup — independent of Gemini
+  // Room setup — join the default persistent room
   // ---------------------------------------------------------------------------
-  let roomSession: RoomSession = {
-    roomCode,
-    sendRealtimeInput: () => {},
-    sendClientContent: () => {},
-    primaryWs: ws,
-    devices: new Map(),
-    midiBuffer: [],
-    midiFlushTimer: null,
-    cameraEnabled: false,
-    bothHandsDetected: false,
-    _lastGeminiFrame: 0,
-    lastMidiSummary: null,
-    sessionSettings: { scale: "C major", bpm: 90, timeSignature: "4/4" },
-  };
+  let roomSession = ensureDefaultRoom();
+  roomSession.primaryWs = ws;
   roomSession.devices.set(primaryDeviceId, primaryDevice);
-  rooms.set(roomCode, roomSession);
+  // Ensure live
+  liveRoomCode = DEFAULT_ROOM;
 
   ws.send(JSON.stringify({ type: "you_are_primary", room: roomCode, deviceId: primaryDeviceId }));
   ws.send(JSON.stringify({ type: "room_code", room: roomCode }));
@@ -1287,24 +1306,17 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
   clearInterval(primaryPingInterval);
   try { if (session) session.close(); } catch {}
 
-  // Cleanup
+  // Cleanup — remove this device from the default room but keep the room alive
   const rs = rooms.get(roomCode);
-  if (rs?.midiFlushTimer) clearTimeout(rs.midiFlushTimer);
   if (rs) {
-    for (const d of rs.devices.values()) {
-      if (!d.isPrimary && d.ws.readyState === WebSocket.OPEN) {
-        try {
-          d.ws.send(JSON.stringify({ type: "room_closed" }));
-          d.ws.close();
-        } catch {}
-      }
-    }
+    rs.devices.delete(primaryDeviceId);
+    rs.primaryWs = null as any;
+    // Don't delete the default room or reset liveRoomCode — room persists
   }
-  rooms.delete(roomCode);
-  if (liveRoomCode === roomCode) {
+  if (false) { // Never delete default room
     liveRoomCode = null;
     console.log(`[${APP_NAME}] Live room ${roomCode} ended`);
   }
-  console.log(`[${APP_NAME}] Primary disconnected: ${sessionId}, room ${roomCode} removed`);
+  console.log(`[${APP_NAME}] Primary disconnected: ${sessionId}, room ${roomCode} (room persists)`);
   try { ws.close(); } catch {}
 }

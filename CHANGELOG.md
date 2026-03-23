@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.3.1] - 2026-03-23
+### Changed
+- Server creates persistent default room ("HOME") on startup — no browser needed
+- MIDI bridge auto-joins default room when no room specified
+- Default room is auto-live — spectators receive data immediately
+- Browser clients join the default room instead of creating new ones
+- Default room persists even when browser disconnects
+
 ## [3.3.0] - 2026-03-23
 ### Changed
 - **UX redesign**: Auto-connect on page load — MIDI visualization works immediately, zero clicks
