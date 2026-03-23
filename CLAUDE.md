@@ -62,6 +62,29 @@ Phone (secondary)                Desktop (primary)
 | `camera` | Phone (secondary) | Sends JPEG frames to Gemini, runs MediaPipe hand skeleton |
 | `midi` | Desktop (primary) | Sends MIDI events + snapshots |
 
+## App Scope — PQ Live vs PQ Desktop
+
+| Responsibility | PQ Live | PQ Desktop |
+|---------------|---------|------------|
+| MIDI input (Web MIDI API) | Yes (direct, fallback) | Yes (primary source) |
+| MIDI bridge streaming | Receives via `/ws/midi` | Sends via `:3490/ws` |
+| MIDI recording/playback | No | Yes |
+| Gemini AI coaching | Yes (sole owner) | No |
+| Room/session management | Yes (sole owner) | No |
+| Go Live / spectator broadcast | Yes (sole owner) | No |
+| Remote viewer (spectator PWA) | Yes | No |
+| Camera / MediaPipe | Yes | No |
+| Agent terminal (tmux) | Yes | No |
+
+**PQ Desktop** is a thin, always-on MIDI bridge + recorder:
+1. Read USB MIDI keyboard
+2. Stream raw MIDI events to PQ Live via `/ws` bridge
+3. Record/playback MIDI sessions
+
+**PQ Live** is the hub — AI coaching, rooms, live broadcast, visualization, remote viewers.
+
+When both run on the same machine, PQ Live auto-detects the bridge and disables direct Web MIDI to prevent duplicate notes (BUG-047).
+
 ## Development
 
 ```bash

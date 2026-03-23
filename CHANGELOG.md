@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.90] - 2026-03-22
+### Changed
+- Updated CLAUDE.md with PQ Live vs PQ Desktop scope table — PQ Live owns Gemini, rooms, Go Live; PQ Desktop is MIDI source + recorder only
+
 ## [3.2.89] - 2026-03-22
 ### Fixed
 - Spectator MIDI noteOn logic — removed erroneous `msg.type === 'midi'` check in noteOn condition
