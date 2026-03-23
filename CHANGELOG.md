@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.2.80] - 2026-03-22
+### Changed
+- Remote viewer shows ALL panels (left, center, scores) — no hiding, scroll/zoom to fit device
+
 ## [3.2.78] - 2026-03-22
 ### Fixed
 - Spectator/Remote viewer: single-column layout (hides left/right panels), fits iPad screen

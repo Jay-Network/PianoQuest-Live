@@ -659,7 +659,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.79 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.2.80 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -5790,19 +5790,12 @@ function buildSecondaryUI(room, params) {
   var params = new URLSearchParams(window.location.search);
   if (params.get('spectator') !== '1') return;
 
-  // Hide controls and side columns — spectator only needs the center panel (waterfall + keyboard)
+  // Hide controls that spectators don't need (Start Session, Go Live, etc.)
   var controls = document.querySelector('.controls');
   if (controls) controls.style.display = 'none';
-  var leftCol = document.querySelector('.left-col');
-  if (leftCol) leftCol.style.display = 'none';
-  var scoreCol = document.getElementById('scoreCol');
-  if (scoreCol) scoreCol.style.display = 'none';
-  // Hide resize handles
-  var handles = document.querySelectorAll('.resize-handle');
-  for (var hi = 0; hi < handles.length; hi++) handles[hi].style.display = 'none';
-  // Make main grid single column — only the center (right-col / midi-stack)
-  var main = document.querySelector('.main');
-  if (main) main.style.gridTemplateColumns = '1fr';
+  // Allow scrolling/zooming on smaller screens
+  document.body.style.overflow = 'auto';
+  document.documentElement.style.overflow = 'auto';
 
   // Update header and title for remote viewer mode
   document.title = 'PianoQuest Remote';
