@@ -158,6 +158,41 @@
     color: var(--gemini); margin-bottom: 4px;
   }
 
+  /* Practice Goal */
+  .goal-card { padding: 10px 12px; }
+  .goal-text { font-size: 12px; color: var(--text1); line-height: 1.4; }
+  .goal-meta { font-size: 10px; color: var(--text3); margin-top: 4px; display: flex; gap: 8px; }
+  .goal-difficulty {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .goal-difficulty.easy { background: rgba(74,222,128,0.15); color: var(--green); }
+  .goal-difficulty.medium { background: rgba(251,191,36,0.15); color: var(--amber, #fbbf24); }
+  .goal-difficulty.hard { background: rgba(251,113,133,0.15); color: var(--rose); }
+
+  /* Performance Score */
+  .score-card { padding: 10px 12px; }
+  .score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .score-category { font-size: 10px; font-weight: 700; color: var(--text3); min-width: 64px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .score-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .score-value { font-size: 11px; font-weight: 700; min-width: 28px; text-align: right; }
+  .score-feedback { font-size: 11px; color: var(--text3); margin-top: 4px; line-height: 1.4; }
+
+  /* Achievement Toast */
+  .achievement-toast {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,113,133,0.15));
+    border: 1px solid rgba(251,191,36,0.4); border-radius: 12px;
+    padding: 12px 24px; z-index: 9999; text-align: center;
+    animation: toastIn 0.4s ease, toastOut 0.4s ease 3.6s forwards;
+    pointer-events: none;
+  }
+  .achievement-title { font-size: 16px; font-weight: 700; color: #fbbf24; }
+  .achievement-detail { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.9); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+
   /* Right column */
   .right-col { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
 
@@ -659,7 +694,7 @@
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.3.7 &middot; INTERNAL</div>
+        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.3.8 &middot; INTERNAL</div>
       </div>
     </div>
     <div class="controls">
@@ -729,6 +764,25 @@
         <div class="coaching-focus">
           <div id="coachingText" style="padding:8px 12px;font-size:12px;color:var(--text3);line-height:1.5;min-height:36px;">Click "Start Coaching" to activate AI coach</div>
         </div>
+      </div>
+
+      <div class="panel goal-card" id="goalCard" style="display:none">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--green)"></div>PRACTICE GOAL
+        </div>
+        <div class="goal-text" id="goalText"></div>
+        <div class="goal-meta">
+          <span id="goalMetric"></span>
+          <span class="goal-difficulty" id="goalDifficulty"></span>
+        </div>
+      </div>
+
+      <div class="panel score-card" id="scoreCard" style="display:none">
+        <div class="panel-header">
+          <div class="dot" style="background:var(--accent)"></div>PERFORMANCE
+        </div>
+        <div id="scoreEntries"></div>
+        <div class="score-feedback" id="scoreFeedback"></div>
       </div>
 
       <div class="panel" id="recordPanel" style="padding:8px 12px;">
@@ -1330,7 +1384,6 @@ function handleToolEvent(msg) {
     var el = document.getElementById('coachingText');
     el.textContent = msg.text;
     el.style.color = 'var(--text1)';
-    // Flash the card border to draw attention
     var card = document.getElementById('coachingCard');
     if (card) {
       card.style.borderColor = 'var(--gemini)';
@@ -1338,7 +1391,76 @@ function handleToolEvent(msg) {
     }
   } else if (msg.type === 'technique_report') {
     showTechniqueReport(msg);
+  } else if (msg.type === 'performance_rating') {
+    showPerformanceRating(msg);
+  } else if (msg.type === 'practice_goal') {
+    showPracticeGoal(msg);
+  } else if (msg.type === 'achievement') {
+    showAchievement(msg);
   }
+}
+
+function showPerformanceRating(data) {
+  var card = document.getElementById('scoreCard');
+  var entries = document.getElementById('scoreEntries');
+  var fb = document.getElementById('scoreFeedback');
+  if (!card || !entries) return;
+  card.style.display = '';
+
+  var score = Math.max(0, Math.min(100, data.score || 0));
+  var cat = data.category || 'overall';
+  var color = score >= 70 ? 'var(--green)' : score >= 40 ? 'var(--amber, #fbbf24)' : 'var(--rose)';
+
+  // Check if this category row already exists
+  var existingRow = entries.querySelector('[data-cat="' + cat + '"]');
+  if (existingRow) {
+    existingRow.querySelector('.score-bar-fill').style.width = score + '%';
+    existingRow.querySelector('.score-bar-fill').style.background = color;
+    existingRow.querySelector('.score-value').textContent = score;
+    existingRow.querySelector('.score-value').style.color = color;
+  } else {
+    var row = document.createElement('div');
+    row.className = 'score-row';
+    row.setAttribute('data-cat', cat);
+    row.innerHTML = '<span class="score-category">' + cat + '</span>' +
+      '<div class="score-bar-bg"><div class="score-bar-fill" style="width:' + score + '%;background:' + color + '"></div></div>' +
+      '<span class="score-value" style="color:' + color + '">' + score + '</span>';
+    entries.appendChild(row);
+  }
+
+  if (fb && data.feedback) fb.textContent = data.feedback;
+
+  // Flash card border
+  card.style.borderColor = color;
+  setTimeout(function() { card.style.borderColor = ''; }, 2000);
+}
+
+function showPracticeGoal(data) {
+  var card = document.getElementById('goalCard');
+  var text = document.getElementById('goalText');
+  var metric = document.getElementById('goalMetric');
+  var diff = document.getElementById('goalDifficulty');
+  if (!card) return;
+  card.style.display = '';
+  if (text) text.textContent = data.goal || '';
+  if (metric) metric.textContent = data.target_metric || '';
+  if (diff) {
+    var d = (data.difficulty || 'medium').toLowerCase();
+    diff.textContent = d;
+    diff.className = 'goal-difficulty ' + d;
+  }
+  card.style.borderColor = 'var(--green)';
+  setTimeout(function() { card.style.borderColor = ''; }, 2000);
+}
+
+function showAchievement(data) {
+  // Animated toast overlay
+  var toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.innerHTML = '<div class="achievement-title">' + (data.achievement || 'Achievement!') + '</div>' +
+    '<div class="achievement-detail">' + (data.detail || '') + '</div>';
+  document.body.appendChild(toast);
+  setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 4000);
 }
 
 function showTechniqueReport(data) {
@@ -1783,7 +1905,8 @@ function connectWebSocket(isReconnect) {
           var msg = JSON.parse(event.data);
           if (msg.type === 'story_scene' || msg.type === 'achievement' ||
                      msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
-                     msg.type === 'technique_report') {
+                     msg.type === 'technique_report' || msg.type === 'performance_rating' ||
+                     msg.type === 'practice_goal' || msg.type === 'achievement') {
             handleToolEvent(msg);
           } else if (msg.type === 'video_frame') {
             var camImg = document.getElementById('remoteCameraImg');
@@ -5291,7 +5414,8 @@ function updateQr(roomCode) {
         handleControlChange(msg.controller || msg.note, msg.value || msg.velocity, nowMs);
       }
     } else if (msg.type === 'coaching_focus' || msg.type === 'technique_report' ||
-               msg.type === 'story_scene' || msg.type === 'achievement') {
+               msg.type === 'story_scene' || msg.type === 'achievement' ||
+               msg.type === 'performance_rating' || msg.type === 'practice_goal') {
       handleToolEvent(msg);
     } else if (msg.type === 'video_frame') {
       var camImg = document.getElementById('remoteCameraImg');
