@@ -1206,6 +1206,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
           }
         } else if (msgType === "set_mode") {
           // Single agent — mode is always storyteller
+        } else if (msgType === "start_coaching") {
+          console.log(`[${APP_NAME}] Coaching started for room ${roomCode}`);
         } else if (msgType === "midi_event") {
           // Broadcast MIDI events to all room devices + spectators for visualization
           if (roomSession) {

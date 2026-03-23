@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-03-23
+### Changed
+- **UX redesign**: Auto-connect on page load — MIDI visualization works immediately, zero clicks
+- Removed "Start Session" / "Stop Session" button — session is always active
+- Added "Start Coaching" button (admin-only) — enables mic + Gemini AI coaching on demand
+- "Go Live" and "Start Coaching" only visible to admin users; brother sees clean minimal header
+- "Sign out" only visible to admin users
+- Auto-reconnect on disconnect (always, no sessionActive gate)
+- Speech recognition moved to coaching-only (not triggered on room join)
+
 ## [3.2.90] - 2026-03-22
 ### Changed
 - Updated CLAUDE.md with PQ Live vs PQ Desktop scope table — PQ Live owns Gemini, rooms, Go Live; PQ Desktop is MIDI source + recorder only
