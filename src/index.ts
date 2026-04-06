@@ -5,7 +5,7 @@
 import "dotenv/config";
 import { createApp } from "./agent/server.js";
 
-const port = parseInt(process.env.PORT ?? "8080", 10);
+const port = parseInt(process.env.PORT ?? "8090", 10);
 
 const server = createApp();
 server.listen(port, () => {

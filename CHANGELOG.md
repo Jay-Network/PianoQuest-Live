@@ -6,6 +6,225 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-04-05
+### Added
+- **Jazz Improvisation Practice Mode** — structured Theme → Improv × 2 → Theme sessions over jazz standards
+- 5 jazz lead sheets with chord symbols, recommended scales, and left-hand voicings: Bye Bye Blackbird, Autumn Leaves, All of Me, Blue Bossa, So What
+- Jazz lead sheet JSON format: per-measure `chord`, `scale` (root + type + MIDI), `voicing` (MIDI), `formSections`, `style: "jazz"`
+- Chord symbol rendering on VexFlow score (yellow text above treble stave) for jazz sheets
+- Form section labels (rehearsal marks: A1, A2, B, A3) as boxed labels above chord symbols
+- Jazz session engine: state machine for Theme/Improv/Theme phases with automatic measure tracking and phase transitions
+- "Jazz Session" button in score toolbar (only visible for jazz sheets), "End Session" stop button
+- Phase indicator overlay showing current phase (THEME, IMPROV 1, IMPROV 2, THEME OUTRO) and measure count
+- Scale waterfall rendering during improv phases — semi-transparent cyan notes showing recommended scale degrees
+- Left-hand chord voicing highlight on keyboard — gold/amber keys with chord name label during improv phases
+- During Theme phases: melody falls as target notes (existing system)
+- During Improv phases: scale guidance waterfall + voicing highlights (no melody targets — free improvisation)
+
+## [3.3.0] - 2026-03-29
+### Changed
+- **Major architecture: Gemini Live session moved from server to browser.** The primary browser now connects directly to Gemini via `@google/genai` SDK loaded from CDN. Server becomes a lightweight coordinator for room/device management, MIDI bridge relay, and spectator broadcasting. This offloads all Gemini API processing to the client machine.
+- Server: removed all Gemini SDK imports and session management. Added `/api/gemini-key` endpoint, forwarding handlers for `gemini_tool_event`, `gemini_transcript`, `gemini_turn`, `midi_for_gemini`, `secondary_audio`, `text_for_gemini`.
+- Browser: added `connectGemini()` with full onmessage handling (audio playback, tool calls, transcripts, turn events). Mic audio, MIDI snapshots, text input, and video frames now go directly to Gemini. Gemini audio and events forwarded to server for spectator broadcast.
+
+## [3.2.95] - 2026-03-29
+### Fixed
+- Added half-diminished 7th template (m7b5: [0,3,6,10]). E,G,Bb,D now correctly detects as Em7b5 instead of Edim (which ignored D).
+
+## [3.2.94] - 2026-03-29
+### Fixed
+- Chord detection now uses ALL finger-down notes instead of time-windowed group. Moving one note of a held chord (e.g. C9 → move C up an octave) no longer loses the other held notes. Time window is now a debounce delay — waits for rapid presses to settle before detecting.
+
+## [3.2.93] - 2026-03-29
+### Fixed
+- Chord scoring now balances template fit AND input coverage — templates that leave notes unexplained are penalized (e.g. G,Bb,D,A now correctly detects Gmadd9 instead of Dsus4)
+- Added minadd9 (minor add 9th) template: [0,3,7,2]
+
+## [3.2.92] - 2026-03-29
+### Fixed
+- Tightened chord detection: require at most 1 missing note from template (2-note templates need exact match). G+B no longer falsely detects as "G" — needs at least G+B+D for G major.
+
+## [3.2.91] - 2026-03-29
+### Changed
+- Chord labels now positioned above the highest note in each chord (not fixed above treble staff)
+- Added 5-note chord templates: 9, maj9, min9, add9
+- Added power chord (5) template for 2-note detection
+- Scoring prefers longer-matching templates (C7 over C when 4 notes present)
+
+## [3.2.90] - 2026-03-29
+### Changed
+- Moved chord detection window control to top-right of grand staff as a semi-transparent overlay
+- Fixed chord label overlap: labels now skip rendering when they'd collide with adjacent labels (measureText + minGap collision avoidance)
+
+## [3.2.89] - 2026-03-29
+### Changed
+- Chord detection now uses time-windowed grouping (default 50ms) — only notes played within the window form a chord
+- Added Chord: 50ms control with +/- buttons (10ms steps, 10-200ms range) in grand staff controls bar
+- Notes outside the window start a new chord group instead of accumulating from all active notes
+
+## [3.2.88] - 2026-03-29
+### Changed
+- Chord detection uses fingerDownNotes only — pedal-sustained notes no longer count toward chord identification
+
+## [3.2.87] - 2026-03-29
+### Added
+- Scrolling chord labels on grand staff — detected chords appear above treble staff and scroll left with notes
+- Chord detection on NoteOn only (no phantom chords on NoteOff per jworks:60 feedback)
+- Chord symbol clears when fewer than 2 notes remain
+
+## [3.2.86] - 2026-03-29
+### Changed
+- Removed viewer count from LIVE indicator, just shows "LIVE"
+
+## [3.2.85] - 2026-03-29
+### Fixed
+- Live indicator now reads actual livestream status from bridge (ws://localhost:3491/ws streamStatus), not local room count
+
+## [3.2.84] - 2026-03-29
+### Changed
+- Live stream: "Go to PianoQuest Live Stream: https://jayismocking.com/live" centered in header, larger text (14px)
+
+## [3.2.79] - 2026-03-29
+### Changed
+- Recording row buttons: Play/Pause/Stop icons (SVG), pencil for Edit, trash for Delete
+- Progress slider appears on playing/paused recording, supports seek
+- Pause/resume support for recording playback
+
+## [3.2.78] - 2026-03-29
+### Fixed
+- Recording playback broken — startPlayback referenced removed btnPlay/btnStopPlay elements, causing null error
+
+## [3.2.77] - 2026-03-29
+### Changed
+- Playback sound now uses real sampled piano (soundfont-player, MusyngKite acoustic_grand_piano) instead of triangle oscillator
+
+## [3.2.76] - 2026-03-29
+### Removed
+- PLAY/STOP buttons and timer from header (playback via Recordings panel Play buttons)
+
+## [3.2.75] - 2026-03-29
+### Changed
+- Moved REC button from header to Recordings panel header (right of RECORDINGS label)
+
+## [3.2.74] - 2026-03-29
+### Fixed
+- Recording user directories are now always lowercase (server lowercases username)
+- Merged Jay/ into jay/, Yuki/ into yuki/
+
+## [3.2.73] - 2026-03-29
+### Fixed
+- Recordings path placeholder now shows per-user path (~/.pianoquest/recordings/Jay)
+- Moved orphan root recordings into Jay's subdirectory, removed empty duplicate jay/ folder
+- Renaming user also updates recordings placeholder and reloads list
+
+## [3.2.72] - 2026-03-29
+### Changed
+- Default tempo changed from 90 to 120 BPM
+
+## [3.2.71] - 2026-03-29
+### Changed
+- Bot terminal now shows real tmux pane (jworks:95) via xterm.js + tmux capture-pane polling, not chat UI
+
+## [3.2.70] - 2026-03-29
+### Changed
+- Moved REC/PLAY buttons into header-left area (next to user badge) for more visual separation from MIDI controls
+
+## [3.2.69] - 2026-03-29
+### Added
+- Floating Bot icon (bottom-right) with terminal overlay for jworks:95 (WebSocket /ws/bot, echo mode for now)
+
+## [3.2.68] - 2026-03-29
+### Changed
+- Moved REC/PLAY buttons to the left of MIDI dropdown with spacer
+
+## [3.2.67] - 2026-03-29
+### Fixed
+- Scores panel playback now feeds notes into waterfall visualization via handleNoteOn/handleNoteOff
+
+## [3.2.66] - 2026-03-29
+### Added
+- Edit button for recordings — rename via prompt, PATCH endpoint on server
+
+## [3.2.65] - 2026-03-29
+### Fixed
+- Recording playback sound — replaced Tone.js synth with plain Web Audio API oscillators (no CDN dependency)
+
+## [3.2.64] - 2026-03-29
+### Fixed
+- Recording playback sound — await Tone.start() to unlock AudioContext before playing
+
+## [3.2.63] - 2026-03-29
+### Changed
+- Username badge in header with pencil icon for renaming (click to change name)
+
+## [3.2.62] - 2026-03-29
+### Added
+- Per-user recordings — prompted for name on first visit, saved to localStorage
+- Recordings stored in ~/.pianoquest/recordings/{username}/ subdirectories
+- Username shown in header bar
+
+## [3.2.61] - 2026-03-29
+### Changed
+- Recordings panel is now always visible in the lower half of the right column
+- Upper half: DRILLS/SCORES tabs, lower half: RECORDINGS
+- Fixed duration/noteCount showing 0 — now computed from events for old PQ Desktop recordings
+- Recordings list loads on page load
+
+## [3.2.60] - 2026-03-29
+### Added
+- REC tab in right panel — lists all saved recordings with Play/Delete
+- Server-side recording storage (default: ~/.pianoquest/recordings/)
+- Custom save folder support — enter any path in the folder input
+- Name prompt when saving recordings
+- REST API: GET/POST/DELETE /api/recordings
+
+## [3.2.59] - 2026-03-29
+### Added
+- Playback now plays sound via Tone.js synth (triangle8 wave, velocity-sensitive)
+- triggerAttack on note_on, triggerRelease on note_off — proper sustain behavior
+- releaseAll on stop to silence any hanging notes
+
+## [3.2.58] - 2026-03-29
+### Added
+- PLAY button — load a recording JSON file and replay through waterfall/keyboard/staff
+- STOP button during playback
+- Playback timer (mm:ss)
+- Supports note_on, note_off, control_change events with relativeTimeMs timing
+
+## [3.2.57] - 2026-03-29
+### Fixed
+- MIDI visualization now works without Start Session — animation loop starts on page load
+- Brother (or anyone) can connect USB MIDI keyboard and see waterfall/keyboard/staff immediately
+
+## [3.2.56] - 2026-03-29
+### Fixed
+- Spectator mode now receives and renders MIDI events (waterfall, keyboard, staff)
+- Spectator also receives transcripts and session settings from primary
+- Started animation loop in spectator mode so visualizations actually render
+
+## [3.2.55] - 2026-03-29
+### Added
+- REC button in header — records MIDI performance client-side (note on/off, CC, pitch bend)
+- Auto-downloads recording as JSON on stop (PQ Desktop compatible format)
+- Sends start_recording/stop_recording to PQ Desktop :3490/ws when connected
+- Timer display during recording (mm:ss)
+
+## [3.2.54] - 2026-03-29
+### Fixed
+- Mic and Gemini are fully optional — session always works for MIDI visualization
+- Status label shows exactly what's missing (no mic, no AI coach) instead of generic failure
+- Removed all "Error" user-facing text — shows "Disconnected" or specific missing component
+### Changed
+- Gemini sends connected status to client so UI tracks AI coach availability in real-time
+
+## [3.2.53] - 2026-03-28
+### Fixed
+- Start Session no longer fails when Gemini Live API is unavailable — session works for MIDI visualization without AI coaching
+- Default port changed from 8080 to 8090 to match Cloudflare tunnel config
+- Added systemd user service for auto-start on boot
+### Changed
+- Gemini Live connection is now optional — shows "Live Agent not available" instead of breaking the session
+
 ## [3.2.52] - 2026-03-20
 ### Removed
 - Hidden pedal status pill from header

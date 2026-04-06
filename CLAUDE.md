@@ -13,38 +13,40 @@ the user through natural voice conversation with real-time visual feedback.
 
 ## Architecture
 
-- **Backend:** TypeScript (Google ADK + Express + WebSocket)
-- **Frontend:** HTML/JS with Web Audio API + Web MIDI API + MediaPipe HandLandmarker
+- **Backend:** TypeScript (Express + WebSocket) — lightweight coordinator
+- **Frontend:** HTML/JS with Web Audio API + Web MIDI API + MediaPipe HandLandmarker + Gemini Live SDK
 - **Deployment:** Google Cloud Run via Cloud Build
-- **API:** Gemini Live API (native audio model) via @google/genai SDK
+- **API:** Gemini Live API (native audio model) via @google/genai SDK **running in browser**
 
-### Multimodal Input Pipeline
+### Architecture (Browser-Side Gemini)
 
 ```
-Phone (secondary)                Desktop (primary)
-├── Camera → JPEG 1fps ──┐      ├── MIDI USB keyboard ──┐
-├── MediaPipe hands ─────┤      │                       │
-└── Mic audio (PCM) ─────┤      │                       │
-                         ▼      │                       ▼
-                    WebSocket (/ws/session)          WebSocket
-                         │                              │
-                         ▼                              ▼
-                   Express Server (server.ts)
+Phone (secondary)                Desktop (primary browser)
+├── Camera → JPEG 1fps ──┐      ├── MIDI USB keyboard ────────────┐
+├── MediaPipe hands ─────┤      ├── Mic audio (PCM) ──────────────┤
+└── Mic audio (PCM) ─────┤      │                                 ▼
+                         ▼      │                          Gemini Live SDK
+                    WebSocket (/ws/session)              (direct from browser)
+                         │                                 │         │
+                         ▼                                 ▼         │
+                   Express Server (server.ts)          Audio playback│
+                   ├── Room/device management              │         │
+                   ├── MIDI bridge relay ──────────────────→│ (midi_for_gemini)
+                   ├── Secondary audio relay ──────────────→│ (secondary_audio)
+                   ├── Video frame relay ──────────────────→│ (video_frame)
+                   └── Spectator broadcast ←───────────────┘ (audio + events)
                          │
-              ┌──────────┼──────────┐
-              ▼          ▼          ▼
-         Gemini Live   Broadcast   Spectators
-         (audio+video  to room     (/ws/spectator)
-          +MIDI text)  devices
+                         ▼
+                    Spectators (/ws/spectator)
 ```
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| `src/agent/server.ts` | Express + WebSocket server, device management, room sessions, Gemini Live connection |
-| `src/agent/agent.ts` | System instruction, tool declarations (set_coaching_focus, report_technique), ADK agent definition |
-| `static/index.html` | All frontend: primary UI, secondary device mode, spectator mode, MediaPipe hand tracking |
+| `src/agent/server.ts` | Express + WebSocket server, device/room management, relay (MIDI bridge, secondary devices), spectator broadcast, `/api/gemini-key` |
+| `src/agent/agent.ts` | System instruction, tool declarations (set_coaching_focus, report_technique), ADK agent definition (constants duplicated in browser) |
+| `static/index.html` | All frontend: primary UI, Gemini Live session, secondary device mode, spectator mode, MediaPipe hand tracking |
 | `src/index.ts` | Entry point |
 
 ### Tools

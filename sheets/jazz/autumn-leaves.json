@@ -1,0 +1,390 @@
+{
+  "title": "Autumn Leaves",
+  "composer": "Joseph Kosma",
+  "key": "G minor",
+  "tempo": 140,
+  "timeSig": "4/4",
+  "beatsPerMeasure": 4,
+  "style": "jazz",
+  "form": "AABA",
+  "formSections": [
+    { "label": "A1", "startMeasure": 1, "endMeasure": 8 },
+    { "label": "A2", "startMeasure": 9, "endMeasure": 16 },
+    { "label": "B", "startMeasure": 17, "endMeasure": 24 },
+    { "label": "A3", "startMeasure": 25, "endMeasure": 32 }
+  ],
+  "measures": [
+    {
+      "_": "A1 m1: Cm7 — The falling leaves",
+      "number": 1,
+      "chord": "Cm7",
+      "scale": { "root": "C", "type": "dorian", "midi": [60,62,63,65,67,69,70] },
+      "voicing": { "midi": [48,51,58] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 75, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A1 m2: F7 — drift by my",
+      "number": 2,
+      "chord": "F7",
+      "scale": { "root": "F", "type": "mixolydian", "midi": [65,67,69,70,72,74,75] },
+      "voicing": { "midi": [53,57,63] },
+      "notes": [
+        {"midi": 77, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"},
+        {"midi": 75, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 74, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "A1 m3: Bbmaj7 — window",
+      "number": 3,
+      "chord": "Bbmaj7",
+      "scale": { "root": "Bb", "type": "ionian", "midi": [58,60,62,63,65,67,69] },
+      "voicing": { "midi": [58,62,65] },
+      "notes": [
+        {"midi": 70, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A1 m4: Ebmaj7 — the autumn leaves",
+      "number": 4,
+      "chord": "Ebmaj7",
+      "scale": { "root": "Eb", "type": "ionian", "midi": [63,65,67,68,70,72,74] },
+      "voicing": { "midi": [51,55,58] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G4"},
+        {"midi": 68, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Ab4"},
+        {"midi": 70, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 72, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "A1 m5: Am7b5 — of red and",
+      "number": 5,
+      "chord": "Am7b5",
+      "scale": { "root": "A", "type": "locrian", "midi": [69,70,72,74,75,77,79] },
+      "voicing": { "midi": [57,60,67] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 75, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A1 m6: D7 — gold",
+      "number": 6,
+      "chord": "D7",
+      "scale": { "root": "D", "type": "mixolydian-b13", "midi": [62,63,66,67,69,70,72] },
+      "voicing": { "midi": [50,54,60] },
+      "notes": [
+        {"midi": 78, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "F#5"},
+        {"midi": 77, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A1 m7: Gm — I see your lips",
+      "number": 7,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 70, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A1 m8: Gm",
+      "number": 8,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 70, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "A2 m9: Cm7 — Since you went away",
+      "number": 9,
+      "chord": "Cm7",
+      "scale": { "root": "C", "type": "dorian", "midi": [60,62,63,65,67,69,70] },
+      "voicing": { "midi": [48,51,58] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 75, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A2 m10: F7 — the days grow",
+      "number": 10,
+      "chord": "F7",
+      "scale": { "root": "F", "type": "mixolydian", "midi": [65,67,69,70,72,74,75] },
+      "voicing": { "midi": [53,57,63] },
+      "notes": [
+        {"midi": 77, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"},
+        {"midi": 75, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 74, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "A2 m11: Bbmaj7 — long",
+      "number": 11,
+      "chord": "Bbmaj7",
+      "scale": { "root": "Bb", "type": "ionian", "midi": [58,60,62,63,65,67,69] },
+      "voicing": { "midi": [58,62,65] },
+      "notes": [
+        {"midi": 70, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A2 m12: Ebmaj7 — and soon I'll hear",
+      "number": 12,
+      "chord": "Ebmaj7",
+      "scale": { "root": "Eb", "type": "ionian", "midi": [63,65,67,68,70,72,74] },
+      "voicing": { "midi": [51,55,58] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G4"},
+        {"midi": 68, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Ab4"},
+        {"midi": 70, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 72, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "A2 m13: Am7b5 — old winter's",
+      "number": 13,
+      "chord": "Am7b5",
+      "scale": { "root": "A", "type": "locrian", "midi": [69,70,72,74,75,77,79] },
+      "voicing": { "midi": [57,60,67] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 75, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A2 m14: D7 — song",
+      "number": 14,
+      "chord": "D7",
+      "scale": { "root": "D", "type": "mixolydian-b13", "midi": [62,63,66,67,69,70,72] },
+      "voicing": { "midi": [50,54,60] },
+      "notes": [
+        {"midi": 78, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "F#5"},
+        {"midi": 77, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A2 m15: Gm — But I miss you",
+      "number": 15,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 70, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A2 m16: Gm — most of all",
+      "number": 16,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 70, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "B m17: Am7b5 — I miss your lips",
+      "number": 17,
+      "chord": "Am7b5",
+      "scale": { "root": "A", "type": "locrian", "midi": [69,70,72,74,75,77,79] },
+      "voicing": { "midi": [57,60,67] },
+      "notes": [
+        {"midi": 75, "beat": 0, "dur": 1, "vel": 85, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 77, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"},
+        {"midi": 75, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 74, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "B m18: D7 — beside me",
+      "number": 18,
+      "chord": "D7",
+      "scale": { "root": "D", "type": "mixolydian-b13", "midi": [62,63,66,67,69,70,72] },
+      "voicing": { "midi": [50,54,60] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "B m19: Gm — the sunlit days",
+      "number": 19,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 70, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "B m20: Gm — that we knew",
+      "number": 20,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "B m21: Cm7 — But I miss you",
+      "number": 21,
+      "chord": "Cm7",
+      "scale": { "root": "C", "type": "dorian", "midi": [60,62,63,65,67,69,70] },
+      "voicing": { "midi": [48,51,58] },
+      "notes": [
+        {"midi": 75, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 77, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"},
+        {"midi": 75, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 74, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "B m22: F7 — most of all",
+      "number": 22,
+      "chord": "F7",
+      "scale": { "root": "F", "type": "mixolydian", "midi": [65,67,69,70,72,74,75] },
+      "voicing": { "midi": [53,57,63] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "B m23: Bbmaj7 — my darling",
+      "number": 23,
+      "chord": "Bbmaj7",
+      "scale": { "root": "Bb", "type": "ionian", "midi": [58,60,62,63,65,67,69] },
+      "voicing": { "midi": [58,62,65] },
+      "notes": [
+        {"midi": 70, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "B m24: Bbmaj7",
+      "number": 24,
+      "chord": "Bbmaj7",
+      "scale": { "root": "Bb", "type": "ionian", "midi": [58,60,62,63,65,67,69] },
+      "voicing": { "midi": [58,62,65] },
+      "notes": [
+        {"midi": 70, "beat": 0, "dur": 4, "vel": 70, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A3 m25: Am7b5 — Since you went away",
+      "number": 25,
+      "chord": "Am7b5",
+      "scale": { "root": "A", "type": "locrian", "midi": [69,70,72,74,75,77,79] },
+      "voicing": { "midi": [57,60,67] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 75, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A3 m26: D7 — the days grow long",
+      "number": 26,
+      "chord": "D7",
+      "scale": { "root": "D", "type": "mixolydian-b13", "midi": [62,63,66,67,69,70,72] },
+      "voicing": { "midi": [50,54,60] },
+      "notes": [
+        {"midi": 78, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "F#5"},
+        {"midi": 77, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A3 m27: Gm — and soon I'll hear",
+      "number": 27,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 70, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A3 m28: Gm — old winter's song",
+      "number": 28,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "A3 m29: Cm7 — But I miss you",
+      "number": 29,
+      "chord": "Cm7",
+      "scale": { "root": "C", "type": "dorian", "midi": [60,62,63,65,67,69,70] },
+      "voicing": { "midi": [48,51,58] },
+      "notes": [
+        {"midi": 75, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A3 m30: F7 — most of all",
+      "number": 30,
+      "chord": "F7",
+      "scale": { "root": "F", "type": "mixolydian", "midi": [65,67,69,70,72,74,75] },
+      "voicing": { "midi": [53,57,63] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 70, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A3 m31: Bbmaj7 — my darling",
+      "number": 31,
+      "chord": "Bbmaj7",
+      "scale": { "root": "Bb", "type": "ionian", "midi": [58,60,62,63,65,67,69] },
+      "voicing": { "midi": [58,62,65] },
+      "notes": [
+        {"midi": 70, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A3 m32: Gm — final",
+      "number": 32,
+      "chord": "Gm",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,75,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 70, "clef": "treble", "pitch": "G4"}
+      ]
+    }
+  ]
+}

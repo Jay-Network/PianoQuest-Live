@@ -1,0 +1,354 @@
+{
+  "title": "So What",
+  "composer": "Miles Davis",
+  "key": "D dorian",
+  "tempo": 136,
+  "timeSig": "4/4",
+  "beatsPerMeasure": 4,
+  "style": "jazz",
+  "form": "AABA",
+  "formSections": [
+    { "label": "A1", "startMeasure": 1, "endMeasure": 8 },
+    { "label": "A2", "startMeasure": 9, "endMeasure": 16 },
+    { "label": "B", "startMeasure": 17, "endMeasure": 24 },
+    { "label": "A3", "startMeasure": 25, "endMeasure": 32 }
+  ],
+  "measures": [
+    {
+      "_": "A1 m1: Dm7 — bass call",
+      "number": 1,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A1 m2: Dm7 — response chord",
+      "number": 2,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A1 m3: Dm7",
+      "number": 3,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A1 m4: Dm7 — response",
+      "number": 4,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A1 m5: Dm7",
+      "number": 5,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A1 m6: Dm7 — response",
+      "number": 6,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A1 m7: Dm7",
+      "number": 7,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A1 m8: Dm7 — response",
+      "number": 8,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A2 m9: Dm7 — repeat A section",
+      "number": 9,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A2 m10: Dm7",
+      "number": 10,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A2 m11: Dm7",
+      "number": 11,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A2 m12: Dm7",
+      "number": 12,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A2 m13: Dm7",
+      "number": 13,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A2 m14: Dm7",
+      "number": 14,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A2 m15: Dm7",
+      "number": 15,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A2 m16: Dm7",
+      "number": 16,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "B m17: Ebm7 — up half step",
+      "number": 17,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 63, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb4"},
+        {"midi": 65, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "B m18: Ebm7",
+      "number": 18,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 66, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "Gb4"}
+      ]
+    },
+    {
+      "_": "B m19: Ebm7",
+      "number": 19,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 63, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb4"},
+        {"midi": 65, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "B m20: Ebm7",
+      "number": 20,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 66, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "Gb4"}
+      ]
+    },
+    {
+      "_": "B m21: Ebm7",
+      "number": 21,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 63, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb4"},
+        {"midi": 65, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "B m22: Ebm7",
+      "number": 22,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 66, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "Gb4"}
+      ]
+    },
+    {
+      "_": "B m23: Ebm7",
+      "number": 23,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 63, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb4"},
+        {"midi": 65, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "B m24: Ebm7",
+      "number": 24,
+      "chord": "Ebm7",
+      "scale": { "root": "Eb", "type": "dorian", "midi": [63,65,66,68,70,72,73] },
+      "voicing": { "midi": [51,54,58,61] },
+      "notes": [
+        {"midi": 66, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "Gb4"}
+      ]
+    },
+    {
+      "_": "A3 m25: Dm7 — back to D dorian",
+      "number": 25,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A3 m26: Dm7",
+      "number": 26,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A3 m27: Dm7",
+      "number": 27,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A3 m28: Dm7",
+      "number": 28,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A3 m29: Dm7",
+      "number": 29,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A3 m30: Dm7",
+      "number": 30,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A3 m31: Dm7",
+      "number": 31,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D4"},
+        {"midi": 64, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A3 m32: Dm7 — final",
+      "number": 32,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57,60] },
+      "notes": [
+        {"midi": 62, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "D4"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "_": "Layout for Blue Bossa — 4 measures per system, 4 systems",
+  "source": "blue-bossa.json",
+  "systems": [4, 4, 4, 4],
+  "staveSpacing": {
+    "trebleToBassGap": 100,
+    "systemToSystemGap": 160,
+    "leftMargin": 60,
+    "rightMargin": 20
+  }
+}
