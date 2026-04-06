@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-04-06
+### Changed
+- Updated Gemini Live model from `gemini-2.5-flash-native-audio-preview-12-2025` to `gemini-2.5-flash-native-audio-latest` (aligns with all other LiveAgent projects)
+- Confirmed `sendClientContent()` is correct for text content — no migration to `sendRealtimeInput()` needed (they serve different purposes)
+
 ## [3.4.0] - 2026-04-05
 ### Added
 - **Jazz Improvisation Practice Mode** — structured Theme → Improv × 2 → Theme sessions over jazz standards
