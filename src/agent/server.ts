@@ -376,135 +376,9 @@ export function createApp() {
   const wssSession = new WebSocketServer({ noServer: true });
   const wssTerminal = new WebSocketServer({ noServer: true });
 
-  // --- Password gate for terminal access ---
-  const TERMINAL_PASSWORD = process.env.TERMINAL_PASSWORD || "chappie2026";
-  // Persist secret so cookies survive server restarts
-  const SECRET_FILE = path.join(process.env.HOME || "/tmp", ".pianoquest-token-secret");
-  let TOKEN_SECRET: string;
-  try {
-    TOKEN_SECRET = fs.readFileSync(SECRET_FILE, "utf-8").trim();
-  } catch {
-    TOKEN_SECRET = crypto.randomBytes(32).toString("hex");
-    fs.writeFileSync(SECRET_FILE, TOKEN_SECRET, { mode: 0o600 });
-  }
-  const TOKEN_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds
-
-  function makeToken(ts: number): string {
-    return crypto.createHmac("sha256", TOKEN_SECRET).update(String(ts)).digest("hex") + "." + ts;
-  }
-
-  function verifyToken(token: string): boolean {
-    const dot = token.lastIndexOf(".");
-    if (dot < 0) return false;
-    const ts = parseInt(token.slice(dot + 1), 10);
-    if (isNaN(ts) || (Date.now() / 1000 - ts) > TOKEN_MAX_AGE) return false;
-    const expected = crypto.createHmac("sha256", TOKEN_SECRET).update(String(ts)).digest("hex") + "." + ts;
-    return token === expected;
-  }
-
-  function parseCookie(header: string | undefined, name: string): string | null {
-    if (!header) return null;
-    const match = header.match(new RegExp(`(?:^|;)\\s*${name}=([^;]+)`));
-    return match ? match[1] : null;
-  }
-
-  function isTerminalAuthed(req: express.Request | IncomingMessage): boolean {
-    const cookieHeader = req.headers.cookie;
-    const token = parseCookie(cookieHeader, "pq_token");
-    if (token && verifyToken(token)) return true;
-    const adminToken = parseCookie(cookieHeader, "pq_admin");
-    if (adminToken && verifyToken(adminToken)) return true;
-    // Also check query param ?token= for WebSocket auth
-    const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
-    const qToken = url.searchParams.get("token");
-    return !!(qToken && verifyToken(qToken));
-  }
-
-  function isAdmin(req: express.Request | IncomingMessage): boolean {
-    const cookieHeader = req.headers.cookie;
-    const adminToken = parseCookie(cookieHeader, "pq_admin");
-    return !!(adminToken && verifyToken(adminToken));
-  }
-
-  const GOOGLE_CLIENT_ID = "168310182926-e1akm27u4rhc8bquoa1669v76lnar3a5.apps.googleusercontent.com";
-  const ADMIN_EMAIL = "jay@jayismocking.com";
-
-  // Login page HTML
-  const LOGIN_PAGE = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PianoQuest — Login</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#09090b;color:#fafafa;font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh}
-.box{background:#111;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:32px;width:320px;text-align:center}
-h1{font-size:18px;margin-bottom:4px}p{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px}
-input{width:100%;padding:10px 14px;background:#1a1a1a;border:1px solid rgba(255,255,255,.15);border-radius:6px;color:#fafafa;font-size:14px;outline:none;margin-bottom:12px}
-input:focus{border-color:#22c55e}button{width:100%;padding:10px;background:#22c55e;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
-button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:8px;display:none}
-.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:rgba(255,255,255,.25);font-size:12px}
-.divider::before,.divider::after{content:'';flex:1;border-top:1px solid rgba(255,255,255,.1)}
-#g_id_onload{margin:0 auto}
-.google-btn{display:flex;justify-content:center;margin-bottom:8px}
-</style></head>
-<body><div class="box"><h1>PianoQuest Live</h1><p>Sign in to continue</p>
-<div class="err" id="err">Wrong password</div>
-<form method="POST" action="/terminal-login"><input type="password" name="password" placeholder="Password" autofocus>
-<button type="submit">Enter</button></form>
-<div id="google-admin" style="display:none;margin-top:16px;"><div class="google-btn"><div id="g_id_onload" data-client_id="${GOOGLE_CLIENT_ID}" data-callback="handleGoogle" data-auto_prompt="false"></div>
-<div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_black" data-text="signin_with" data-size="large" data-logo_alignment="center" data-width="256"></div></div></div>
-<a href="#" onclick="document.getElementById('google-admin').style.display='block';this.style.display='none';return false" style="display:inline-block;margin-top:20px;font-size:11px;color:rgba(255,255,255,.2);text-decoration:none">(admin)</a></div>
-<script>function handleGoogle(r){fetch('/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:r.credential})}).then(function(res){if(res.ok)window.location='/';else res.text().then(function(t){document.getElementById('err').textContent=t;document.getElementById('err').style.display='block';});});}</script>
-</body></html>`;
+  // Auth handled by Cloudflare Zero Trust — no app-level gate needed
 
   app.use(express.json());
-
-  app.use(express.urlencoded({ extended: false }));
-
-  // Google Sign-In verification — decode JWT and check email
-  app.post("/auth/google", async (req, res) => {
-    try {
-      const { credential } = req.body;
-      if (!credential) { res.status(400).send("Missing credential"); return; }
-      // Decode the JWT payload (Google ID tokens are JWTs)
-      const parts = credential.split(".");
-      if (parts.length !== 3) { res.status(400).send("Invalid token"); return; }
-      const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString());
-      // Verify: audience matches our client ID and email matches admin
-      if (payload.aud !== GOOGLE_CLIENT_ID) { res.status(403).send("Invalid audience"); return; }
-      if (payload.iss !== "accounts.google.com" && payload.iss !== "https://accounts.google.com") { res.status(403).send("Invalid issuer"); return; }
-      if (payload.exp && payload.exp < Date.now() / 1000) { res.status(403).send("Token expired"); return; }
-      const email = (payload.email || "").toLowerCase();
-      if (email !== ADMIN_EMAIL) { res.status(403).send("Not authorized — only " + ADMIN_EMAIL); return; }
-      // Issue admin cookie
-      const ts = Math.floor(Date.now() / 1000);
-      const token = makeToken(ts);
-      res.cookie("pq_admin", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: TOKEN_MAX_AGE * 1000 });
-      res.cookie("pq_token", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: TOKEN_MAX_AGE * 1000 });
-      res.json({ ok: true, email });
-    } catch (e: any) {
-      res.status(500).send("Auth error: " + (e?.message || "unknown"));
-    }
-  });
-
-  app.post("/terminal-login", (req, res) => {
-    if (req.body?.password === TERMINAL_PASSWORD) {
-      const ts = Math.floor(Date.now() / 1000);
-      const token = makeToken(ts);
-      res.cookie("pq_token", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: TOKEN_MAX_AGE * 1000 });
-      const redirect = (req.query.next as string) || "/";
-      res.redirect(redirect);
-    } else {
-      res.status(401).send(LOGIN_PAGE.replace('display:none', ''));
-    }
-  });
-
-  app.get("/auth/signout", (_req, res) => {
-    res.clearCookie("pq_token");
-    res.clearCookie("pq_admin");
-    res.redirect("/");
-  });
-
-  app.get("/auth/me", (req, res) => {
-    res.json({ admin: isAdmin(req), authed: isTerminalAuthed(req) });
-  });
 
   app.get("/health", (_req, res) => {
     res.json({
@@ -538,13 +412,11 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
     res.json(status);
   });
 
-  app.get("/", (req, res) => {
-    if (!isTerminalAuthed(req)) return res.send(LOGIN_PAGE);
+  app.get("/", (_req, res) => {
     res.sendFile(path.join(STATIC_DIR, "index.html"));
   });
 
-  app.get("/terminal", (req, res) => {
-    if (!isTerminalAuthed(req)) return res.send(LOGIN_PAGE);
+  app.get("/terminal", (_req, res) => {
     res.sendFile(path.join(STATIC_DIR, "terminal.html"));
   });
 
@@ -612,11 +484,6 @@ button:hover{background:#16a34a}.err{color:#ef4444;font-size:12px;margin-bottom:
         wssMidi.emit("connection", ws, request);
       });
     } else if (url.pathname === "/ws/terminal") {
-      if (!isTerminalAuthed(request)) {
-        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-        socket.destroy();
-        return;
-      }
       wssTerminal.handleUpgrade(request, socket, head, (ws) => {
         wssTerminal.emit("connection", ws, request);
       });

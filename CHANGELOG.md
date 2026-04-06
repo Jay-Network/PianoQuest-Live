@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.3.11] - 2026-04-06
+### Removed
+- App-level password gate (chappie2026) and all auth routes — Cloudflare Zero Trust now handles access control
+- Sign-out button and /auth/me check from frontend
+- Google Sign-In admin flow, cookie token system, LOGIN_PAGE HTML
+
 ## [3.3.10] - 2026-03-23
 ### Added
 - Inline tool call messages in conversation panel (shows icon + summary for each tool event)
