@@ -27,10 +27,10 @@ No browser, no clicks, no manual steps.
 
 ## Architecture
 
-- **Backend:** TypeScript (Google ADK + Express + WebSocket)
-- **Frontend:** HTML/JS with Web Audio API + Web MIDI API + MediaPipe HandLandmarker
+- **Backend:** TypeScript (Express + WebSocket) — lightweight coordinator
+- **Frontend:** HTML/JS with Web Audio API + Web MIDI API + MediaPipe HandLandmarker + Gemini Live SDK
 - **Deployment:** Google Cloud Run via Cloud Build (hackathon branch), systemd locally (dev-terminal)
-- **API:** Gemini Live API (native audio model) via @google/genai SDK
+- **API:** Gemini Live API (native audio model) via @google/genai SDK **running in browser**
 
 ### Signal Flow
 
@@ -41,11 +41,13 @@ Piano (CASIO USB)
 PQ Desktop (:3490/ws)          Browser (optional)
     │                           ├── Web MIDI (fallback)
     │                           ├── Camera/MediaPipe
-    │                           └── Mic → Gemini coaching
+    │                           └── Mic → Gemini Live SDK (direct)
     ▼                               │
 PQ Live server (systemd :8090)  ◄───┘
     │
     ├── HOME room (persistent, auto-live)
+    ├── MIDI bridge relay → browser Gemini
+    ├── Secondary audio/video relay → browser Gemini
     ├── /ws/spectator → iPad (PQ Remote)
     └── /ws/spectator → jayismocking.com/live (PQ Stream)
 ```
@@ -54,9 +56,9 @@ PQ Live server (systemd :8090)  ◄───┘
 
 | File | Purpose |
 |------|---------|
-| `src/agent/server.ts` | Express + WebSocket server, device management, room sessions, Gemini Live connection |
-| `src/agent/agent.ts` | System instruction, tool declarations (set_coaching_focus, report_technique), ADK agent definition |
-| `static/index.html` | All frontend: primary UI, secondary device mode, spectator mode, MediaPipe hand tracking |
+| `src/agent/server.ts` | Express + WebSocket server, device/room management, relay (MIDI bridge, secondary devices), spectator broadcast, `/api/gemini-key` |
+| `src/agent/agent.ts` | System instruction, tool declarations (set_coaching_focus, report_technique), ADK agent definition (constants duplicated in browser) |
+| `static/index.html` | All frontend: primary UI, Gemini Live session, secondary device mode, spectator mode, MediaPipe hand tracking |
 | `src/index.ts` | Entry point |
 
 ### Tools

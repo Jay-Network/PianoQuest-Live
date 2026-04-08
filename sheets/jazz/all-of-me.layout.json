@@ -1,0 +1,11 @@
+{
+  "_": "Layout for All of Me — 4 measures per system, 8 systems",
+  "source": "all-of-me.json",
+  "systems": [4, 4, 4, 4, 4, 4, 4, 4],
+  "staveSpacing": {
+    "trebleToBassGap": 100,
+    "systemToSystemGap": 160,
+    "leftMargin": 60,
+    "rightMargin": 20
+  }
+}

@@ -1,0 +1,377 @@
+{
+  "title": "All of Me",
+  "composer": "Gerald Marks & Seymour Simons",
+  "key": "C major",
+  "tempo": 130,
+  "timeSig": "4/4",
+  "beatsPerMeasure": 4,
+  "style": "jazz",
+  "form": "ABAC",
+  "formSections": [
+    { "label": "A1", "startMeasure": 1, "endMeasure": 8 },
+    { "label": "B", "startMeasure": 9, "endMeasure": 16 },
+    { "label": "A2", "startMeasure": 17, "endMeasure": 24 },
+    { "label": "C", "startMeasure": 25, "endMeasure": 32 }
+  ],
+  "measures": [
+    {
+      "_": "A1 m1: C — All of me",
+      "number": 1,
+      "chord": "C",
+      "scale": { "root": "C", "type": "ionian", "midi": [60,62,64,65,67,69,71] },
+      "voicing": { "midi": [48,52,55] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G4"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A1 m2: C — why not take",
+      "number": 2,
+      "chord": "C",
+      "scale": { "root": "C", "type": "ionian", "midi": [60,62,64,65,67,69,71] },
+      "voicing": { "midi": [48,52,55] },
+      "notes": [
+        {"midi": 76, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A1 m3: E7 — all of me",
+      "number": 3,
+      "chord": "E7",
+      "scale": { "root": "E", "type": "mixolydian", "midi": [64,66,68,69,71,73,74] },
+      "voicing": { "midi": [52,56,62] },
+      "notes": [
+        {"midi": 68, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G#4"},
+        {"midi": 71, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A1 m4: E7 — can't you see",
+      "number": 4,
+      "chord": "E7",
+      "scale": { "root": "E", "type": "mixolydian", "midi": [64,66,68,69,71,73,74] },
+      "voicing": { "midi": [52,56,62] },
+      "notes": [
+        {"midi": 76, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A1 m5: A7 — I'm no good with-",
+      "number": 5,
+      "chord": "A7",
+      "scale": { "root": "A", "type": "mixolydian", "midi": [69,71,73,74,76,78,79] },
+      "voicing": { "midi": [57,61,67] },
+      "notes": [
+        {"midi": 71, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A1 m6: A7 — -out you",
+      "number": 6,
+      "chord": "A7",
+      "scale": { "root": "A", "type": "mixolydian", "midi": [69,71,73,74,76,78,79] },
+      "voicing": { "midi": [57,61,67] },
+      "notes": [
+        {"midi": 76, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A1 m7: Dm — take my lips",
+      "number": 7,
+      "chord": "Dm",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 80, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A1 m8: Dm — I want to lose them",
+      "number": 8,
+      "chord": "Dm",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "B m9: E7 — take my arms",
+      "number": 9,
+      "chord": "E7",
+      "scale": { "root": "E", "type": "mixolydian", "midi": [64,66,68,69,71,73,74] },
+      "voicing": { "midi": [52,56,62] },
+      "notes": [
+        {"midi": 68, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G#4"},
+        {"midi": 71, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"},
+        {"midi": 74, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "B m10: E7 — I'll never use them",
+      "number": 10,
+      "chord": "E7",
+      "scale": { "root": "E", "type": "mixolydian", "midi": [64,66,68,69,71,73,74] },
+      "voicing": { "midi": [52,56,62] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "B m11: Am — your goodbye",
+      "number": 11,
+      "chord": "Am",
+      "scale": { "root": "A", "type": "aeolian", "midi": [69,71,72,74,76,77,79] },
+      "voicing": { "midi": [57,60,64] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 71, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "B4"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 80, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "B m12: Am — left me with eyes that cry",
+      "number": 12,
+      "chord": "Am",
+      "scale": { "root": "A", "type": "aeolian", "midi": [69,71,72,74,76,77,79] },
+      "voicing": { "midi": [57,60,64] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "B m13: D7 — how can I",
+      "number": 13,
+      "chord": "D7",
+      "scale": { "root": "D", "type": "mixolydian", "midi": [62,64,66,67,69,71,72] },
+      "voicing": { "midi": [50,54,60] },
+      "notes": [
+        {"midi": 66, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F#4"},
+        {"midi": 69, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 72, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "B m14: D7 — go on dear",
+      "number": 14,
+      "chord": "D7",
+      "scale": { "root": "D", "type": "mixolydian", "midi": [62,64,66,67,69,71,72] },
+      "voicing": { "midi": [50,54,60] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "B m15: Dm7 — without you",
+      "number": 15,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,60] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"},
+        {"midi": 71, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "B4"},
+        {"midi": 69, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "B m16: G7 — you took the part",
+      "number": 16,
+      "chord": "G7",
+      "scale": { "root": "G", "type": "mixolydian", "midi": [67,69,71,72,74,76,77] },
+      "voicing": { "midi": [55,59,65] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "A2 m17: C — that once was my heart",
+      "number": 17,
+      "chord": "C",
+      "scale": { "root": "C", "type": "ionian", "midi": [60,62,64,65,67,69,71] },
+      "voicing": { "midi": [48,52,55] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G4"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A2 m18: C — so why not",
+      "number": 18,
+      "chord": "C",
+      "scale": { "root": "C", "type": "ionian", "midi": [60,62,64,65,67,69,71] },
+      "voicing": { "midi": [48,52,55] },
+      "notes": [
+        {"midi": 76, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A2 m19: E7 — take all of me",
+      "number": 19,
+      "chord": "E7",
+      "scale": { "root": "E", "type": "mixolydian", "midi": [64,66,68,69,71,73,74] },
+      "voicing": { "midi": [52,56,62] },
+      "notes": [
+        {"midi": 68, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G#4"},
+        {"midi": 71, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A2 m20: E7 — can't you see",
+      "number": 20,
+      "chord": "E7",
+      "scale": { "root": "E", "type": "mixolydian", "midi": [64,66,68,69,71,73,74] },
+      "voicing": { "midi": [52,56,62] },
+      "notes": [
+        {"midi": 76, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A2 m21: A7 — I'm no good with-",
+      "number": 21,
+      "chord": "A7",
+      "scale": { "root": "A", "type": "mixolydian", "midi": [69,71,73,74,76,78,79] },
+      "voicing": { "midi": [57,61,67] },
+      "notes": [
+        {"midi": 71, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A2 m22: A7 — -out you",
+      "number": 22,
+      "chord": "A7",
+      "scale": { "root": "A", "type": "mixolydian", "midi": [69,71,73,74,76,78,79] },
+      "voicing": { "midi": [57,61,67] },
+      "notes": [
+        {"midi": 76, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A2 m23: Dm — take my lips",
+      "number": 23,
+      "chord": "Dm",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 80, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A2 m24: Dm — I want to lose them",
+      "number": 24,
+      "chord": "Dm",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,57] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "C m25: F — you took my heart",
+      "number": 25,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 2, "dur": 2, "vel": 85, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "C m26: Fm — and then you start-",
+      "number": 26,
+      "chord": "Fm",
+      "scale": { "root": "F", "type": "dorian", "midi": [65,67,68,70,72,74,75] },
+      "voicing": { "midi": [53,56,60] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 68, "beat": 2, "dur": 2, "vel": 80, "clef": "treble", "pitch": "Ab4"}
+      ]
+    },
+    {
+      "_": "C m27: C — -ed, why not take",
+      "number": 27,
+      "chord": "C",
+      "scale": { "root": "C", "type": "ionian", "midi": [60,62,64,65,67,69,71] },
+      "voicing": { "midi": [48,52,55] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G4"},
+        {"midi": 69, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 71, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"},
+        {"midi": 72, "beat": 3, "dur": 1, "vel": 85, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "C m28: A7 — all of me",
+      "number": 28,
+      "chord": "A7",
+      "scale": { "root": "A", "type": "mixolydian", "midi": [69,71,73,74,76,78,79] },
+      "voicing": { "midi": [57,61,67] },
+      "notes": [
+        {"midi": 73, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "C#5"},
+        {"midi": 69, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "C m29: Dm7 — you took the part",
+      "number": 29,
+      "chord": "Dm7",
+      "scale": { "root": "D", "type": "dorian", "midi": [62,64,65,67,69,71,72] },
+      "voicing": { "midi": [50,53,60] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"},
+        {"midi": 69, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "A4"},
+        {"midi": 67, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "C m30: G7 — that once was my heart",
+      "number": 30,
+      "chord": "G7",
+      "scale": { "root": "G", "type": "mixolydian", "midi": [67,69,71,72,74,76,77] },
+      "voicing": { "midi": [55,59,65] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F4"},
+        {"midi": 67, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "G4"},
+        {"midi": 69, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 71, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"}
+      ]
+    },
+    {
+      "_": "C m31: C — so why not take all of me",
+      "number": 31,
+      "chord": "C",
+      "scale": { "root": "C", "type": "ionian", "midi": [60,62,64,65,67,69,71] },
+      "voicing": { "midi": [48,52,55] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 4, "vel": 85, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "C m32: C — (ending)",
+      "number": 32,
+      "chord": "C",
+      "scale": { "root": "C", "type": "ionian", "midi": [60,62,64,65,67,69,71] },
+      "voicing": { "midi": [48,52,55] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    }
+  ]
+}

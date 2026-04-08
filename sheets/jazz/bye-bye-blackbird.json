@@ -1,0 +1,386 @@
+{
+  "title": "Bye Bye Blackbird",
+  "composer": "Ray Henderson",
+  "key": "F major",
+  "tempo": 140,
+  "timeSig": "4/4",
+  "beatsPerMeasure": 4,
+  "style": "jazz",
+  "form": "AABA",
+  "formSections": [
+    { "label": "A1", "startMeasure": 1, "endMeasure": 8 },
+    { "label": "A2", "startMeasure": 9, "endMeasure": 16 },
+    { "label": "B", "startMeasure": 17, "endMeasure": 24 },
+    { "label": "A3", "startMeasure": 25, "endMeasure": 32 }
+  ],
+  "measures": [
+    {
+      "_": "A1 m1: F — Pack up all my cares and woe",
+      "number": 1,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 76, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A1 m2: F — here I go",
+      "number": 2,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 77, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "F5"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A1 m3: Gm7 — singing low",
+      "number": 3,
+      "chord": "Gm7",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,76,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A1 m4: Gm7",
+      "number": 4,
+      "chord": "Gm7",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,76,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "A1 m5: C7 — bye bye",
+      "number": 5,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 70, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 72, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "A1 m6: C7 — blackbird",
+      "number": 6,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A1 m7: F — bye bye",
+      "number": 7,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A1 m8: F",
+      "number": 8,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 70, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A2 m9: F — No one here can love or understand me",
+      "number": 9,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 76, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A2 m10: F",
+      "number": 10,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 77, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "F5"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A2 m11: Gm7",
+      "number": 11,
+      "chord": "Gm7",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,76,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A2 m12: Gm7",
+      "number": 12,
+      "chord": "Gm7",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,76,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "A2 m13: C7",
+      "number": 13,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 70, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 72, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "A2 m14: C7",
+      "number": 14,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "Bb4"}
+      ]
+    },
+    {
+      "_": "A2 m15: F",
+      "number": 15,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A2 m16: F",
+      "number": 16,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 70, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "B m17: Fm7 — Make my bed and light the light",
+      "number": 17,
+      "chord": "Fm7",
+      "scale": { "root": "F", "type": "dorian", "midi": [65,67,68,70,72,74,75] },
+      "voicing": { "midi": [53,56,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 1, "vel": 85, "clef": "treble", "pitch": "F4"},
+        {"midi": 68, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Ab4"},
+        {"midi": 72, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 75, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"}
+      ]
+    },
+    {
+      "_": "B m18: Bb7",
+      "number": 18,
+      "chord": "Bb7",
+      "scale": { "root": "Bb", "type": "mixolydian", "midi": [70,72,74,75,77,79,80] },
+      "voicing": { "midi": [58,62,68] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "B m19: Ebmaj7 — I'll arrive late tonight",
+      "number": 19,
+      "chord": "Ebmaj7",
+      "scale": { "root": "Eb", "type": "ionian", "midi": [63,65,67,68,70,72,74] },
+      "voicing": { "midi": [51,55,58] },
+      "notes": [
+        {"midi": 70, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 75, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Eb5"}
+      ]
+    },
+    {
+      "_": "B m20: Ebmaj7",
+      "number": 20,
+      "chord": "Ebmaj7",
+      "scale": { "root": "Eb", "type": "ionian", "midi": [63,65,67,68,70,72,74] },
+      "voicing": { "midi": [51,55,58] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "B m21: G7",
+      "number": 21,
+      "chord": "G7",
+      "scale": { "root": "G", "type": "mixolydian", "midi": [67,69,71,72,74,76,77] },
+      "voicing": { "midi": [55,59,65] },
+      "notes": [
+        {"midi": 71, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "B4"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 76, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "B m22: G7",
+      "number": 22,
+      "chord": "G7",
+      "scale": { "root": "G", "type": "mixolydian", "midi": [67,69,71,72,74,76,77] },
+      "voicing": { "midi": [55,59,65] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "B m23: C7",
+      "number": 23,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "A4"},
+        {"midi": 67, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "B m24: C7",
+      "number": 24,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 2, "vel": 75, "clef": "treble", "pitch": "F4"},
+        {"midi": 64, "beat": 2, "dur": 2, "vel": 70, "clef": "treble", "pitch": "E4"}
+      ]
+    },
+    {
+      "_": "A3 m25: F — Pack up all my cares and woe (reprise)",
+      "number": 25,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 76, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "E5"},
+        {"midi": 77, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "F5"}
+      ]
+    },
+    {
+      "_": "A3 m26: F",
+      "number": 26,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 77, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "F5"},
+        {"midi": 76, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "E5"}
+      ]
+    },
+    {
+      "_": "A3 m27: Gm7",
+      "number": 27,
+      "chord": "Gm7",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,76,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 74, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"},
+        {"midi": 72, "beat": 1, "dur": 1, "vel": 75, "clef": "treble", "pitch": "C5"},
+        {"midi": 70, "beat": 2, "dur": 1, "vel": 75, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 69, "beat": 3, "dur": 1, "vel": 75, "clef": "treble", "pitch": "A4"}
+      ]
+    },
+    {
+      "_": "A3 m28: Gm7",
+      "number": 28,
+      "chord": "Gm7",
+      "scale": { "root": "G", "type": "dorian", "midi": [67,69,70,72,74,76,77] },
+      "voicing": { "midi": [55,58,62] },
+      "notes": [
+        {"midi": 67, "beat": 0, "dur": 4, "vel": 75, "clef": "treble", "pitch": "G4"}
+      ]
+    },
+    {
+      "_": "A3 m29: C7",
+      "number": 29,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 1, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 70, "beat": 1, "dur": 1, "vel": 80, "clef": "treble", "pitch": "Bb4"},
+        {"midi": 72, "beat": 2, "dur": 1, "vel": 80, "clef": "treble", "pitch": "C5"},
+        {"midi": 74, "beat": 3, "dur": 1, "vel": 80, "clef": "treble", "pitch": "D5"}
+      ]
+    },
+    {
+      "_": "A3 m30: C7",
+      "number": 30,
+      "chord": "C7",
+      "scale": { "root": "C", "type": "mixolydian", "midi": [60,62,64,65,67,69,70] },
+      "voicing": { "midi": [48,52,58] },
+      "notes": [
+        {"midi": 72, "beat": 0, "dur": 4, "vel": 80, "clef": "treble", "pitch": "C5"}
+      ]
+    },
+    {
+      "_": "A3 m31: F — ending",
+      "number": 31,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 69, "beat": 0, "dur": 2, "vel": 80, "clef": "treble", "pitch": "A4"},
+        {"midi": 65, "beat": 2, "dur": 2, "vel": 75, "clef": "treble", "pitch": "F4"}
+      ]
+    },
+    {
+      "_": "A3 m32: F — final",
+      "number": 32,
+      "chord": "F",
+      "scale": { "root": "F", "type": "ionian", "midi": [65,67,69,70,72,74,76] },
+      "voicing": { "midi": [53,57,60] },
+      "notes": [
+        {"midi": 65, "beat": 0, "dur": 4, "vel": 70, "clef": "treble", "pitch": "F4"}
+      ]
+    }
+  ]
+}

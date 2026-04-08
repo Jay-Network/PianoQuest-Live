@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.5.1] - 2026-04-07
+### Changed
+- Merged dev-terminal branch into main: combined browser-side Gemini architecture with desktop bridge, persistent HOME room, status tracking, on-demand coaching state, and Cloudflare Zero Trust auth
+- Removed broken terminal panel code (missing node-pty dependency)
+- Server-side Gemini code replaced with browser-side forwarding (gemini_tool_event, gemini_transcript, gemini_turn message types)
+
+## [3.5.0] - 2026-04-06
+### Changed
+- Updated Gemini Live model from `gemini-2.5-flash-native-audio-preview-12-2025` to `gemini-2.5-flash-native-audio-latest` (aligns with all other LiveAgent projects)
+- Confirmed `sendClientContent()` is correct for text content — no migration to `sendRealtimeInput()` needed (they serve different purposes)
+
+## [3.4.0] - 2026-04-05
+### Added
+- **Jazz Improvisation Practice Mode** — structured Theme → Improv × 2 → Theme sessions over jazz standards
+- 5 jazz lead sheets with chord symbols, recommended scales, and left-hand voicings: Bye Bye Blackbird, Autumn Leaves, All of Me, Blue Bossa, So What
+- Jazz lead sheet JSON format: per-measure `chord`, `scale` (root + type + MIDI), `voicing` (MIDI), `formSections`, `style: "jazz"`
+- Chord symbol rendering on VexFlow score (yellow text above treble stave) for jazz sheets
+- Form section labels (rehearsal marks: A1, A2, B, A3) as boxed labels above chord symbols
+- Jazz session engine: state machine for Theme/Improv/Theme phases with automatic measure tracking and phase transitions
+- "Jazz Session" button in score toolbar (only visible for jazz sheets), "End Session" stop button
+- Phase indicator overlay showing current phase (THEME, IMPROV 1, IMPROV 2, THEME OUTRO) and measure count
+- Scale waterfall rendering during improv phases — semi-transparent cyan notes showing recommended scale degrees
+- Left-hand chord voicing highlight on keyboard — gold/amber keys with chord name label during improv phases
+- During Theme phases: melody falls as target notes (existing system)
+- During Improv phases: scale guidance waterfall + voicing highlights (no melody targets — free improvisation)
+
+## [3.3.0] - 2026-03-29
+### Changed
+- **Major architecture: Gemini Live session moved from server to browser.** The primary browser now connects directly to Gemini via `@google/genai` SDK loaded from CDN. Server becomes a lightweight coordinator for room/device management, MIDI bridge relay, and spectator broadcasting. This offloads all Gemini API processing to the client machine.
+- Server: removed all Gemini SDK imports and session management. Added `/api/gemini-key` endpoint, forwarding handlers for `gemini_tool_event`, `gemini_transcript`, `gemini_turn`, `midi_for_gemini`, `secondary_audio`, `text_for_gemini`.
+- Browser: added `connectGemini()` with full onmessage handling (audio playback, tool calls, transcripts, turn events). Mic audio, MIDI snapshots, text input, and video frames now go directly to Gemini. Gemini audio and events forwarded to server for spectator broadcast.
+
 ## [3.3.11] - 2026-04-06
 ### Removed
 - App-level password gate (chappie2026) and all auth routes — Cloudflare Zero Trust now handles access control
