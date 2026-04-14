@@ -1,7 +1,7 @@
 # TODO — PianoQuest Live
 
 ## Active Tasks
-- [ ] S1-PQ-1: Verify 3 play modes functional (Journey/Compose/Jam) — v3.6.0 mode selector implemented, needs commit + restart service to verify
+(none)
 
 ## Investigated (needs Jay)
 - pianoquest.live NXDOMAIN — domain not in Cloudflare, tunnel only routes pianoquest.jayismocking.com. Needs zone setup or redirect. Reported to jworks:20 (2026-04-10)
@@ -13,6 +13,8 @@
 - BUG-015 status: Gemini connection twitching — marked investigating, may be resolved after browser-side Gemini move
 
 ## Completed
+- [x] S1-PQ-1: 3 play modes (Journey/Compose/Jam) v3.6.0 — deployed, awaiting Jay browser verification (2026-04-14)
+- [x] BUG-003: Fix bridge reconnect log spam — backoff cap 30s→5min (2026-04-14)
 - [x] Resolve merge conflicts: dev-terminal + main → v3.5.1 (2026-04-07)
 - [x] Update Gemini model to -latest alias, confirm sendClientContent is correct — v3.5.0 (2026-04-06)
 - [x] Commit all uncommitted changes v3.2.53–v3.4.0 (2026-04-06)
