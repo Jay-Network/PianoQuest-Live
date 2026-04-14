@@ -10,9 +10,8 @@
 - Test all flows: mic → Gemini → audio, MIDI bridge, secondary camera, spectators (needs hardware/Jay present)
 - Evaluate migration to gemini-3.1-flash-live-preview (2x conversation memory, 90+ languages, faster responses)
 - Verify browser-side Gemini works with Start Coaching flow after merge
-- BUG-015: Closed as resolved — superseded by browser-side Gemini architecture (v3.3.0)
-
 ## Completed
+- [x] v3.6.1: Fix dead imports, WS error handlers, Gemini key fetch UI, close BUG-015 (2026-04-14)
 - [x] S1-PQ-1: 3 play modes (Journey/Compose/Jam) v3.6.0 — deployed, awaiting Jay browser verification (2026-04-14)
 - [x] BUG-003: Fix bridge reconnect log spam — backoff cap 30s→5min (2026-04-14)
 - [x] Resolve merge conflicts: dev-terminal + main → v3.5.1 (2026-04-07)
