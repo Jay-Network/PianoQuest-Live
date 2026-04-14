@@ -125,9 +125,9 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 ## BUG-015
 - Version found: `1.8.1`
 - Severity: Critical
-- Status: Investigating
+- Status: Resolved (superseded by architecture change in v3.3.0)
 - Root cause: Gemini connection still twitching between connected/disconnected even with SDK live.connect(). Stripped to minimal config in v1.8.2.
-- Fix: TBD — stripped config to absolute minimum (responseModalities only). If still failing, need to check API key, model availability, or network issues.
+- Fix: Architecture changed in v3.3.0 — Gemini Live session moved from server to browser. Server-side Gemini code removed entirely. Browser-side connection uses @google/genai SDK directly with simpler lifecycle. The twitching was caused by server-side WebSocket relay complexity that no longer exists.
 
 ## BUG-017
 - Version found: `2.0.3`

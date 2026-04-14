@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.6.1] - 2026-04-14
+### Fixed
+- Remove unused imports (`crypto`, `execFile`) from server.ts
+- Add missing `ws.on("error")` handlers to bot terminal and MIDI bridge WebSocket connections — prevents resource leaks on error
+- Fix Gemini key fetch error not updating UI status (sessionFlags.gemini not set, statusLabel not updated on /api/gemini-key failure)
+- Close BUG-015 (Gemini connection twitching) as resolved — superseded by browser-side Gemini architecture in v3.3.0
+
 ## [3.6.0] - 2026-04-14
 ### Added
 - **3 Play Modes** — Journey (guided coaching + drills), Compose (free play + recording + scores), Jam (jazz improvisation + lead sheets). Mode selector bar with persistent localStorage selection.

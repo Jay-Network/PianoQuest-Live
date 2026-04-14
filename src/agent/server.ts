@@ -5,12 +5,10 @@
  */
 
 import express from "express";
-import crypto from "crypto";
 import { createServer } from "http";
 import { execFileSync } from "child_process";
 import path from "path";
 import fs from "fs";
-import { execFile } from "child_process";
 import { WebSocketServer, WebSocket } from "ws";
 import type { IncomingMessage } from "http";
 // Gemini Live API now runs in the browser — server is a lightweight coordinator
@@ -705,6 +703,11 @@ export function createApp() {
       botClients.delete(ws);
       console.log(`[${APP_NAME}] Bot terminal disconnected (total: ${botClients.size})`);
     });
+
+    ws.on("error", () => {
+      clearInterval(poll);
+      botClients.delete(ws);
+    });
   });
 
   wssSpectator.on("connection", (ws: WebSocket) => {
@@ -862,13 +865,16 @@ export function createApp() {
 
     ws.on("close", () => {
       console.log(`[${APP_NAME}] MIDI bridge disconnected from room "${room}"`);
-      // Notify room clients that bridge MIDI is gone — fall back to direct
       broadcastToRoom(roomSession, JSON.stringify({ type: "midi_source", source: "direct" }));
       if (roomSession.midiFlushTimer) {
         clearTimeout(roomSession.midiFlushTimer);
         roomSession.midiFlushTimer = null;
         flushMidiToGemini(roomSession);
       }
+    });
+
+    ws.on("error", () => {
+      broadcastToRoom(roomSession, JSON.stringify({ type: "midi_source", source: "direct" }));
     });
   });
 
