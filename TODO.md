@@ -1,7 +1,10 @@
 # TODO — PianoQuest Live
 
 ## Active Tasks
-(none)
+- [ ] S1-PQ-1: Verify 3 play modes functional (Journey/Compose/Jam) — v3.6.0 mode selector implemented, needs commit + restart service to verify
+
+## Investigated (needs Jay)
+- pianoquest.live NXDOMAIN — domain not in Cloudflare, tunnel only routes pianoquest.jayismocking.com. Needs zone setup or redirect. Reported to jworks:20 (2026-04-10)
 
 ## Backlog
 - Test all flows: mic → Gemini → audio, MIDI bridge, secondary camera, spectators (needs hardware/Jay present)

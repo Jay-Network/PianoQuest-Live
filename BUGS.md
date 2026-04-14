@@ -6,6 +6,12 @@
 
 ## Resolved
 
+### BUG-003: Desktop bridge reconnect log spam (2026-04-14)
+- **Symptom**: When PQ Desktop is offline, server logs "Desktop bridge disconnected, reconnecting in 30000ms" every 30 seconds, producing 2,880 log lines/day
+- **Root cause**: Exponential backoff capped at 30s max. Once at cap, every reconnect attempt logged identically.
+- **Fix**: Increased backoff cap from 30s to 5min (300000ms). Suppressed log output once delay exceeds 60s (status log still shows bridge state every 60s).
+- **Prevention**: Long-running background reconnect loops should cap at minutes, not seconds, and suppress repetitive logs.
+
 ### BUG-001: Start Session fails with generic "error" (2026-03-28)
 - **Symptom**: Clicking "Start Session" showed "error" status, session never connected
 - **Root cause**: `handlePrimaryWebSocket` required successful Gemini Live API connection before creating the room. If Gemini connect failed (or was slow), the entire session was aborted — no room, no MIDI, nothing.

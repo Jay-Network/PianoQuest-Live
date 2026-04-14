@@ -59,6 +59,30 @@
   .header h1 span { color: var(--accent); }
   .header-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.04em; }
 
+  /* Play Mode Selector */
+  .mode-bar {
+    display: flex; align-items: center; gap: 0; padding: 0 12px;
+    flex-shrink: 0;
+  }
+  .mode-bar-group {
+    display: flex; gap: 0; background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+  }
+  .mode-btn {
+    padding: 6px 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+    color: var(--text3); background: transparent; border: none; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; position: relative;
+  }
+  .mode-btn:hover { color: var(--text2); background: rgba(255,255,255,0.03); }
+  .mode-btn.active {
+    color: var(--text1); background: rgba(255,255,255,0.08);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+  .mode-btn + .mode-btn { border-left: 1px solid var(--border); }
+  .mode-desc {
+    margin-left: 16px; font-size: 11px; color: var(--text3); letter-spacing: 0.02em;
+  }
+
   .controls { display: flex; gap: 10px; align-items: center; }
   .status-dot {
     width: 8px; height: 8px; border-radius: 50%; background: #444;
@@ -696,7 +720,7 @@ window.GeminiModality = Modality;
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">CREATIVE STORYTELLER &middot; REAL-TIME PIANO COACHING &middot; v3.5.1</div>
+        <div class="header-sub">REAL-TIME PIANO COACHING &middot; v3.6.0</div>
       </div>
       <div id="userBadge" style="display:none;align-items:center;gap:6px;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);cursor:pointer;" onclick="renameUser()" title="Click to change name">
         <span id="userBadgeName" style="font-size:13px;font-weight:600;color:var(--text1);"></span>
@@ -729,6 +753,16 @@ window.GeminiModality = Modality;
       <button id="btn-terminal" title="Toggle Agent Terminal (Ctrl+`)">&#9638; Talk to Claude</button>
       <button class="primary" id="btnStart" onclick="toggleSession()">Start Session</button>
     </div>
+  </div>
+
+  <!-- Play Mode Selector -->
+  <div class="mode-bar">
+    <div class="mode-bar-group">
+      <button class="mode-btn active" data-mode="journey" onclick="switchPlayMode('journey')">JOURNEY</button>
+      <button class="mode-btn" data-mode="compose" onclick="switchPlayMode('compose')">COMPOSE</button>
+      <button class="mode-btn" data-mode="jam" onclick="switchPlayMode('jam')">JAM</button>
+    </div>
+    <span class="mode-desc" id="modeDesc">Guided coaching with AI — drills, exercises, and technique feedback</span>
   </div>
 
   <!-- Main content -->
@@ -1120,6 +1154,13 @@ function setFontScale(val) {
 (function() {
   var saved = localStorage.getItem('pq_fontScale') || '150';
   setFontScale(saved);
+})();
+
+// Restore play mode from localStorage
+(function() {
+  var saved = localStorage.getItem('pq-play-mode') || 'journey';
+  // Defer to after DOM is ready and drill catalog is built
+  setTimeout(function() { switchPlayMode(saved); }, 200);
 })();
 
 // Device management state
@@ -4956,6 +4997,77 @@ function switchRightTab(tab) {
     document.getElementById('scoresTab').classList.add('active');
     if (stageTabs) stageTabs.style.display = 'none';
   }
+}
+
+// =========================================================================
+// Play Mode Selector (Journey / Compose / Jam)
+// =========================================================================
+var currentPlayMode = localStorage.getItem('pq-play-mode') || 'journey';
+
+var modeDescriptions = {
+  journey: 'Guided coaching with AI \u2014 drills, exercises, and technique feedback',
+  compose: 'Free play \u2014 record passages, view scores, practice at your own pace',
+  jam: 'Jazz improvisation \u2014 play over standards with scale and chord guidance'
+};
+
+function switchPlayMode(mode) {
+  currentPlayMode = mode;
+  localStorage.setItem('pq-play-mode', mode);
+
+  // Update mode buttons
+  document.querySelectorAll('.mode-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+  });
+
+  // Update description
+  var desc = document.getElementById('modeDesc');
+  if (desc) desc.textContent = modeDescriptions[mode] || '';
+
+  // Show/hide panels based on mode
+  var coachingCard = document.getElementById('coachingCard');
+  var goalCard = document.getElementById('goalCard');
+  var scoreCard = document.getElementById('scoreCard');
+  var recordPanel = document.getElementById('recordPanel');
+  var btnCoaching = document.getElementById('btn-coaching');
+  var jazzBtn = document.getElementById('smrBtnJazzSession');
+
+  // Journey: coaching + drills focused
+  // Compose: recording + scores focused
+  // Jam: jazz sessions + scores focused
+  if (mode === 'journey') {
+    if (coachingCard) coachingCard.style.display = '';
+    if (recordPanel) recordPanel.style.display = '';
+    if (btnCoaching) btnCoaching.style.display = '';
+    switchRightTab('drills');
+  } else if (mode === 'compose') {
+    if (coachingCard) coachingCard.style.display = '';
+    if (recordPanel) recordPanel.style.display = '';
+    if (btnCoaching) btnCoaching.style.display = '';
+    switchRightTab('scores');
+  } else if (mode === 'jam') {
+    if (coachingCard) coachingCard.style.display = '';
+    if (recordPanel) recordPanel.style.display = '';
+    if (btnCoaching) btnCoaching.style.display = '';
+    switchRightTab('scores');
+    // Auto-filter to jazz sheets if available
+    setTimeout(function() { filterJazzSheets(); }, 100);
+  }
+}
+
+function filterJazzSheets() {
+  // If in jam mode and score tree is visible, try to expand jazz folder
+  var tree = document.getElementById('smrTree');
+  if (!tree) return;
+  var folders = tree.querySelectorAll('.smr-folder-label');
+  folders.forEach(function(f) {
+    if (f.textContent.toLowerCase().indexOf('jazz') !== -1) {
+      var parent = f.parentElement;
+      if (parent) {
+        var content = parent.querySelector('.smr-folder-content');
+        if (content) content.style.display = '';
+      }
+    }
+  });
 }
 
 function selectDrill(drillId) {

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-04-14
+### Added
+- **3 Play Modes** — Journey (guided coaching + drills), Compose (free play + recording + scores), Jam (jazz improvisation + lead sheets). Mode selector bar with persistent localStorage selection.
+- Mode descriptions update dynamically below the selector
+- Jam mode auto-expands jazz folder in score library
+
+### Fixed
+- Desktop bridge reconnect backoff cap increased from 30s to 5min, suppressing log spam when PQ Desktop is offline (was 2 lines/min, now silent after initial attempts — status log still shows bridge state every 60s)
+
 ## [3.5.1] - 2026-04-07
 ### Changed
 - Merged dev-terminal branch into main: combined browser-side Gemini architecture with desktop bridge, persistent HOME room, status tracking, on-demand coaching state, and Cloudflare Zero Trust auth

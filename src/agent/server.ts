@@ -932,7 +932,10 @@ export function createApp() {
       });
 
       desktopBridgeWs.on("close", () => {
-        console.log(`[${APP_NAME}] Desktop bridge disconnected, reconnecting in ${desktopBridgeReconnectDelay}ms`);
+        // Only log first few attempts; after cap, status log covers it
+        if (desktopBridgeReconnectDelay < 60000) {
+          console.log(`[${APP_NAME}] Desktop bridge disconnected, reconnecting in ${Math.round(desktopBridgeReconnectDelay / 1000)}s`);
+        }
         desktopBridgeWs = null;
         statusTracker.desktopBridge.connected = false;
         statusTracker.desktopBridge.disconnectedAt = Date.now();
@@ -940,7 +943,7 @@ export function createApp() {
         const room = rooms.get(DEFAULT_ROOM);
         if (room) broadcastToRoom(room, JSON.stringify({ type: "midi_source", source: "direct" }));
         setTimeout(connectDesktopBridge, desktopBridgeReconnectDelay);
-        desktopBridgeReconnectDelay = Math.min(desktopBridgeReconnectDelay * 2, 30000);
+        desktopBridgeReconnectDelay = Math.min(desktopBridgeReconnectDelay * 2, 300000);
       });
 
       desktopBridgeWs.on("error", () => {
@@ -948,7 +951,7 @@ export function createApp() {
       });
     } catch {
       setTimeout(connectDesktopBridge, desktopBridgeReconnectDelay);
-      desktopBridgeReconnectDelay = Math.min(desktopBridgeReconnectDelay * 2, 30000);
+      desktopBridgeReconnectDelay = Math.min(desktopBridgeReconnectDelay * 2, 300000);
     }
   }
 
