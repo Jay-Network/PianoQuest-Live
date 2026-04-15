@@ -5,6 +5,7 @@
  */
 
 import express from "express";
+import crypto from "crypto";
 import { createServer } from "http";
 import { execFileSync } from "child_process";
 import path from "path";
@@ -235,7 +236,7 @@ function generateRoomCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let code = "";
   const arr = new Uint8Array(4);
-  require("crypto").randomFillSync(arr);
+  crypto.randomFillSync(arr);
   for (let i = 0; i < 4; i++) {
     code += chars[arr[i] % chars.length];
   }
@@ -244,7 +245,7 @@ function generateRoomCode(): string {
 
 function randomHex(bytes: number): string {
   const arr = new Uint8Array(bytes);
-  require("crypto").randomFillSync(arr);
+  crypto.randomFillSync(arr);
   return Buffer.from(arr).toString("hex");
 }
 
@@ -372,10 +373,14 @@ export function createApp() {
   // Bridge livestream status (ws://localhost:3491/ws)
   let streamLive = false;
   let streamViewers = 0;
+  let streamBridgeReconnectDelay = 5000;
   function connectBridge() {
     try {
       const bws = new WebSocket("ws://localhost:3491/ws");
-      bws.on("open", () => console.log(`[${APP_NAME}] Bridge connected`));
+      bws.on("open", () => {
+        console.log(`[${APP_NAME}] Bridge connected`);
+        streamBridgeReconnectDelay = 5000;
+      });
       bws.on("message", (raw: Buffer) => {
         try {
           const msg = JSON.parse(raw.toString());
@@ -386,21 +391,23 @@ export function createApp() {
         } catch (_) {}
       });
       bws.on("close", () => {
-        console.log(`[${APP_NAME}] Bridge disconnected, reconnecting in 5s`);
-        setTimeout(connectBridge, 5000);
+        if (streamBridgeReconnectDelay < 60000) {
+          console.log(`[${APP_NAME}] Bridge disconnected, reconnecting in ${Math.round(streamBridgeReconnectDelay / 1000)}s`);
+        }
+        setTimeout(connectBridge, streamBridgeReconnectDelay);
+        streamBridgeReconnectDelay = Math.min(streamBridgeReconnectDelay * 2, 300000);
       });
       bws.on("error", () => {
         bws.close();
       });
     } catch (_) {
-      setTimeout(connectBridge, 5000);
+      setTimeout(connectBridge, streamBridgeReconnectDelay);
+      streamBridgeReconnectDelay = Math.min(streamBridgeReconnectDelay * 2, 300000);
     }
   }
   connectBridge();
 
   // Auth handled by Cloudflare Zero Trust — no app-level gate needed
-
-  app.use(express.json());
 
   app.get("/health", (_req, res) => {
     res.json({
@@ -500,8 +507,21 @@ export function createApp() {
     const base = customDir || DEFAULT_RECORDINGS_DIR;
     const safeName = (user || "").replace(/[^a-zA-Z0-9_\-]/g, "").toLowerCase();
     const dir = safeName ? path.join(base, safeName) : base;
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    return dir;
+    // Prevent path traversal — resolved dir must be under DEFAULT_RECORDINGS_DIR
+    const resolved = path.resolve(dir);
+    const safeBase = path.resolve(DEFAULT_RECORDINGS_DIR);
+    if (!resolved.startsWith(safeBase + path.sep) && resolved !== safeBase) {
+      return safeBase;
+    }
+    if (!fs.existsSync(resolved)) fs.mkdirSync(resolved, { recursive: true });
+    return resolved;
+  }
+
+  /** Sanitize filename to prevent path traversal */
+  function safeFilename(filename: string): string | null {
+    const base = path.basename(filename);
+    if (!base || base === "." || base === ".." || base !== filename) return null;
+    return base;
   }
 
   // List recordings in a directory
@@ -552,31 +572,40 @@ export function createApp() {
 
   // Load a recording
   app.get("/api/recordings/:filename", (req, res) => {
+    const fname = safeFilename(req.params.filename);
+    if (!fname) { res.status(400).json({ error: "Invalid filename" }); return; }
     const dir = getRecDir(req.query.dir as string | undefined, req.query.user as string | undefined);
-    const full = path.join(dir, req.params.filename);
+    const full = path.join(dir, fname);
     if (!fs.existsSync(full)) { res.status(404).json({ error: "Not found" }); return; }
     res.json(JSON.parse(fs.readFileSync(full, "utf-8")));
   });
 
-  // Delete a recording
+  // Rename a recording
   app.patch("/api/recordings/:filename", (req, res) => {
+    const fname = safeFilename(req.params.filename);
+    if (!fname) { res.status(400).json({ error: "Invalid filename" }); return; }
     const dir = getRecDir(req.query.dir as string | undefined, req.query.user as string | undefined);
-    const full = path.join(dir, req.params.filename);
+    const full = path.join(dir, fname);
     if (!fs.existsSync(full)) { res.status(404).json({ error: "Not found" }); return; }
     const newName = (req.body.name || "").trim();
     if (!newName) { res.status(400).json({ error: "Name required" }); return; }
     const safeName = newName.replace(/[<>:"/\\|?*]/g, "_");
     const newFilename = safeName + (safeName.endsWith(".json") ? "" : ".json");
-    const newFull = path.join(dir, newFilename);
+    const checkedNew = safeFilename(newFilename);
+    if (!checkedNew) { res.status(400).json({ error: "Invalid new name" }); return; }
+    const newFull = path.join(dir, checkedNew);
     if (fs.existsSync(newFull) && newFull !== full) { res.status(409).json({ error: "Name already exists" }); return; }
     fs.renameSync(full, newFull);
-    console.log(`[${APP_NAME}] Recording renamed: ${req.params.filename} → ${newFilename}`);
-    res.json({ ok: true, filename: newFilename });
+    console.log(`[${APP_NAME}] Recording renamed: ${fname} → ${checkedNew}`);
+    res.json({ ok: true, filename: checkedNew });
   });
 
+  // Delete a recording
   app.delete("/api/recordings/:filename", (req, res) => {
+    const fname = safeFilename(req.params.filename);
+    if (!fname) { res.status(400).json({ error: "Invalid filename" }); return; }
     const dir = getRecDir(req.query.dir as string | undefined, req.query.user as string | undefined);
-    const full = path.join(dir, req.params.filename);
+    const full = path.join(dir, fname);
     if (!fs.existsSync(full)) { res.status(404).json({ error: "Not found" }); return; }
     fs.unlinkSync(full);
     console.log(`[${APP_NAME}] Recording deleted: ${full}`);
@@ -1102,7 +1131,8 @@ async function handleSecondaryWebSocket(
           }
         } catch {}
       } else if (typeof rawMsg === "string") {
-        const msg = JSON.parse(rawMsg);
+        let msg: any;
+        try { msg = JSON.parse(rawMsg); } catch { continue; }
         const msgType = msg.type;
 
         if (msgType === "midi_snapshot" && device.roles.midi) {
@@ -1241,7 +1271,8 @@ async function handlePrimaryWebSocket(ws: WebSocket, req: IncomingMessage) {
         // Binary from primary = Gemini audio for spectator broadcast
         broadcastSpectators(rawMsg instanceof ArrayBuffer ? Buffer.from(rawMsg) : rawMsg, true);
       } else if (typeof rawMsg === "string") {
-        const msg = JSON.parse(rawMsg);
+        let msg: any;
+        try { msg = JSON.parse(rawMsg); } catch { continue; }
         const msgType = msg.type;
 
         // Browser Gemini forwarding — broadcast to room + spectators

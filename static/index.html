@@ -720,7 +720,7 @@ window.GeminiModality = Modality;
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">REAL-TIME PIANO COACHING &middot; v3.6.1</div>
+        <div class="header-sub">REAL-TIME PIANO COACHING &middot; v3.6.2</div>
       </div>
       <div id="userBadge" style="display:none;align-items:center;gap:6px;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);cursor:pointer;" onclick="renameUser()" title="Click to change name">
         <span id="userBadgeName" style="font-size:13px;font-weight:600;color:var(--text1);"></span>
@@ -1992,9 +1992,23 @@ function showPerformanceRating(data) {
     var row = document.createElement('div');
     row.className = 'score-row';
     row.setAttribute('data-cat', cat);
-    row.innerHTML = '<span class="score-category">' + cat + '</span>' +
-      '<div class="score-bar-bg"><div class="score-bar-fill" style="width:' + score + '%;background:' + color + '"></div></div>' +
-      '<span class="score-value" style="color:' + color + '">' + score + '</span>';
+    var catSpan = document.createElement('span');
+    catSpan.className = 'score-category';
+    catSpan.textContent = cat;
+    var barBg = document.createElement('div');
+    barBg.className = 'score-bar-bg';
+    var barFill = document.createElement('div');
+    barFill.className = 'score-bar-fill';
+    barFill.style.width = score + '%';
+    barFill.style.background = color;
+    barBg.appendChild(barFill);
+    var valSpan = document.createElement('span');
+    valSpan.className = 'score-value';
+    valSpan.style.color = color;
+    valSpan.textContent = score;
+    row.appendChild(catSpan);
+    row.appendChild(barBg);
+    row.appendChild(valSpan);
     entries.appendChild(row);
   }
 
@@ -2027,8 +2041,14 @@ function showAchievement(data) {
   // Animated toast overlay
   var toast = document.createElement('div');
   toast.className = 'achievement-toast';
-  toast.innerHTML = '<div class="achievement-title">' + (data.achievement || 'Achievement!') + '</div>' +
-    '<div class="achievement-detail">' + (data.detail || '') + '</div>';
+  var titleDiv = document.createElement('div');
+  titleDiv.className = 'achievement-title';
+  titleDiv.textContent = data.achievement || 'Achievement!';
+  var detailDiv = document.createElement('div');
+  detailDiv.className = 'achievement-detail';
+  detailDiv.textContent = data.detail || '';
+  toast.appendChild(titleDiv);
+  toast.appendChild(detailDiv);
   document.body.appendChild(toast);
   setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 4000);
 }
@@ -2527,7 +2547,8 @@ function connectWebSocket(isReconnect) {
         if (event.data instanceof ArrayBuffer) {
           queueAudio(event.data);
         } else {
-          var msg = JSON.parse(event.data);
+          var msg;
+          try { msg = JSON.parse(event.data); } catch(e) { console.warn('[PQ] Bad WS JSON:', e); return; }
           if (msg.type === 'story_scene' || msg.type === 'achievement' ||
                      msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
                      msg.type === 'technique_report' || msg.type === 'performance_rating' ||
@@ -6997,7 +7018,8 @@ function updateQr(roomCode) {
       return;
     }
 
-    var msg = JSON.parse(event.data);
+    var msg;
+    try { msg = JSON.parse(event.data); } catch(e) { console.warn('[PQ] Bad WS JSON:', e); return; }
 
     if (msg.type === 'you_are_secondary') {
       myDeviceId = msg.deviceId;
@@ -7276,7 +7298,8 @@ function buildSecondaryUI(room, params) {
       return;
     }
 
-    var msg = JSON.parse(event.data);
+    var msg;
+    try { msg = JSON.parse(event.data); } catch(e) { console.warn('[PQ] Bad WS JSON:', e); return; }
 
     if (msg.type === 'you_are_secondary') {
       myDeviceId = msg.deviceId;
@@ -7637,7 +7660,8 @@ function buildSecondaryUI(room, params) {
       src.start(startAt);
       specNextPlayTime = startAt + buf.duration;
     } else {
-      var msg = JSON.parse(event.data);
+      var msg;
+      try { msg = JSON.parse(event.data); } catch(e) { console.warn('[PQ] Bad WS JSON:', e); return; }
       if (msg.type === 'story_scene' || msg.type === 'achievement' ||
           msg.type === 'coaching_focus' || msg.type === 'quest_advance' ||
           msg.type === 'technique_report') {

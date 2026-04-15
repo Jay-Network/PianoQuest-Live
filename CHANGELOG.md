@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.6.2] - 2026-04-15
+### Security
+- Fix path traversal vulnerability in recording APIs — sanitize filename params and constrain directory traversal to recordings base dir
+- Fix XSS via innerHTML in achievement toasts and performance score cards — use DOM API (textContent/createElement) instead
+
+### Fixed
+- Add try/catch around JSON.parse in all WebSocket onmessage handlers (primary, secondary, tablet, spectator) — malformed messages no longer crash the session
+- Remove duplicate express.json() middleware (was registered twice, second overrode first)
+- Add exponential backoff to livestream bridge reconnect (was reconnecting every 5s forever, now backs off to 5min like desktop bridge)
+- Use imported `crypto` module consistently instead of mixing import with `require('crypto')`
+
 ## [3.6.1] - 2026-04-14
 ### Fixed
 - Remove unused imports (`crypto`, `execFile`) from server.ts
