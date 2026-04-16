@@ -6,6 +6,18 @@
 
 ## Resolved
 
+### BUG-007: cameraStaleTimer resource leak (2026-04-16)
+- **Symptom**: After stopping a coaching session, cameraStaleTimer interval continued running indefinitely, wasting CPU
+- **Root cause**: `stopSession()` cleared `midiSnapshotTimer` and `animFrame` but not `cameraStaleTimer`
+- **Fix**: Added `clearInterval(cameraStaleTimer)` to `stopSession()`
+- **Prevention**: When adding new interval timers, always add cleanup to all teardown paths.
+
+### BUG-008: geminiSession race condition on tool response (2026-04-16)
+- **Symptom**: Intermittent crash when Gemini disconnects while processing a tool call — `geminiSession.sendToolResponse()` called on null
+- **Root cause**: `onclose` sets `geminiSession = null` asynchronously. `onmessage` tool handlers called `sendToolResponse()` without null check.
+- **Fix**: Added `if (geminiSession)` guard around both `sendToolResponse()` call sites
+- **Prevention**: Always null-check session objects before method calls in async message handlers.
+
 ### BUG-004: Path traversal in recording APIs (2026-04-15)
 - **Symptom**: `/api/recordings/:filename` and recording dir param accepted `../` sequences, allowing read/write/delete of arbitrary files
 - **Root cause**: `req.params.filename` and `req.query.dir` used directly in `path.join()` without sanitization

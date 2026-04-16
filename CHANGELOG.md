@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.6.3] - 2026-04-16
+### Fixed
+- Fix cameraStaleTimer not cleared in stopSession() — interval leaked CPU after session end
+- Guard geminiSession.sendToolResponse() against null in both tool call handlers — prevents crash if Gemini disconnects during tool processing
+
 ## [3.6.2] - 2026-04-15
 ### Security
 - Fix path traversal vulnerability in recording APIs — sanitize filename params and constrain directory traversal to recordings base dir

@@ -720,7 +720,7 @@ window.GeminiModality = Modality;
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">REAL-TIME PIANO COACHING &middot; v3.6.2</div>
+        <div class="header-sub">REAL-TIME PIANO COACHING &middot; v3.6.3</div>
       </div>
       <div id="userBadge" style="display:none;align-items:center;gap:6px;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);cursor:pointer;" onclick="renameUser()" title="Click to change name">
         <span id="userBadgeName" style="font-size:13px;font-weight:600;color:var(--text1);"></span>
@@ -1592,7 +1592,9 @@ function connectGemini() {
                     }
                   }
                   var toolResult = executeGeminiTool(fcName, fcArgs);
-                  geminiSession.sendToolResponse({ functionResponses: [{ id: fcId, name: fcName, response: toolResult }] });
+                  if (geminiSession) {
+                    geminiSession.sendToolResponse({ functionResponses: [{ id: fcId, name: fcName, response: toolResult }] });
+                  }
                   console.log('[PQ] Gemini tool:', fcName);
                 }
               }
@@ -1662,7 +1664,9 @@ function connectGemini() {
                 }
               }
               var tcResult = executeGeminiTool(tcName, tcArgs);
-              geminiSession.sendToolResponse({ functionResponses: [{ id: tcId, name: tcName, response: tcResult }] });
+              if (geminiSession) {
+                geminiSession.sendToolResponse({ functionResponses: [{ id: tcId, name: tcName, response: tcResult }] });
+              }
               console.log('[PQ] Gemini toolCall:', tcName);
             }
           }
@@ -2791,6 +2795,7 @@ function stopSession() {
   }
   ws = null;
   if (midiSnapshotTimer) { clearTimeout(midiSnapshotTimer); midiSnapshotTimer = null; }
+  if (cameraStaleTimer) { clearInterval(cameraStaleTimer); cameraStaleTimer = null; }
   if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
   if (playbackCtx) { playbackCtx.close(); playbackCtx = null; }
   resetMidiState();
