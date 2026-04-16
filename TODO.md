@@ -8,9 +8,10 @@
 
 ## Backlog
 - Test all flows: mic → Gemini → audio, MIDI bridge, secondary camera, spectators (needs hardware/Jay present)
-- Evaluate migration to gemini-3.1-flash-live-preview (2x conversation memory, 90+ languages, faster responses)
-- Verify browser-side Gemini works with Start Coaching flow after merge
+- Verify browser-side Gemini works with Start Coaching flow after merge (needs Jay present)
+- Gemini 3.1 Flash Live evaluated — NOT recommended yet (breaking changes: sendClientContent restricted, no async tools). Revisit when GA.
 ## Completed
+- [x] Evaluate Gemini 3.1 Flash Live — not recommended, stay on 2.5 (2026-04-16)
 - [x] v3.6.3: Fix cameraStaleTimer leak + geminiSession race condition on tool response (2026-04-16)
 - [x] v3.6.2: Security fixes + hardening — path traversal, XSS, JSON.parse crash, duplicate middleware, bridge backoff, crypto import (2026-04-15)
 - [x] v3.6.1: Fix dead imports, WS error handlers, Gemini key fetch UI, close BUG-015 (2026-04-14)
