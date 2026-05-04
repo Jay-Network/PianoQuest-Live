@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [3.7.0] - 2026-04-27
+### Fixed
+- Sync browser Gemini tool declarations with agent.ts — 3 tools (rate_performance, set_practice_goal, celebrate_progress) were defined server-side but missing from browser's buildGeminiToolDeclarations(), executeGeminiTool(), and toolCallToVisualEvent(). Gemini Live could not call these tools during coaching sessions. UI handlers already existed.
+### Changed
+- Remove dead ADK code from agent.ts — LlmAgent, FunctionTool, zod imports never used by server; remove @google/adk and zod dependencies
+- Update default BOT_TMUX_TARGET from jworks:95 to jworks:120
+
 ## [3.6.3] - 2026-04-16
 ### Fixed
 - Fix cameraStaleTimer not cleared in stopSession() — interval leaked CPU after session end

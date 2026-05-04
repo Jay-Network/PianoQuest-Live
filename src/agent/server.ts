@@ -682,7 +682,7 @@ export function createApp() {
   // /ws/bot — Bot terminal (jworks:95) relay
   // -----------------------------------------------------------------
 
-  const BOT_TMUX_TARGET = process.env.BOT_TMUX_TARGET || "jworks:95";
+  const BOT_TMUX_TARGET = process.env.BOT_TMUX_TARGET || "jworks:120";
   const BOT_POLL_MS = 500;
 
   function captureTmuxPane(target: string): string {

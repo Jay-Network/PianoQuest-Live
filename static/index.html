@@ -720,7 +720,7 @@ window.GeminiModality = Modality;
     <div class="header-left">
       <div>
         <h1>Piano<span>Quest</span> Live</h1>
-        <div class="header-sub">REAL-TIME PIANO COACHING &middot; v3.6.3</div>
+        <div class="header-sub">REAL-TIME PIANO COACHING &middot; v3.7.0</div>
       </div>
       <div id="userBadge" style="display:none;align-items:center;gap:6px;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);cursor:pointer;" onclick="renameUser()" title="Click to change name">
         <span id="userBadgeName" style="font-size:13px;font-weight:600;color:var(--text1);"></span>
@@ -1431,6 +1431,44 @@ function buildGeminiToolDeclarations() {
           },
           required: ['finger', 'visual_observation', 'audio_observation', 'suggestion']
         }
+      },
+      {
+        name: 'rate_performance',
+        description: 'Rate the player\'s recent performance on a 0-100 scale for a specific category. Call this when the player asks for feedback or after they finish a piece. Be specific with MIDI numbers in feedback.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            score: { type: 'NUMBER', description: 'Performance score from 0 to 100.' },
+            category: { type: 'STRING', description: 'Category being rated: dynamics, rhythm, technique, or overall.' },
+            feedback: { type: 'STRING', description: 'Specific feedback citing MIDI data (velocity ranges, timing, note accuracy).' }
+          },
+          required: ['score', 'category', 'feedback']
+        }
+      },
+      {
+        name: 'set_practice_goal',
+        description: 'Set a specific practice goal for the current session. Call this when the player asks what to work on, or when shifting focus to a new skill area. Goals should be concrete and achievable within the session.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            goal: { type: 'STRING', description: 'The practice goal (e.g. Play C major scale with velocity between 60-80).' },
+            target_metric: { type: 'STRING', description: 'What to measure (e.g. velocity evenness, tempo consistency).' },
+            difficulty: { type: 'STRING', description: 'Difficulty level: easy, medium, or hard.' }
+          },
+          required: ['goal', 'target_metric', 'difficulty']
+        }
+      },
+      {
+        name: 'celebrate_progress',
+        description: 'Celebrate when the player achieves something noteworthy. Use when you notice real improvement or when they accomplish a practice goal. Be genuine — only celebrate real progress.',
+        parameters: {
+          type: 'OBJECT',
+          properties: {
+            achievement: { type: 'STRING', description: 'Short achievement title (e.g. Even Dynamics!, Perfect Tempo).' },
+            detail: { type: 'STRING', description: 'What specifically improved, citing MIDI data if available.' }
+          },
+          required: ['achievement', 'detail']
+        }
       }
     ]
   }];
@@ -1442,6 +1480,12 @@ function executeGeminiTool(name, args) {
       return { status: 'ok', instruction: args.instruction };
     case 'report_technique':
       return { status: 'ok', finger: args.finger, visual_observation: args.visual_observation, audio_observation: args.audio_observation, suggestion: args.suggestion };
+    case 'rate_performance':
+      return { status: 'ok', score: args.score, category: args.category, feedback: args.feedback };
+    case 'set_practice_goal':
+      return { status: 'ok', goal: args.goal, target_metric: args.target_metric, difficulty: args.difficulty };
+    case 'celebrate_progress':
+      return { status: 'ok', achievement: args.achievement, detail: args.detail };
     default:
       return { error: 'Unknown tool: ' + name };
   }
@@ -1453,6 +1497,12 @@ function toolCallToVisualEvent(name, args) {
       return { type: 'coaching_focus', text: args.instruction };
     case 'report_technique':
       return { type: 'technique_report', finger: args.finger, visual_observation: args.visual_observation, audio_observation: args.audio_observation, suggestion: args.suggestion };
+    case 'rate_performance':
+      return { type: 'performance_rating', score: args.score, category: args.category, feedback: args.feedback };
+    case 'set_practice_goal':
+      return { type: 'practice_goal', goal: args.goal, target_metric: args.target_metric, difficulty: args.difficulty };
+    case 'celebrate_progress':
+      return { type: 'achievement', achievement: args.achievement, detail: args.detail };
     default:
       return null;
   }

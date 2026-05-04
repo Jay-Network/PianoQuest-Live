@@ -1,12 +1,11 @@
 /**
- * PianoQuest Live — agent definition with tools and system instruction.
+ * PianoQuest Live — canonical tool declarations and system instruction.
  *
- * Tools are declared both as ADK FunctionTool (for structure/future runLive)
- * and as raw functionDeclarations for the @google/genai Live API.
+ * Gemini Live runs in the browser. This file is the server-side reference
+ * for tool schemas and system instruction. The browser has inline copies
+ * in index.html — keep both in sync.
  */
 
-import { z } from "zod";
-import { LlmAgent, FunctionTool } from "@google/adk";
 import { Type } from "@google/genai";
 
 // =========================================================================
@@ -256,74 +255,3 @@ repertoire selection, hand ergonomics, sight-reading strategies, performance psy
 Share this knowledge freely when asked. You don't need MIDI data to have a useful conversation about piano.
 `;
 
-// =========================================================================
-// ADK Agent definition (structural — for future runLive support)
-// =========================================================================
-
-const setCoachingFocusTool = new FunctionTool({
-  name: "set_coaching_focus",
-  description: "Update the coaching focus card with the current technique tip.",
-  parameters: z.object({
-    instruction: z.string().describe("The coaching tip to display."),
-  }) as any,
-  execute: (input: any) => ({ status: "ok", instruction: input.instruction }),
-});
-
-const reportTechniqueTool = new FunctionTool({
-  name: "report_technique",
-  description: "Report a visual+audio technique observation when camera is active.",
-  parameters: z.object({
-    finger: z.string().describe("Which finger or hand area observed."),
-    visual_observation: z.string().describe("What you see in the video frame."),
-    audio_observation: z.string().describe("What you hear in the audio/MIDI."),
-    suggestion: z.string().describe("Actionable suggestion for improvement."),
-  }) as any,
-  execute: (input: any) => {
-    return { status: "ok", finger: input.finger, visual_observation: input.visual_observation, audio_observation: input.audio_observation, suggestion: input.suggestion };
-  },
-});
-
-const ratePerformanceTool = new FunctionTool({
-  name: "rate_performance",
-  description: "Rate the player's recent performance on a 0-100 scale for a specific category.",
-  parameters: z.object({
-    score: z.number().describe("Performance score from 0 to 100."),
-    category: z.string().describe("Category: dynamics, rhythm, technique, or overall."),
-    feedback: z.string().describe("Specific feedback citing MIDI data."),
-  }) as any,
-  execute: (input: any) => ({ status: "ok", ...input }),
-});
-
-const setPracticeGoalTool = new FunctionTool({
-  name: "set_practice_goal",
-  description: "Set a specific practice goal for the current session.",
-  parameters: z.object({
-    goal: z.string().describe("The practice goal."),
-    target_metric: z.string().describe("What to measure."),
-    difficulty: z.string().describe("Difficulty: easy, medium, or hard."),
-  }) as any,
-  execute: (input: any) => ({ status: "ok", ...input }),
-});
-
-const celebrateProgressTool = new FunctionTool({
-  name: "celebrate_progress",
-  description: "Celebrate when the player achieves something noteworthy.",
-  parameters: z.object({
-    achievement: z.string().describe("Short achievement title."),
-    detail: z.string().describe("What specifically improved."),
-  }) as any,
-  execute: (input: any) => ({ status: "ok", ...input }),
-});
-
-export const storytellerAgent = new LlmAgent({
-  name: "pianoquest_storyteller",
-  model: LIVE_MODEL,
-  instruction: STORYTELLER_INSTRUCTION,
-  tools: [
-    setCoachingFocusTool,
-    reportTechniqueTool,
-    ratePerformanceTool,
-    setPracticeGoalTool,
-    celebrateProgressTool,
-  ],
-});

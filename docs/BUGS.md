@@ -376,3 +376,11 @@ Each bug: ID, version found, severity, status, root cause, fix, prevention.
 - Root cause: Spectator/Remote viewer displayed the full 3-column desktop layout (520px + 1fr + 560px grid), causing the UI to overflow and appear magnified/cropped on iPad. Additionally, spectator mode didn't process incoming MIDI events for visualization — only tool events and audio were handled.
 - Fix: In spectator mode, hide left/right columns and resize handles, set grid to single column. Added MIDI event handling (noteOn, noteOff, controlChange) to spectator onmessage. Start draw loop on spectator WS connect.
 - Prevention: Always test spectator/remote mode on mobile/tablet viewport. Ensure all visualization data streams are handled in spectator mode, not just audio.
+
+## BUG-048
+- Version found: `3.6.3`
+- Severity: High
+- Status: Fixed (v3.7.0)
+- Root cause: Browser-side `buildGeminiToolDeclarations()` only declared 2 of 5 tools (set_coaching_focus, report_technique). The 3 missing tools (rate_performance, set_practice_goal, celebrate_progress) were defined in agent.ts but never synced to the browser's Gemini Live session config. Since Gemini runs in the browser, these tools were literally uncallable — Gemini could not invoke them during coaching. The UI handlers for all 5 tool events already existed and were waiting for data that could never arrive.
+- Fix: Added rate_performance, set_practice_goal, and celebrate_progress to buildGeminiToolDeclarations(), executeGeminiTool(), and toolCallToVisualEvent() in index.html to match agent.ts.
+- Prevention: When tool declarations exist in two places (agent.ts reference + browser inline), any tool added to one must be added to the other. Consider a build step or API endpoint to serve canonical declarations instead of manual duplication.
