@@ -11,6 +11,7 @@
 - Verify browser-side Gemini works with Start Coaching flow after merge (needs Jay present)
 - Gemini 3.1 Flash Live evaluated — NOT recommended yet (breaking changes: sendClientContent restricted, no async tools). Revisit when GA.
 ## Completed
+- [x] v3.7.0: Sync browser tool declarations (BUG-048) + remove dead ADK code — committed 0cf2f17 (2026-05-04, prepared 2026-04-27)
 - [x] Evaluate Gemini 3.1 Flash Live — not recommended, stay on 2.5 (2026-04-16)
 - [x] v3.6.3: Fix cameraStaleTimer leak + geminiSession race condition on tool response (2026-04-16)
 - [x] v3.6.2: Security fixes + hardening — path traversal, XSS, JSON.parse crash, duplicate middleware, bridge backoff, crypto import (2026-04-15)
