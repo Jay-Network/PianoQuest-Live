@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-05-07 - 3.7.1
+- Added fleet CODEOWNERS generated from agent-repo-map.json.
+
 All notable changes to PianoQuest Live will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
